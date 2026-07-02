@@ -490,7 +490,9 @@
         <div class="cap-editor-toolbar">
           <button class="btn btn-red" onclick="addCapability()">+ Capability toevoegen</button>
           <button class="btn btn-outline" onclick="addDomain()">+ Domein toevoegen</button>
+          <button class="btn btn-outline" onclick="saveAsDefaultFramework()">★ Als standaard opslaan</button>
           <button class="btn btn-outline" onclick="resetCapabilitiesToDefaults()">↻ Standaard herstellen</button>
+          <button class="btn btn-outline" id="factory-reset-btn" onclick="factoryResetFramework()" style="display:none;">↻ Fabrieksinstellingen</button>
           <button class="btn btn-outline" onclick="exportCapabilitiesJSON()">↓ Framework exporteren</button>
           <input type="file" id="import-caps-input" accept=".json" style="display:none;" onchange="importCapabilitiesJSON(event)" />
           <button class="btn btn-outline" onclick="document.getElementById('import-caps-input').click()">↑ Framework importeren</button>
@@ -795,6 +797,20 @@ function loadCustomFramework() {
   return null;
 }
 
+function loadSavedDefault() {
+  try {
+    const stored = localStorage.getItem('eiffel_saved_default_framework');
+    if (stored) return JSON.parse(stored);
+  } catch {}
+  return null;
+}
+
+function getEffectiveDefaults() {
+  const saved = loadSavedDefault();
+  if (saved) return { capabilities: saved.capabilities, domains: saved.domains, levelDesc: saved.levelDesc };
+  return { capabilities: DEFAULT_CAPABILITIES, domains: DEFAULT_DOMAINS, levelDesc: DEFAULT_LEVEL_DESC };
+}
+
 function saveCustomFramework() {
   localStorage.setItem('eiffel_custom_framework', JSON.stringify({ capabilities: CAPABILITIES, domains: DOMAINS, levelDesc: LEVEL_DESC }));
 }
@@ -958,8 +974,16 @@ function renderCapEditor() {
   if (!container) return;
 
   const isCustom = !!localStorage.getItem('eiffel_custom_framework');
-  stats.innerHTML = `<strong>${CAPABILITIES.length}</strong> capabilities in <strong>${DOMAINS.length}</strong> domeinen (${DOMAINS.join(', ')}).
-    ${isCustom ? '<span style="color:var(--red); font-weight:700;"> Aangepast framework actief.</span>' : 'Standaard framework actief.'}`;
+  const hasSavedDefault = !!localStorage.getItem('eiffel_saved_default_framework');
+  const factoryBtn = document.getElementById('factory-reset-btn');
+  if (factoryBtn) factoryBtn.style.display = hasSavedDefault ? '' : 'none';
+
+  let statusText = 'Standaard framework actief.';
+  if (isCustom && hasSavedDefault) statusText = '<span style="color:var(--red); font-weight:700;">Aangepast framework actief.</span> Eigen standaard opgeslagen — "Standaard herstellen" gaat terug naar uw opgeslagen versie.';
+  else if (isCustom) statusText = '<span style="color:var(--red); font-weight:700;">Aangepast framework actief.</span>';
+  else if (hasSavedDefault) statusText = 'Eigen standaard actief (opgeslagen via "Als standaard opslaan").';
+
+  stats.innerHTML = `<strong>${CAPABILITIES.length}</strong> capabilities in <strong>${DOMAINS.length}</strong> domeinen (${DOMAINS.join(', ')}). ${statusText}`;
 
   let html = '';
   DOMAINS.forEach(domain => {
@@ -1061,13 +1085,36 @@ function addDomain() {
   renderCapEditor();
 }
 
+function saveAsDefaultFramework() {
+  if (!confirm('Huidig framework opslaan als uw standaardtemplate? "Standaard herstellen" zal voortaan naar deze versie terugkeren.')) return;
+  localStorage.setItem('eiffel_saved_default_framework', JSON.stringify({ capabilities: CAPABILITIES, domains: DOMAINS, levelDesc: LEVEL_DESC }));
+  localStorage.removeItem('eiffel_custom_framework');
+  showAutosaveIndicator('★ Opgeslagen als standaard');
+  renderCapEditor();
+}
+
 function resetCapabilitiesToDefaults() {
-  if (!confirm('Weet u zeker dat u het standaard framework wilt herstellen? Alle aanpassingen gaan verloren.')) return;
+  const defaults = getEffectiveDefaults();
+  const hasSavedDefault = !!localStorage.getItem('eiffel_saved_default_framework');
+  const label = hasSavedDefault ? 'uw opgeslagen standaard' : 'het standaard framework';
+  if (!confirm(`Terugzetten naar ${label}? Huidige aanpassingen gaan verloren.`)) return;
+  CAPABILITIES = JSON.parse(JSON.stringify(defaults.capabilities));
+  DOMAINS.length = 0;
+  defaults.domains.forEach(d => DOMAINS.push(d));
+  LEVEL_DESC = JSON.parse(JSON.stringify(defaults.levelDesc));
+  localStorage.removeItem('eiffel_custom_framework');
+  expandedEditorRows = {};
+  renderCapEditor();
+}
+
+function factoryResetFramework() {
+  if (!confirm('Alles terugzetten naar de originele fabrieksinstellingen? Uw opgeslagen standaard en alle aanpassingen worden verwijderd.')) return;
   CAPABILITIES = JSON.parse(JSON.stringify(DEFAULT_CAPABILITIES));
   DOMAINS.length = 0;
   DEFAULT_DOMAINS.forEach(d => DOMAINS.push(d));
   LEVEL_DESC = JSON.parse(JSON.stringify(DEFAULT_LEVEL_DESC));
   localStorage.removeItem('eiffel_custom_framework');
+  localStorage.removeItem('eiffel_saved_default_framework');
   expandedEditorRows = {};
   renderCapEditor();
 }
