@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Datagedreven Werken Maturity Scan — Team EIFFEL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --red: #C8102E;
+      --red-dark: #A30D26;
+      --red-deep: #8B0000;
+      --black: #1A1A1A;
+      --orange: #F5A623;
+      --green: #2E7D32;
+      --gray-bg: #F5F5F5;
+      --gray-border: #E5E5E5;
+      --white: #FFFFFF;
+    }
+    html, body { height: 100%; font-family: 'Inter', sans-serif; background: #F0F0F0; color: var(--black); font-size: 13px; }
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* HEADER */
+    header {
+      height: 56px; background: var(--white); border-bottom: 2px solid var(--red);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; position: sticky; top: 0; z-index: 100; flex-shrink: 0;
+    }
+    .header-title { font-size: 13px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: var(--black); }
+    .header-title span { color: var(--red); font-weight: 400; }
+    .eiffel-logo { display: flex; align-items: center; gap: 8px; }
+    .eiffel-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; width: 18px; height: 18px; }
+    .eiffel-grid span { border: 1.5px solid var(--red); display: block; }
+    .eiffel-logo-text { font-size: 13px; font-weight: 900; color: var(--red); letter-spacing: 0.15em; text-transform: uppercase; }
+
+    /* NAV */
+    nav {
+      height: 44px; background: var(--black);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; position: sticky; top: 56px; z-index: 99; flex-shrink: 0;
+    }
+    .nav-tabs { display: flex; height: 100%; }
+    .nav-tab {
+      padding: 0 20px; height: 100%; display: flex; align-items: center;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.5); cursor: pointer; border: none; background: none;
+      border-bottom: 3px solid transparent; transition: all 0.15s; font-family: 'Inter', sans-serif;
+    }
+    .nav-tab:hover { color: white; }
+    .nav-tab.active { color: white; border-bottom-color: var(--red); background: rgba(255,255,255,0.08); }
+    .nav-meta { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.35); letter-spacing: 0.08em; text-transform: uppercase; display: flex; gap: 12px; }
+    .nav-meta span { display: inline-flex; align-items: center; gap: 4px; }
+
+    /* STATUS BAR */
+    .status-bar {
+      background: var(--black); border-bottom: 1px solid rgba(200,16,46,0.25);
+      padding: 6px 24px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .status-badge { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
+    .pulse { width: 8px; height: 8px; background: var(--red); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .reset-btn { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .reset-btn:hover { color: white; }
+
+    /* MAIN */
+    main { flex: 1; background: #F0F0F0; }
+    .tab-content { display: none; max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+    .tab-content.active { display: block; }
+
+    /* CARDS */
+    .card { background: var(--white); border: 1px solid var(--black); padding: 20px; }
+    .card-gray { background: var(--gray-bg); border: 1px solid var(--gray-border); padding: 20px; }
+    .card-warn { background: #FFFDF5; border: 1px solid var(--orange); padding: 16px; }
+    .card-error { background: #FFF5F6; border: 1px solid rgba(200,16,46,0.25); padding: 16px; }
+
+    /* TYPOGRAPHY */
+    .label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #888; }
+    .section-title { font-size: 14px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: var(--black); }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* BUTTONS */
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: none; cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.15s; }
+    .btn-red { background: var(--red); color: white; }
+    .btn-red:hover { background: var(--red-dark); }
+    .btn-red:disabled { background: #ccc; cursor: not-allowed; }
+    .btn-outline { background: var(--gray-bg); color: var(--black); border: 1px solid var(--black); }
+    .btn-outline:hover { background: #ddd; }
+    .btn-orange { background: #D78A00; color: white; }
+    .btn-orange:hover { background: #B57400; }
+
+    /* GRID */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .gap-4 { gap: 16px; }
+    .gap-6 { gap: 24px; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .mt-2 { margin-top: 8px; }
+    .mt-4 { margin-top: 16px; }
+    .mt-6 { margin-top: 24px; }
+
+    /* TABS (sub) */
+    .sub-tabs { display: flex; border-bottom: 1px solid var(--black); background: var(--white); }
+    .sub-tab { padding: 12px 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; background: none; border-bottom: 3px solid transparent; color: #888; font-family: 'Inter', sans-serif; transition: all 0.15s; margin-bottom: -1px; }
+    .sub-tab:hover { color: var(--black); }
+    .sub-tab.active { color: var(--red); border-bottom-color: var(--red); background: var(--gray-bg); }
+
+    /* FORM ELEMENTS */
+    input[type=text], input[type=date], input[type=password], textarea, select {
+      font-family: 'Inter', sans-serif; font-size: 12px; border: 1px solid var(--black);
+      padding: 6px 10px; background: white; color: var(--black); outline: none;
+      border-radius: 0; -webkit-appearance: none; width: 100%;
+    }
+    input[type=text]:focus, input[type=date]:focus, input[type=password]:focus, textarea:focus, select:focus { border-color: var(--red); }
+    select { cursor: pointer; }
+    .input-underline { border: none; border-bottom: 1px solid var(--black); padding: 4px 0; background: transparent; font-weight: 700; font-size: 13px; border-radius: 0; }
+    .input-underline:focus { border-bottom-color: var(--red); outline: none; }
+
+    /* TABLE */
+    table { width: 100%; border-collapse: collapse; }
+    th { background: var(--red); color: white; padding: 10px 12px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; text-align: left; }
+    td { padding: 9px 12px; font-size: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+    tr:nth-child(even) td { background: var(--gray-bg); }
+    tr:hover td { background: #F0F0F0; }
+    .table-wrap { border: 1px solid var(--black); overflow-x: auto; }
+
+    /* SCORE BADGES */
+    .score-huidige { background: #FFF5F6; color: var(--red); border: 1px solid rgba(200,16,46,0.25); padding: 2px 8px; font-size: 11px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+    .score-ambitie { background: white; color: var(--black); border: 1px solid var(--black); padding: 2px 8px; font-size: 11px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+    /* PRIORITY */
+    .prio-hoog { background: var(--red-deep); color: white; padding: 2px 8px; font-size: 9px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
+    .prio-gemiddeld { background: var(--orange); color: black; padding: 2px 8px; font-size: 9px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
+    .prio-opschema { background: var(--green); color: white; padding: 2px 8px; font-size: 9px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
+
+    /* EXPAND ROW */
+    .expand-btn { background: none; border: none; cursor: pointer; color: #aaa; padding: 4px; font-size: 16px; line-height: 1; }
+    .expand-btn:hover { color: var(--black); }
+    .expanded-row td { background: #FFF5F6 !important; padding: 16px 12px; }
+    .expanded-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .expanded-card { background: white; border: 1px solid rgba(0,0,0,0.08); padding: 14px; font-size: 12px; }
+    .expanded-card .card-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--red); margin-bottom: 6px; }
+    .expanded-card .card-label.next { color: var(--black); }
+    .toelichting-input { border: none; border-bottom: 1px solid rgba(0,0,0,0.15); width: 100%; padding: 4px 0; font-size: 12px; background: transparent; font-family: 'Inter', sans-serif; color: var(--black); }
+    .toelichting-input:focus { outline: none; border-bottom-color: var(--red); }
+
+    /* DASHBOARD SCORE CARD */
+    .score-card { border: 1px solid var(--black); background: white; padding: 20px; position: relative; min-height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .score-card-label { position: absolute; top: 0; left: 0; background: var(--red); color: white; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 10px; }
+    .score-big { font-size: 64px; font-weight: 900; color: var(--black); line-height: 1; font-family: 'JetBrains Mono', monospace; margin-top: 8px; }
+    .score-level-badge { margin-top: 10px; padding: 4px 14px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+    .score-ambitie-sub { margin-top: 12px; font-size: 10px; font-weight: 700; color: #888; letter-spacing: 0.08em; text-transform: uppercase; }
+    .meta-card { background: var(--gray-bg); border: 1px solid var(--gray-border); padding: 20px; display: flex; flex-direction: column; gap: 16px; min-height: 180px; }
+    .meta-field label { display: block; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 4px; }
+
+    /* RADAR */
+    .radar-card { border: 1px solid var(--black); background: white; display: flex; flex-direction: column; align-items: center; padding: 16px; }
+    .radar-title { font-size: 12px; font-weight: 600; color: var(--black); margin-bottom: 8px; text-align: center; }
+    .radar-legend { display: flex; gap: 20px; margin-top: 12px; border-top: 1px solid #eee; padding-top: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #555; }
+    .legend-fill { width: 16px; height: 12px; background: rgba(200,16,46,0.25); border: 2px solid var(--red); display: inline-block; }
+    .legend-dash { width: 16px; height: 0; border-top: 2.5px dashed var(--black); display: inline-block; }
+
+    /* DASHBOARD GRID */
+    .dashboard-top { display: grid; grid-template-columns: 220px 1fr 1fr; gap: 16px; align-items: stretch; }
+
+    /* SORT BAR */
+    .sort-bar { display: flex; border: 1px solid rgba(0,0,0,0.1); }
+    .sort-btn { padding: 6px 14px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: white; border: none; cursor: pointer; font-family: 'Inter', sans-serif; color: #888; border-left: 1px solid rgba(0,0,0,0.1); }
+    .sort-btn:first-child { border-left: none; }
+    .sort-btn:hover { color: var(--black); }
+    .sort-btn.active { background: var(--red); color: white; }
+
+    /* TABLE FOOTER */
+    .table-footer { height: 38px; background: white; border-top: 1px solid var(--black); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; }
+    .table-footer-left { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #aaa; }
+    .table-footer-right { display: flex; gap: 16px; }
+    .prio-stat { display: flex; align-items: center; gap: 5px; }
+    .prio-dot { width: 8px; height: 8px; }
+
+    /* EXPORT */
+    .export-header-card { background: var(--gray-bg); border: 1px solid var(--black); padding: 24px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+    .export-btns { display: flex; gap: 12px; flex-shrink: 0; }
+
+    /* PDF PREVIEW */
+    #printable-report { background: white; padding: 48px; width: 800px; margin: 0 auto; box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
+    .pdf-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--red); padding-bottom: 16px; margin-bottom: 24px; }
+    .pdf-meta-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; background: var(--gray-bg); padding: 16px; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 24px; }
+    .pdf-meta-item .label { display: block; margin-bottom: 4px; }
+    .pdf-meta-item .value { font-size: 13px; font-weight: 600; }
+    .pdf-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 24px; margin-bottom: 24px; }
+    .pdf-score-box { display: flex; align-items: center; gap: 20px; background: var(--gray-bg); padding: 16px; border: 1px solid rgba(0,0,0,0.06); }
+    .pdf-score-item { display: flex; flex-direction: column; }
+    .pdf-score-item .big { font-size: 32px; font-weight: 900; font-family: 'JetBrains Mono', monospace; }
+    .pdf-divider { width: 1px; height: 48px; background: #ccc; }
+    .pdf-gap-table th { font-size: 9px; padding: 8px 10px; }
+    .pdf-gap-table td { font-size: 11px; padding: 7px 10px; }
+    .pdf-roadmap-item { border: 1px solid rgba(0,0,0,0.1); padding: 14px; margin-bottom: 10px; }
+    .pdf-roadmap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 11px; margin-top: 8px; }
+    .pdf-footer { display: flex; justify-content: space-between; border-top: 1px solid #eee; padding-top: 14px; margin-top: 24px; font-size: 9px; color: #aaa; }
+
+    /* EMPTY STATE */
+    .empty-state { max-width: 480px; margin: 60px auto; text-align: center; padding: 40px; border: 1px dashed rgba(0,0,0,0.2); background: white; }
+    .empty-icon { font-size: 40px; color: var(--red); margin-bottom: 16px; }
+    .empty-title { font-size: 18px; font-weight: 900; margin-bottom: 10px; }
+    .empty-text { font-size: 12px; color: #888; line-height: 1.7; }
+
+    /* KEY FIELD */
+    .key-panel { background: white; border: 1px solid var(--black); border-top: none; padding: 16px; display: none; }
+    .key-panel.open { display: block; }
+    .key-row { display: flex; gap: 8px; margin-top: 8px; }
+    .key-row input { flex: 1; }
+
+    /* WARNINGS */
+    .warn-list { max-height: 130px; overflow-y: auto; padding-left: 16px; margin-top: 8px; border-left: 2px solid rgba(245,166,35,0.4); }
+    .warn-item { font-size: 11px; color: #555; margin-bottom: 4px; display: flex; gap: 4px; }
+    .warn-item::before { content: '•'; color: var(--orange); font-weight: 700; flex-shrink: 0; }
+    .error-msg { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--red); margin-top: 8px; }
+
+    /* FOOTER */
+    footer { background: white; border-top: 1px solid rgba(0,0,0,0.08); height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; }
+    footer span { font-size: 10px; color: #aaa; font-weight: 600; }
+
+    @keyframes fadeInOut { 0%{opacity:0} 10%{opacity:1} 80%{opacity:1} 100%{opacity:0} }
+    .autosave-flash { animation: fadeInOut 2.5s ease forwards; }
+
+    @media (max-width: 768px) {
+      .dashboard-top { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+      .export-header-card { flex-direction: column; }
+      .nav-meta { display: none; }
+      #printable-report { width: 100%; padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-title">Datagedreven Werken <span>Maturity Scan</span></div>
+  <div class="eiffel-logo">
+    <div class="eiffel-grid">
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <span class="eiffel-logo-text">team EIFFEL</span>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('invoer', event)">Invoer</button>
+    <button class="nav-tab" onclick="switchTab('dashboard', event)">Dashboard</button>
+    <button class="nav-tab" onclick="switchTab('export', event)">Export</button>
+  </div>
+  <div class="nav-meta" id="nav-meta">
+    <span>Consultant: <strong id="meta-consultant-nav">—</strong></span>
+    <span>|</span>
+    <span>Organisatie: <strong id="meta-org-nav">—</strong></span>
+    <span>|</span>
+    <span>Datum: <strong id="meta-date-nav">—</strong></span>
+  </div>
+</nav>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="status-badge"><div class="pulse"></div>Consultant Werktool — Datagedreven Werken Maturity Scan</div>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <span id="autosave-indicator" style="display:none; font-size:10px; font-weight:700; color:rgba(255,255,255,0.35); letter-spacing:0.08em; text-transform:uppercase;">✓ Sessie opgeslagen</span>
+    <button class="reset-btn" id="session-save-btn" onclick="exportSession()" style="display:none; color:rgba(255,255,255,0.5);">↓ Sessie opslaan</button>
+    <button class="reset-btn" id="session-restore-btn" onclick="document.getElementById('session-file-input').click()" style="color:rgba(255,255,255,0.35);">↑ Sessie herstellen</button>
+    <input type="file" id="session-file-input" accept=".json" style="display:none;" onchange="importSession(event)" />
+    <button class="reset-btn" id="reset-btn" onclick="resetScores()" style="display:none">Scan resetten ×</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main>
+
+  <!-- ===== TAB: INVOER ===== -->
+  <div class="tab-content active" id="tab-invoer">
+
+    <!-- Demo data banner -->
+    <div class="card-warn flex items-center justify-between" style="gap:16px; margin-bottom:16px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:200px;">
+        <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--black); margin-bottom:4px;">⚡ Snelstart met Demo-data</div>
+        <div style="font-size:11px; color:#555; line-height:1.6;">Geen bestand bij de hand? Laad een volledige realistische dataset om de tool direct te verkennen.</div>
+      </div>
+      <button class="btn btn-orange" onclick="loadDemoData()">Demo-data laden</button>
+    </div>
+
+    <!-- API Key -->
+    <div class="card-gray flex items-center justify-between" style="gap:16px; margin-bottom:0; flex-wrap:wrap; border-bottom:none;">
+      <div style="flex:1; min-width:200px;">
+        <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--black); margin-bottom:4px;">🔑 AI Model Configuratie</div>
+        <div style="font-size:11px; color:#555;" id="key-status-text">Geen Anthropic sleutel ingevoerd. De analyse gebruikt de Anthropic API via uw eigen sleutel.</div>
+      </div>
+      <button class="btn btn-outline" style="font-size:10px;" onclick="toggleKeyPanel()">Sleutel beheren →</button>
+    </div>
+    <div class="key-panel" id="key-panel">
+      <div class="label">Anthropic API Key (sk-ant-...)</div>
+      <div class="key-row">
+        <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." />
+        <button class="btn btn-red" onclick="saveApiKey()">Opslaan</button>
+      </div>
+      <div style="font-size:10px; color:#aaa; margin-top:8px;">Uw sleutel wordt uitsluitend in het sessiegeheugen van uw browser bewaard en nooit permanent opgeslagen.</div>
+    </div>
+
+    <!-- Sub-tabs -->
+    <div class="sub-tabs" style="margin-top:16px;">
+      <button class="sub-tab active" onclick="switchSubTab('upload', event)">TAB A — Upload (CSV / Excel)</button>
+      <button class="sub-tab" onclick="switchSubTab('ai', event)">✦ TAB B — Interview Notities (AI-analyse)</button>
+    </div>
+
+    <!-- TAB A: Upload -->
+    <div id="sub-upload" class="sub-content">
+      <div class="card mt-4">
+        <div class="grid-2" style="gap:24px;">
+          <div>
+            <div class="section-title" style="margin-bottom:8px;">Stap 1 — Download template</div>
+            <div style="font-size:11px; color:#555; line-height:1.7; margin-bottom:16px;">Gebruik de gestandaardiseerde CSV-template. Voeg extra regels toe voor meerdere respondenten — de app berekent automatisch het gemiddelde.</div>
+            <button class="btn btn-outline" onclick="downloadTemplate()">↓ Download invultemplate</button>
+          </div>
+          <div style="border-left:1px solid var(--gray-border); padding-left:24px;">
+            <div class="section-title" style="margin-bottom:8px;">Stap 2 — Upload ingevulde template</div>
+            <div style="font-size:11px; color:#555; line-height:1.7; margin-bottom:16px;">Upload het ingevulde bestand in <strong>.csv</strong> of <strong>.xlsx</strong> formaat. De app parseert en aggregeert de scores automatisch.</div>
+            <input type="file" id="file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleFileUpload(event)" />
+            <button class="btn btn-red" onclick="document.getElementById('file-input').click()">↑ Kies bestand en importeer</button>
+            <div class="error-msg" id="upload-error" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload warnings -->
+      <div class="card-warn mt-4" id="upload-warnings-box" style="display:none;">
+        <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#D78A00; margin-bottom:6px;">⚠ Aandachtspunten bij import</div>
+        <div class="warn-list" id="upload-warnings-list"></div>
+      </div>
+
+      <!-- Preview table -->
+      <div id="upload-preview" style="display:none; margin-top:16px;">
+        <div class="flex items-center justify-between" style="margin-bottom:12px;">
+          <div class="section-title">Voorbeeld — geïmporteerde scores</div>
+          <button class="btn btn-red" onclick="applyUploadedScores()">Scores toepassen → Dashboard</button>
+        </div>
+        <div class="table-wrap">
+          <table id="preview-table">
+            <thead><tr><th>Capability</th><th>Domein</th><th style="text-align:center">Nulmeting</th><th style="text-align:center">Ambitie</th><th>Toelichting</th></tr></thead>
+            <tbody id="preview-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB B: AI -->
+    <div id="sub-ai" class="sub-content" style="display:none;">
+      <div class="card mt-4">
+        <div class="section-title" style="margin-bottom:6px;">Interviewnotities analyseren met AI</div>
+        <div style="font-size:11px; color:#555; margin-bottom:14px; line-height:1.7;">Plak ruwe interviewnotities, gespreksverslagen of Microsoft Copilot-samenvattingen hieronder. De AI leest de tekst en stelt scores vast voor alle 15 capabilities.</div>
+        <textarea id="interview-notes" rows="10" style="resize:vertical; font-size:12px; line-height:1.7;" placeholder="Plak hier uw interviewnotities of Copilot-output van gesprekken met stakeholders. Beschrijf de situatie per thema: beleid, tools, cultuur, datakwaliteit, leiderschap..."></textarea>
+        <div class="flex items-center justify-between" style="margin-top:14px; flex-wrap:wrap; gap:10px;">
+          <button class="btn btn-red" id="ai-btn" onclick="runAIAnalysis()">✦ Analyseer met AI</button>
+          <div class="label" id="ai-model-label">Actief model: Anthropic Claude</div>
+        </div>
+        <div class="error-msg" id="ai-error" style="display:none;"></div>
+      </div>
+
+      <!-- AI warnings -->
+      <div class="card-warn mt-4" id="ai-warnings-box" style="display:none;">
+        <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#D78A00; margin-bottom:6px;">⚠ AI-analyse aandachtspunten</div>
+        <div class="warn-list" id="ai-warnings-list"></div>
+      </div>
+
+      <!-- AI result table -->
+      <div id="ai-result" style="display:none; margin-top:16px;">
+        <div class="flex items-center justify-between" style="margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+          <div>
+            <div class="section-title">AI-geadviseerde scores — controleer &amp; corrigeer</div>
+            <div style="font-size:11px; color:#888; margin-top:4px;">Pas aan waar de AI een verkeerde inschatting maakt op basis van uw kennis van de situatie.</div>
+          </div>
+          <button class="btn btn-red" onclick="applyAIScores()">Scores bevestigen → Dashboard</button>
+        </div>
+        <div class="table-wrap">
+          <table id="ai-table">
+            <thead><tr><th style="width:32px;"></th><th>Capability</th><th>Domein</th><th style="text-align:center">Nulmeting</th><th style="text-align:center">Ambitie</th><th>Toelichting</th></tr></thead>
+            <tbody id="ai-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB: DASHBOARD ===== -->
+  <div class="tab-content" id="tab-dashboard">
+    <div id="dashboard-empty" class="empty-state" style="display:none;">
+      <div class="empty-icon">◉</div>
+      <div class="empty-title">Geen gegevens geladen</div>
+      <div class="empty-text">Voer eerst scores in via het <strong>Invoer</strong>-tabblad door een bestand te uploaden of interviewnotities te analyseren.</div>
+    </div>
+    <div id="dashboard-main" style="display:none;">
+      <!-- Top row -->
+      <div class="dashboard-top">
+        <div class="score-card">
+          <div class="score-card-label">Nulmeting Gemiddeld</div>
+          <div class="score-big" id="dash-score-huidige">—</div>
+          <div class="score-level-badge" id="dash-level-badge">—</div>
+          <div class="score-ambitie-sub" id="dash-score-ambitie-sub">—</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-field">
+            <label class="label">Organisatie</label>
+            <input type="text" class="input-underline" id="meta-organisatie" placeholder="Naam organisatie" oninput="updateMeta()" />
+          </div>
+          <div class="grid-2" style="gap:16px;">
+            <div class="meta-field">
+              <label class="label">Datum scan</label>
+              <input type="date" class="input-underline" id="meta-datum" oninput="updateMeta()" />
+            </div>
+            <div class="meta-field">
+              <label class="label">Eiffel Consultant</label>
+              <input type="text" class="input-underline" id="meta-consultant" placeholder="Naam consultant" oninput="updateMeta()" />
+            </div>
+          </div>
+          <div style="font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#aaa; border-top:1px solid #ddd; padding-top:10px; display:flex; align-items:center; gap:6px;">
+            <span style="width:10px; height:10px; background:var(--red); display:inline-block; flex-shrink:0;"></span>
+            Groeibehoefte: <span id="dash-gap-total">—</span> punten
+          </div>
+        </div>
+        <div class="radar-card">
+          <div class="radar-title">Domein Volwassenheidsradar (schaal 1–4)</div>
+          <svg id="radar-svg" viewBox="0 0 450 390" style="width:100%; max-width:420px; height:auto;"></svg>
+          <div class="radar-legend">
+            <div class="legend-item"><span class="legend-fill"></span> Nulmeting</div>
+            <div class="legend-item"><span class="legend-dash"></span> Ambitie</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gap table -->
+      <div style="margin-top:24px;">
+        <div class="flex items-center justify-between" style="margin-bottom:12px; flex-wrap:wrap; gap:12px;">
+          <div>
+            <div class="section-title">Detailed Gap Analysis &amp; Priorities</div>
+            <div style="font-size:11px; color:#888; margin-top:4px;">Pas scores inline aan. Klik op de pijl voor toelichting en volgende stap.</div>
+          </div>
+          <div class="flex items-center" style="gap:10px; flex-wrap:wrap;">
+            <span class="label">Sorteer op:</span>
+            <div class="sort-bar">
+              <button class="sort-btn active" id="sort-gap" onclick="sortTable('gap')">Grootste gap ↓</button>
+              <button class="sort-btn" id="sort-domein" onclick="sortTable('domein')">Domein</button>
+              <button class="sort-btn" id="sort-naam" onclick="sortTable('naam')">Naam</button>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th style="width:36px;"></th>
+              <th>Capability</th>
+              <th>Domein</th>
+              <th style="text-align:center; width:90px;">Nulmeting</th>
+              <th style="text-align:center; width:90px;">Ambitie</th>
+              <th style="text-align:center; width:60px;">Gap</th>
+              <th style="text-align:center; width:100px;">Prioriteit</th>
+            </tr></thead>
+            <tbody id="gap-tbody"></tbody>
+          </table>
+          <div class="table-footer">
+            <span class="table-footer-left" id="dash-total-caps">15 capabilities</span>
+            <div class="table-footer-right" id="prio-stats"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB: EXPORT ===== -->
+  <div class="tab-content" id="tab-export">
+    <div id="export-empty" class="empty-state" style="display:none;">
+      <div class="empty-icon">↓</div>
+      <div class="empty-title">Geen gegevens om te exporteren</div>
+      <div class="empty-text">Ga naar het <strong>Invoer</strong>-tabblad om scores in te voeren alvorens te exporteren.</div>
+    </div>
+    <div id="export-main" style="display:none;">
+      <div class="export-header-card" style="margin-bottom:24px;">
+        <div style="flex:1;">
+          <div class="section-title" style="margin-bottom:6px;">Consultant Rapportage &amp; Delen</div>
+          <div style="font-size:11px; color:#555; line-height:1.7; max-width:520px;">Exporteer de volwassenheidsscan als PDF-rapport voor presentatie aan de directie of als CSV voor verdere verwerking in Excel of BI-tools.</div>
+        </div>
+        <div class="export-btns">
+          <button class="btn btn-outline" onclick="exportCSV()">↓ Scores als CSV</button>
+          <button class="btn btn-red" id="pdf-btn" onclick="exportPDF()">↓ Download PDF Rapport</button>
+        </div>
+      </div>
+      <div id="pdf-error" class="card-error" style="display:none; margin-bottom:16px; font-size:12px; color:var(--red);"></div>
+
+      <div class="label" style="margin-bottom:12px;">A4 Rapportage Preview</div>
+      <div style="background:#e0e0e0; padding:20px; overflow-x:auto;">
+        <div id="printable-report">
+          <div class="pdf-header">
+            <div>
+              <div class="label" style="margin-bottom:4px;">Team EIFFEL Assessment Tool</div>
+              <div style="font-size:22px; font-weight:900; letter-spacing:-0.02em;">Datagedreven Werken Maturity Scan</div>
+            </div>
+            <div class="eiffel-logo">
+              <div class="eiffel-grid"><span></span><span></span><span></span><span></span></div>
+              <span style="font-size:15px; font-weight:900; color:var(--red); letter-spacing:0.15em; text-transform:uppercase;">team EIFFEL</span>
+            </div>
+          </div>
+          <div class="pdf-meta-grid" id="pdf-meta"></div>
+          <div class="pdf-summary">
+            <div>
+              <div style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px;">Samenvatting &amp; Volwassenheid</div>
+              <div style="font-size:11px; color:#555; line-height:1.8; margin-bottom:14px;">Deze scan brengt de huidige stand van zaken en groeiambities in kaart rondom datagedreven werken. Op basis van de resultaten is een roadmap gedefinieerd om de data-volwassenheid stapsgewijs te verhogen.</div>
+              <div class="pdf-score-box" id="pdf-scores"></div>
+            </div>
+            <div style="border:1px solid rgba(0,0,0,0.1);">
+              <svg id="radar-svg-pdf" viewBox="0 0 450 390" style="width:100%; height:auto;"></svg>
+              <div class="radar-legend" style="padding:8px 14px;"><div class="legend-item"><span class="legend-fill"></span> Nulmeting</div><div class="legend-item"><span class="legend-dash"></span> Ambitie</div></div>
+            </div>
+          </div>
+          <div style="margin-bottom:24px;">
+            <div style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px;">Maturity Matrix &amp; Gap Analyse</div>
+            <div class="table-wrap">
+              <table class="pdf-gap-table">
+                <thead><tr><th>Capability</th><th>Domein</th><th style="text-align:center">Huidig</th><th style="text-align:center">Ambitie</th><th style="text-align:center">Gap</th><th style="text-align:center">Prioriteit</th></tr></thead>
+                <tbody id="pdf-gap-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div style="border-top:1px solid #eee; padding-top:24px; margin-top:8px;">
+            <div style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Aanbevolen Strategische Roadmap</div>
+            <div style="font-size:11px; color:#888; margin-bottom:14px; line-height:1.6;">Door de beschreven acties per capability uit te voeren klimt de organisatie stapsgewijs omhoog in volwassenheid.</div>
+            <div id="pdf-roadmap"></div>
+          </div>
+          <div class="pdf-footer">
+            <span>© <span id="pdf-year"></span> Team EIFFEL • Vertrouwelijk Consultant Rapport</span>
+            <span>Rapport gegenereerd op <span id="pdf-date"></span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <span>© <span id="footer-year"></span> Team EIFFEL • Alle rechten voorbehouden</span>
+  <span style="display:none" class="hidden sm:inline">Vertrouwelijk • Enkel voor intern gebruik door geautoriseerde consultants</span>
+</footer>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const CAPABILITIES = [
+  { id:'dg',  naam:'Data Governance',                          domein:'Data Management' },
+  { id:'dq',  naam:'Data Quality',                             domein:'Data Management' },
+  { id:'mm',  naam:'Metadata Management',                      domein:'Data Management' },
+  { id:'ds',  naam:'Data Security',                            domein:'Data Management' },
+  { id:'dso', naam:'Data Storage & Operations',                domein:'Data Management' },
+  { id:'rmd', naam:'Reference & Master Data Management',       domein:'Data Management' },
+  { id:'dii', naam:'Data Integration & Interoperability',      domein:'Data Management' },
+  { id:'dmd', naam:'Data Modeling & Design',                   domein:'Data Management' },
+  { id:'dwb', naam:'Data Warehousing & Business Intelligence', domein:'Data Management' },
+  { id:'de',  naam:'Data Ethiek',                              domein:'Datageletterdheid' },
+  { id:'ct',  naam:'Communicatie & Training',                  domein:'Datageletterdheid' },
+  { id:'ws',  naam:'Wervingsstrategie',                        domein:'Datageletterdheid' },
+  { id:'dl',  naam:'Data Leiderschap',                         domein:'Datageletterdheid' },
+  { id:'tc',  naam:'Talent & Cultuur',                         domein:'Talent & Cultuur' },
+  { id:'rv',  naam:'Rapportage & Visualisatie',                domein:'Strategie & Output' },
+];
+
+const DOMAINS = ['Data Management','Datageletterdheid','Talent & Cultuur','Strategie & Output'];
+
+const MATURITY_LEVELS = { 1:'Basic "Survive"', 2:'Moderate "Maintain"', 3:'Advanced "Build"', 4:'Leading "Evolve"' };
+
+const LEVEL_COLORS = { 1:'#8B0000', 2:'#F5A623', 3:'#C8102E', 4:'#2E7D32' };
+
+const LEVEL_DESC = {
+  'Data Governance':{ 1:'Geen formeel beleid; dataverantwoordelijkheid is ad hoc en persoonsafhankelijk', 2:'Eerste beleidsdocumenten aanwezig; data ownership deels belegd maar niet consequent nageleefd', 3:'Governance-structuur actief met data owners, stewards en een duidelijk besluitvormingsproces', 4:'Enterprise-brede governance met meetbare naleving, continue verbetering en bestuurlijke verankering' },
+  'Data Quality':{ 1:'Datakwaliteit wordt reactief opgepakt; fouten worden pas opgemerkt bij gebruik', 2:'Basiskwaliteitsregels gedefinieerd; periodieke controles maar geen geautomatiseerd monitoren', 3:'Geautomatiseerde kwaliteitsmonitoring actief; eigenaarschap belegd; structurele root-cause analyse', 4:'Proactief kwaliteitsmanagement met voorspellende signalering en organisatiebrede kwaliteitscultuur' },
+  'Metadata Management':{ 1:'Geen centrale metadataregistratie; kennis over databronnen is impliciet en persoonsgebonden', 2:'Decentrale metadataregistratie in losse documenten of spreadsheets', 3:'Centrale datacatalogus actief gevuld en raadpleegbaar; businessglosarium in gebruik', 4:'Automatisch gegenereerde metadata; datacatalogus geïntegreerd in dagelijkse werkprocessen' },
+  'Data Security':{ 1:'Minimale toegangscontrole; geen structureel beleid rondom gevoelige data', 2:'Basisautorisatiestructuur aanwezig; AVG-bewustzijn maar beperkte handhaving', 3:'Rolgebaseerde toegang consequent ingericht; security-audits en classificatiebeleid actief', 4:'Geautomatiseerde detectie van afwijkingen; privacy-by-design geborgd in alle dataprocessen' },
+  'Data Storage & Operations':{ 1:"Datasilo's per afdeling; geen centrale opslag; beperkte beschikbaarheid en reproduceerbaarheid", 2:'Gedeeltelijke centralisatie; basisafspraken over opslag en back-up', 3:"Centrale, gedocumenteerde dataopslag met SLA's voor beschikbaarheid en hersteltijd", 4:'Cloudnative of hybride architectuur; volledig geautomatiseerde operaties en zelfherstellende systemen' },
+  'Reference & Master Data Management':{ 1:'Geen gemeenschappelijke definities; stamdata verschilt per systeem en afdeling', 2:'Eerste stappen richting harmonisatie; deels gedeelde referentiedata maar inconsistenties bestaan', 3:'Centraal stamdata-management actief; één bron van waarheid voor kernentiteiten', 4:'Volledig geharmoniseerde master data over alle systemen; realtime synchronisatie en beheer' },
+  'Data Integration & Interoperability':{ 1:'Handmatige datakoppelingen of point-to-point integraties; foutgevoelig en niet schaalbaar', 2:'Eerste integratiepipelines aanwezig; beperkte documentatie en monitoring', 3:'Gestandaardiseerde integratiearchitectuur met monitoring en foutafhandeling', 4:'Event-driven of API-first integratie; realtime datadeling over systemen heen' },
+  'Data Modeling & Design':{ 1:'Geen datamodellen; structuur van data is impliciet en gedocumenteerd noch gestandaardiseerd', 2:'Datamodellen bestaan voor kernprocessen maar zijn verouderd of incompleet', 3:'Actuele, beheerde datamodellen afgestemd op businessdomeinen; versiebeheer ingericht', 4:'Modelgedreven ontwikkeling; datamodellen zijn leidend in systeemontwerp en architectuurkeuzes' },
+  'Data Warehousing & Business Intelligence':{ 1:'Rapportages worden handmatig samengesteld uit losse bronnen; Excel-dominant', 2:'Eerste dashboards beschikbaar; beperkte self-service; afhankelijkheid van IT voor analyses', 3:'Centraal datawarehouse of dataplatform actief; self-service BI beschikbaar voor eindgebruikers', 4:'Geïntegreerd analytisch platform met voorspellende modellen en realtime inzichten' },
+  'Data Ethiek':{ 1:'Geen bewustzijn van ethische vraagstukken rondom datagebruik', 2:'Basiskennis van AVG en ethische richtlijnen; niet structureel toegepast', 3:'Ethische afwegingen maken deel uit van datagebruiksprocessen; training aanwezig', 4:"Ethiek is geborgd in beleid, tooling en cultuur; organisatie denkt proactief na over datadillemma's" },
+  'Communicatie & Training':{ 1:'Geen gestructureerd aanbod; datatraining vindt incidenteel plaats', 2:'Basistraining beschikbaar; bereik beperkt tot specifieke afdelingen', 3:'Structureel opleidingsprogramma; communicatie over data-initiatieven is actief en afdelingsoverstijgend', 4:'Continu leerklimaat; medewerkers zijn ambassadeurs van datagedreven werken' },
+  'Wervingsstrategie':{ 1:'Data-vaardigheden geen criterium bij werving; geen dataprofiel in functiebeschrijvingen', 2:'Data-vaardigheden worden incidenteel meegewogen; geen structureel wervingsprofiel', 3:'Data-competenties expliciet opgenomen in functieprofielen; gericht werven op datagedreven rollen', 4:'Wervingsstrategie volledig afgestemd op dataambitie; actief employer branding op datagebied' },
+  'Data Leiderschap':{ 1:'Geen zichtbaar leiderschap op data; initiatieven zijn bottom-up en onsamenhangend', 2:'Eén of enkele personen dragen data actief uit; geen formele CDO of equivalent', 3:'Data leadership formeel belegd; directie betrokken bij datastrategie en investeringskeuzes', 4:'Data staat op de boardroom agenda; leiders sturen actief op data als strategisch kapitaal' },
+  'Talent & Cultuur':{ 1:'Datagedreven werken is geen onderdeel van de organisatiecultuur; weerstand of onverschilligheid', 2:'Groeiend bewustzijn; eilanden van enthousiasme maar geen organisatiebrede beweging', 3:'Datagedreven werken is de norm in kernprocessen; cultuurverandering zichtbaar en meetbaar', 4:'Volledig data-gedreven organisatie; experimenteren met data is structureel onderdeel van werkwijze' },
+  'Rapportage & Visualisatie':{ 1:'Statische rapporten; handmatig samengesteld; weinig visuele duiding', 2:'Eerste dashboards actief; beperkte interactiviteit; niet breed toegankelijk', 3:'Interactieve, self-service dashboards breed beschikbaar; afgestemd op besluitvormingsbehoeften', 4:'Geïntegreerde rapportageomgeving met real-time data, drill-down en voorspellende signalering' },
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let scores = null;
+let aiExtractedScores = null;
+let uploadPreviewScores = null;
+let sortField = 'gap';
+let sortDir = 'desc';
+let expandedRows = {};
+let metadata = { organisatie:'', datum: todayStr(), consultant:'' };
+let apiKey = localStorage.getItem('eiffel_anthropic_key') || '';
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// Init
+document.getElementById('footer-year').textContent = new Date().getFullYear();
+document.getElementById('pdf-year').textContent = new Date().getFullYear();
+document.getElementById('pdf-date').textContent = new Date().toLocaleDateString('nl-NL');
+if (apiKey) {
+  document.getElementById('api-key-input').value = apiKey;
+  document.getElementById('key-status-text').textContent = 'Anthropic API-sleutel opgeslagen. Claude wordt gebruikt voor AI-analyse.';
+}
+const storedScores = localStorage.getItem('eiffel_scores');
+if (storedScores) {
+  scores = JSON.parse(storedScores);
+  // Show save/reset buttons if scores already in session
+  setTimeout(() => {
+    document.getElementById('reset-btn').style.display = 'block';
+    document.getElementById('session-save-btn').style.display = 'inline';
+  }, 0);
+}
+const storedMeta = localStorage.getItem('eiffel_meta');
+if (storedMeta) { metadata = JSON.parse(storedMeta); }
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function switchTab(tab, e) {
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  if (e && e.target) e.target.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'dashboard') renderDashboard();
+  if (tab === 'export') renderExport();
+}
+
+function switchSubTab(tab, e) {
+  document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sub-content').forEach(c => c.style.display = 'none');
+  if (e && e.target) e.target.classList.add('active');
+  document.getElementById('sub-' + tab).style.display = 'block';
+}
+
+// ============================================================
+// API KEY
+// ============================================================
+function toggleKeyPanel() {
+  const panel = document.getElementById('key-panel');
+  panel.classList.toggle('open');
+}
+
+function saveApiKey() {
+  apiKey = document.getElementById('api-key-input').value.trim();
+  localStorage.setItem('eiffel_anthropic_key', apiKey);
+  document.getElementById('key-status-text').textContent = apiKey
+    ? 'Anthropic API-sleutel opgeslagen. Claude wordt gebruikt voor AI-analyse.'
+    : 'Geen sleutel ingevoerd.';
+  document.getElementById('key-panel').classList.remove('open');
+}
+
+// ============================================================
+// TEMPLATE DOWNLOAD
+// ============================================================
+function downloadTemplate() {
+  const rows = ['Respondent;Capability;Huidige score (1-4);Ambitiescore (1-4)'];
+  CAPABILITIES.forEach(c => rows.push(`Respondent 1;${c.naam};1;2`));
+  const blob = new Blob(['\uFEFF' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = 'EIFFEL_Datagedreven_Werken_Template.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+// ============================================================
+// FILE UPLOAD
+// ============================================================
+function handleFileUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  clearUploadUI();
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext === 'csv') {
+    Papa.parse(file, { header: true, skipEmptyLines: true,
+      complete: r => processRows(r.data),
+      error: err => showUploadError('CSV parse fout: ' + err.message)
+    });
+  } else if (ext === 'xlsx' || ext === 'xls') {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const wb = XLSX.read(new Uint8Array(ev.target.result), { type:'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        processRows(XLSX.utils.sheet_to_json(ws));
+      } catch(err) { showUploadError('Excel leesfout: ' + err.message); }
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    showUploadError('Ongeldig bestandsformaat. Upload een .csv of .xlsx bestand.');
+  }
+}
+
+function clearUploadUI() {
+  document.getElementById('upload-error').style.display = 'none';
+  document.getElementById('upload-warnings-box').style.display = 'none';
+  document.getElementById('upload-preview').style.display = 'none';
+  uploadPreviewScores = null;
+}
+
+function showUploadError(msg) {
+  const el = document.getElementById('upload-error');
+  el.textContent = '⚠ ' + msg; el.style.display = 'flex';
+}
+
+function processRows(rows) {
+  if (!rows || rows.length === 0) { showUploadError('Het bestand bevat geen gegevens.'); return; }
+  const keys = Object.keys(rows[0] || {});
+  const capH = keys.find(k => k.toLowerCase().includes('capability'));
+  const huidH = keys.find(k => k.toLowerCase().includes('huidige') || k.toLowerCase() === 'score');
+  const ambH = keys.find(k => k.toLowerCase().includes('ambitie') || k.toLowerCase() === 'ambitie');
+  if (!capH) { showUploadError('Kolom "Capability" ontbreekt. Download de invultemplate en gebruik die als basis.'); return; }
+  const warnings = [];
+  const capMap = {};
+  CAPABILITIES.forEach(c => { capMap[c.naam.toLowerCase()] = { huidige:[], ambitie:[], count:0 }; });
+  rows.forEach((row, idx) => {
+    const rn = idx + 2;
+    const capRaw = String(row[capH] || '').trim();
+    const capLow = capRaw.toLowerCase();
+    if (!capLow) { warnings.push(`Rij ${rn}: lege capability-naam overgeslagen.`); return; }
+    const match = CAPABILITIES.find(c => c.naam.toLowerCase() === capLow || c.naam.toLowerCase().includes(capLow) || capLow.includes(c.naam.toLowerCase()));
+    if (!match) { warnings.push(`Rij ${rn}: onbekende capability '${capRaw}' overgeslagen.`); return; }
+    const key = match.naam.toLowerCase();
+    const parseScore = (raw, label) => {
+      if (raw === undefined || raw === null || String(raw).trim() === '') { warnings.push(`Rij ${rn} [${match.naam}]: geen ${label} ingevuld. Standaard: 1.`); return 1; }
+      const n = Number(raw);
+      if (isNaN(n)) { warnings.push(`Rij ${rn} [${match.naam}]: ${label} '${raw}' is geen getal. Standaard: 1.`); return 1; }
+      if (n < 1 || n > 4) { const c = Math.max(1, Math.min(4, Math.round(n))); warnings.push(`Rij ${rn} [${match.naam}]: ${label} buiten 1-4 bereik, gecorrigeerd naar ${c}.`); return c; }
+      return Math.round(n);
+    };
+    const h = parseScore(huidH ? row[huidH] : undefined, 'huidige score');
+    const a = parseScore(ambH ? row[ambH] : undefined, 'ambitiescore');
+    if (a < h) warnings.push(`Rij ${rn} [${match.naam}]: ambitie (${a}) lager dan huidig (${h}).`);
+    capMap[key].huidige.push(h); capMap[key].ambitie.push(a); capMap[key].count++;
+  });
+  const missing = CAPABILITIES.filter(c => capMap[c.naam.toLowerCase()].count === 0);
+  if (missing.length) warnings.push(`Ontbrekende capabilities ingesteld op niveau 1: ${missing.map(c=>c.naam).join(', ')}.`);
+  const finalScores = CAPABILITIES.map(c => {
+    const d = capMap[c.naam.toLowerCase()];
+    const avgH = d.huidige.length ? d.huidige.reduce((a,b)=>a+b,0)/d.huidige.length : 1;
+    const avgA = d.ambitie.length ? d.ambitie.reduce((a,b)=>a+b,0)/d.ambitie.length : 1;
+    return { naam:c.naam, domein:c.domein, huidige_score:Math.round(avgH), ambitie_score:Math.round(avgA), toelichting: d.count > 1 ? `Gemiddelde van ${d.count} respondenten.` : d.count === 1 ? 'Geïmporteerd via bestand.' : 'Ontbrak in bestand; ingesteld op niveau 1.' };
+  });
+  uploadPreviewScores = finalScores;
+  if (warnings.length) {
+    document.getElementById('upload-warnings-box').style.display = 'block';
+    const list = document.getElementById('upload-warnings-list');
+    list.innerHTML = warnings.map(w => `<div class="warn-item">${w}</div>`).join('');
+  }
+  renderPreviewTable(finalScores);
+}
+
+function renderPreviewTable(data) {
+  const tbody = document.getElementById('preview-tbody');
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td><strong>${r.naam}</strong></td>
+      <td style="color:#888;">${r.domein}</td>
+      <td style="text-align:center;"><span class="score-huidige">${r.huidige_score}</span></td>
+      <td style="text-align:center;"><span class="score-ambitie">${r.ambitie_score}</span></td>
+      <td style="color:#888; font-style:italic; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${r.toelichting}">${r.toelichting}</td>
+    </tr>`).join('');
+  document.getElementById('upload-preview').style.display = 'block';
+}
+
+function applyUploadedScores() {
+  if (!uploadPreviewScores) return;
+  setScores(uploadPreviewScores);
+  goToDashboard();
+}
+
+// ============================================================
+// AI ANALYSIS
+// ============================================================
+async function runAIAnalysis() {
+  const text = document.getElementById('interview-notes').value.trim();
+  if (!text) { document.getElementById('ai-error').textContent = '⚠ Voer eerst interviewnotities in.'; document.getElementById('ai-error').style.display='flex'; return; }
+  document.getElementById('ai-error').style.display = 'none';
+  document.getElementById('ai-warnings-box').style.display = 'none';
+  document.getElementById('ai-result').style.display = 'none';
+  const btn = document.getElementById('ai-btn');
+  btn.textContent = '✦ AI analyseert...'; btn.disabled = true;
+
+  const systemPrompt = `Je bent een expert in datavolwassenheid die interviewnotities analyseert voor een management consultant. Geef per capability een huidige score én ambitiescore op schaal 1–4.
+
+SCORESCHAAL:
+1 = Basic "Survive": ad hoc, reactief, geen formeel beleid of eigenaarschap
+2 = Moderate "Maintain": eerste processen gedefinieerd, deels belegd, maar gefragmenteerd
+3 = Advanced "Build": gestandaardiseerd, centraal beheerd, structureel geborgd
+4 = Leading "Evolve": volledig geautomatiseerd, voorspellend, verankerd in cultuur en strategie
+
+SCORINGSREGELS — volg deze strikt:
+
+REGEL 1 — Alleen scoren op basis van expliciete tekstevidentie:
+Stel een huidige score uitsluitend vast op basis van wat er letterlijk in de notities staat. Interpreteer niet, vul niet aan vanuit aannames. Als een capability niet of nauwelijks wordt besproken, stel dan huidige_score op 1 en schrijf in toelichting: "Niet besproken in het interview — score vereist verificatie door consultant." Stel in dat geval ambitie_score ook op 1.
+
+REGEL 2 — Ambitie conservatief en onderbouwd scoren:
+Stel ambitie_score alleen op 4 als de tekst expliciet wijst op een Leading-ambitie: volledige automatisering, organisatiebrede datagedreven cultuur, of vergelijkbare concrete Leading-kenmerken. Een algemene wens zoals "we willen datagedreven worden" of "we willen dashboards" = ambitie_score 3, niet 4. Wanneer geen ambitie wordt uitgesproken voor een capability EN er ook geen organisatiebrede ambitie in de tekst staat, stel ambitie_score gelijk aan huidige_score.
+
+REGEL 2B — Organisatiebrede ambitie geldt als minimumambitie voor besproken capabilities:
+Als de tekst een algemene organisatiebrede ambitie uitspreekt (bijv. "we willen datagedreven worden", "ambitie 2027", "elke afdeling moet zelfstandig dashboards kunnen raadplegen"), gebruik dan ambitie_score minimaal 3 voor alle capabilities die wel expliciet besproken worden in de notities. De organisatiebrede ambitie impliceert vooruitgang op alle besproken terreinen. Alleen voor capabilities die helemaal niet besproken zijn, blijft ambitie_score gelijk aan huidige_score (zie regel 1).
+
+REGEL 2C — Capabilities bijna op ambitieniveau krijgen hogere ambitiescore:
+Als de huidige score al 2 of 3 is en er concrete acties lopen (bijv. uitrol, aanstelling, audit afgerond), stel ambitie_score dan minimaal één niveau hoger dan de huidige score. Een organisatie die actief bezig is met implementatie heeft per definitie een hogere ambitie dan waar ze nu staan.
+
+REGEL 3 — Consistentie: meer bewezen actie = hogere huidige score:
+Weeg concrete bewezen acties (aanstellingen, afgeronde audits, lopende uitrollen) zwaarder dan intenties en plannen. Een CISO die is aangesteld en een audit heeft afgerond en RBAC uitrolt = huidige score 2 a 3, niet 1. Een plan zonder uitvoering = huidige score 1.
+
+REGEL 4 — Toelichting is altijd bewijsgebonden:
+Schrijf in de toelichting (max 1 zin) wat de concrete tekstevidentie is voor de score. Noem nooit iets wat niet in de notities staat. Voor niet-besproken capabilities schrijf: "Niet besproken in het interview - score vereist verificatie door consultant." 
+
+OUTPUT: Geef je antwoord ALLEEN als JSON zonder uitleg of markdown backticks:
+{"capabilities":[{"naam":"[capability naam]","huidige_score":[1-4],"ambitie_score":[1-4],"toelichting":"[max 1 zin met tekstevidentie]"}]}
+
+De 15 capabilities zijn: Data Governance, Data Quality, Metadata Management, Data Security, Data Storage & Operations, Reference & Master Data Management, Data Integration & Interoperability, Data Modeling & Design, Data Warehousing & Business Intelligence, Data Ethiek, Communicatie & Training, Wervingsstrategie, Data Leiderschap, Talent & Cultuur, Rapportage & Visualisatie`;
+
+  try {
+    const currentKey = apiKey || localStorage.getItem('eiffel_anthropic_key') || '';
+    if (!currentKey) throw new Error('Geen Anthropic API-sleutel ingevuld. Voeg uw sleutel toe via "Sleutel beheren" hierboven.');
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'content-type':'application/json', 'x-api-key': currentKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:2000, system:systemPrompt, messages:[{ role:'user', content:`Hier zijn de interviewnotities:\n\n${text}` }] })
+    });
+    if (!res.ok) { const e = await res.text(); throw new Error(`API-fout (${res.status}): ${e}`); }
+    const data = await res.json();
+    const raw = data.content?.[0]?.text || '';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    if (!parsed.capabilities || !Array.isArray(parsed.capabilities)) throw new Error('Onverwacht JSON-formaat van AI.');
+    processAIResponse(parsed.capabilities);
+  } catch(err) {
+    document.getElementById('ai-error').textContent = '⚠ ' + err.message;
+    document.getElementById('ai-error').style.display = 'flex';
+  } finally {
+    btn.textContent = '✦ Analyseer met AI'; btn.disabled = false;
+  }
+}
+
+function processAIResponse(aiRows) {
+  const warnings = [];
+  const mapped = CAPABILITIES.map(cap => {
+    const match = aiRows.find(r => r && r.naam && (r.naam.toLowerCase() === cap.naam.toLowerCase() || cap.naam.toLowerCase().includes(r.naam.toLowerCase()) || r.naam.toLowerCase().includes(cap.naam.toLowerCase())));
+    if (!match) { warnings.push(`'${cap.naam}' niet gedetecteerd; ingesteld op niveau 1.`); return { naam:cap.naam, domein:cap.domein, huidige_score:1, ambitie_score:1, toelichting:'Niet besproken in de aangeleverde notities.' }; }
+    let h = parseInt(match.huidige_score, 10); if (isNaN(h)||h<1||h>4) { warnings.push(`Ongeldig huidig score voor '${cap.naam}', gecorrigeerd naar 1.`); h=Math.max(1,Math.min(4,h||1)); }
+    let a = parseInt(match.ambitie_score, 10); if (isNaN(a)||a<1||a>4) { warnings.push(`Ongeldig ambitiescore voor '${cap.naam}', gecorrigeerd naar 1.`); a=Math.max(1,Math.min(4,a||1)); }
+    if (a < h) warnings.push(`Ambitie (${a}) lager dan huidig (${h}) voor '${cap.naam}'.`);
+    return { naam:cap.naam, domein:cap.domein, huidige_score:h, ambitie_score:a, toelichting: match.toelichting || 'Geanalyseerd via AI.' };
+  });
+  aiExtractedScores = mapped;
+  if (warnings.length) {
+    document.getElementById('ai-warnings-box').style.display = 'block';
+    document.getElementById('ai-warnings-list').innerHTML = warnings.map(w=>`<div class="warn-item">${w}</div>`).join('');
+  }
+  renderAITable(mapped);
+}
+
+function renderAITable(data) {
+  const tbody = document.getElementById('ai-tbody');
+  tbody.innerHTML = data.map((r, i) => `
+    <tr id="ai-row-${i}">
+      <td><button class="expand-btn" onclick="toggleAIRow(${i})">▸</button></td>
+      <td><strong>${r.naam}</strong></td>
+      <td style="color:#888;">${r.domein}</td>
+      <td style="text-align:center;">
+        <select class="mono" style="width:50px; padding:4px; color:var(--red); font-weight:700; border-color:var(--black);" onchange="updateAIScore(${i},'huidige_score',this.value)">
+          ${[1,2,3,4].map(n=>`<option value="${n}" ${r.huidige_score==n?'selected':''}>${n}</option>`).join('')}
+        </select>
+      </td>
+      <td style="text-align:center;">
+        <select class="mono" style="width:50px; padding:4px; font-weight:700; border-color:var(--black);" onchange="updateAIScore(${i},'ambitie_score',this.value)">
+          ${[1,2,3,4].map(n=>`<option value="${n}" ${r.ambitie_score==n?'selected':''}>${n}</option>`).join('')}
+        </select>
+      </td>
+      <td><input type="text" value="${r.toelichting.replace(/"/g,'&quot;')}" class="toelichting-input" onchange="updateAIScore(${i},'toelichting',this.value)" /></td>
+    </tr>
+    <tr id="ai-expand-${i}" style="display:none;">
+      <td></td>
+      <td colspan="5" style="background:#FFF5F6; padding:14px;">
+        <div class="expanded-grid">
+          <div class="expanded-card"><div class="card-label">Huidig niveau</div><div id="ai-desc-h-${i}">${LEVEL_DESC[r.naam]?.[r.huidige_score]||''}</div></div>
+          <div class="expanded-card"><div class="card-label next">Volgende stap</div><div id="ai-desc-n-${i}">${r.huidige_score<4?LEVEL_DESC[r.naam]?.[r.huidige_score+1]||'':'Reeds op Leading-niveau.'}</div></div>
+        </div>
+      </td>
+    </tr>`).join('');
+  document.getElementById('ai-result').style.display = 'block';
+}
+
+function toggleAIRow(i) {
+  const row = document.getElementById('ai-expand-'+i);
+  const btn = document.querySelector(`#ai-row-${i} .expand-btn`);
+  const open = row.style.display !== 'none' && row.style.display !== '';
+  row.style.display = open ? 'none' : 'table-row';
+  btn.textContent = open ? '▸' : '▾';
+}
+
+function updateAIScore(i, field, val) {
+  if (!aiExtractedScores) return;
+  if (field !== 'toelichting') val = parseInt(val, 10);
+  aiExtractedScores[i][field] = val;
+  if (field === 'huidige_score' || field === 'ambitie_score') {
+    const r = aiExtractedScores[i];
+    const hEl = document.getElementById(`ai-desc-h-${i}`);
+    const nEl = document.getElementById(`ai-desc-n-${i}`);
+    if (hEl) hEl.textContent = LEVEL_DESC[r.naam]?.[r.huidige_score] || '';
+    if (nEl) nEl.textContent = r.huidige_score < 4 ? LEVEL_DESC[r.naam]?.[r.huidige_score+1] || '' : 'Reeds op Leading-niveau.';
+  }
+}
+
+function applyAIScores() {
+  if (!aiExtractedScores) return;
+  setScores(aiExtractedScores);
+  goToDashboard();
+}
+
+// ============================================================
+// DEMO DATA
+// ============================================================
+function loadDemoData() {
+  const demo = [
+    { naam:'Data Governance', domein:'Data Management', huidige_score:2, ambitie_score:3, toelichting:'Rollen en verantwoordelijkheden zijn ad-hoc belegd; business toont beperkte betrokkenheid.' },
+    { naam:'Data Quality', domein:'Data Management', huidige_score:1, ambitie_score:3, toelichting:'Kwaliteitsproblemen worden reactief gecorrigeerd zodra rapportages fouten vertonen.' },
+    { naam:'Metadata Management', domein:'Data Management', huidige_score:1, ambitie_score:2, toelichting:'Kennis over bronbestanden is niet gecentraliseerd en berust op individuen.' },
+    { naam:'Data Security', domein:'Data Management', huidige_score:3, ambitie_score:4, toelichting:'Toegangsbeheer is rolgebaseerd ingericht; AVG-richtlijnen worden nageleefd.' },
+    { naam:'Data Storage & Operations', domein:'Data Management', huidige_score:2, ambitie_score:3, toelichting:'Lokale servers met handmatige back-ups; capaciteitslimieten worden regelmatig bereikt.' },
+    { naam:'Reference & Master Data Management', domein:'Data Management', huidige_score:1, ambitie_score:2, toelichting:'Meerdere inconsistente versies van stamdata in omloop over afdelingen.' },
+    { naam:'Data Integration & Interoperability', domein:'Data Management', huidige_score:2, ambitie_score:3, toelichting:'Koppelingen zijn voornamelijk point-to-point scripts en handmatige downloads.' },
+    { naam:'Data Modeling & Design', domein:'Data Management', huidige_score:2, ambitie_score:3, toelichting:'Datamodellen worden ad-hoc per applicatie ontworpen zonder overkoepelend referentiemodel.' },
+    { naam:'Data Warehousing & Business Intelligence', domein:'Data Management', huidige_score:2, ambitie_score:3, toelichting:'Dashboards direct gekoppeld aan operationele database; trage performance.' },
+    { naam:'Data Ethiek', domein:'Datageletterdheid', huidige_score:1, ambitie_score:2, toelichting:'Ethiek en verantwoord datagebruik worden niet expliciet getoetst bij initiatieven.' },
+    { naam:'Communicatie & Training', domein:'Datageletterdheid', huidige_score:1, ambitie_score:3, toelichting:'Geen actieve trainingsprogramma\'s om datagebruik te stimuleren bij de business.' },
+    { naam:'Wervingsstrategie', domein:'Datageletterdheid', huidige_score:2, ambitie_score:3, toelichting:'Data-gerelateerde vacatures worden ad-hoc uitgezet; focus op traditionele IT-profielen.' },
+    { naam:'Data Leiderschap', domein:'Datageletterdheid', huidige_score:1, ambitie_score:3, toelichting:'Besluitvorming vindt primair plaats op basis van ervaring en intuïtie.' },
+    { naam:'Talent & Cultuur', domein:'Talent & Cultuur', huidige_score:2, ambitie_score:3, toelichting:'Medewerkers zijn nieuwsgierig maar drempels in tool-toegang remmen exploratie.' },
+    { naam:'Rapportage & Visualisatie', domein:'Strategie & Output', huidige_score:2, ambitie_score:4, toelichting:'Merendeel van rapportages is statisch (Excel/PDF) met veel handmatige bewerkingstijd.' },
+  ];
+  setScores(demo);
+  goToDashboard();
+}
+
+// ============================================================
+// SCORES STATE
+// ============================================================
+function setScores(s) {
+  scores = s;
+  localStorage.setItem('eiffel_scores', JSON.stringify(s));
+  document.getElementById('reset-btn').style.display = 'block';
+  document.getElementById('session-save-btn').style.display = 'inline';
+}
+
+function resetScores() {
+  if (!confirm('Weet u zeker dat u alle scores wilt wissen?')) return;
+  scores = null;
+  localStorage.removeItem('eiffel_scores');
+  document.getElementById('reset-btn').style.display = 'none';
+  document.getElementById('session-save-btn').style.display = 'none';
+  document.getElementById('autosave-indicator').style.display = 'none';
+  switchTabById('invoer');
+}
+
+function switchTabById(tab) {
+  document.querySelectorAll('.nav-tab').forEach((b,i) => {
+    const tabs = ['invoer','dashboard','export'];
+    b.classList.toggle('active', tabs[i]===tab);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+function goToDashboard() {
+  switchTabById('dashboard');
+  renderDashboard();
+}
+
+function updateMeta() {
+  metadata.organisatie = document.getElementById('meta-organisatie').value;
+  metadata.datum = document.getElementById('meta-datum').value;
+  metadata.consultant = document.getElementById('meta-consultant').value;
+  localStorage.setItem('eiffel_meta', JSON.stringify(metadata));
+  document.getElementById('meta-org-nav').textContent = metadata.organisatie || '—';
+  document.getElementById('meta-consultant-nav').textContent = metadata.consultant || '—';
+  document.getElementById('meta-date-nav').textContent = metadata.datum ? new Date(metadata.datum+'T00:00:00').toLocaleDateString('nl-NL') : '—';
+}
+
+// ============================================================
+// MATURITY HELPERS
+// ============================================================
+function getMaturityInfo(score) {
+  if (score < 1.75) return { label:'Basic "Survive"', color:'#8B0000' };
+  if (score < 2.75) return { label:'Moderate "Maintain"', color:'#F5A623' };
+  if (score < 3.75) return { label:'Advanced "Build"', color:'#C8102E' };
+  return { label:'Leading "Evolve"', color:'#2E7D32' };
+}
+
+function getPriorityEl(gap) {
+  if (gap >= 2) return '<span class="prio-hoog">Hoog</span>';
+  if (gap === 1) return '<span class="prio-gemiddeld">Gemiddeld</span>';
+  return '<span class="prio-opschema">Op schema</span>';
+}
+
+// ============================================================
+// DASHBOARD RENDER
+// ============================================================
+function renderDashboard() {
+  if (!scores) {
+    document.getElementById('dashboard-empty').style.display = 'block';
+    document.getElementById('dashboard-main').style.display = 'none';
+    return;
+  }
+  document.getElementById('dashboard-empty').style.display = 'none';
+  document.getElementById('dashboard-main').style.display = 'block';
+
+  const avgH = scores.reduce((s,r)=>s+r.huidige_score,0)/scores.length;
+  const avgA = scores.reduce((s,r)=>s+r.ambitie_score,0)/scores.length;
+  const mH = getMaturityInfo(avgH);
+
+  document.getElementById('dash-score-huidige').textContent = avgH.toFixed(1);
+  const badge = document.getElementById('dash-level-badge');
+  badge.textContent = mH.label; badge.style.background = mH.color; badge.style.color = 'white';
+  document.getElementById('dash-score-ambitie-sub').textContent = `Ambitie score: ${avgA.toFixed(1)}`;
+  document.getElementById('dash-gap-total').textContent = (avgA-avgH).toFixed(1);
+
+  // Meta fields
+  document.getElementById('meta-organisatie').value = metadata.organisatie || '';
+  document.getElementById('meta-datum').value = metadata.datum || todayStr();
+  document.getElementById('meta-consultant').value = metadata.consultant || '';
+  document.getElementById('meta-org-nav').textContent = metadata.organisatie || '—';
+  document.getElementById('meta-consultant-nav').textContent = metadata.consultant || '—';
+  document.getElementById('meta-date-nav').textContent = metadata.datum ? new Date(metadata.datum+'T00:00:00').toLocaleDateString('nl-NL') : '—';
+
+  renderRadar('radar-svg');
+  renderGapTable();
+}
+
+function renderRadar(svgId) {
+  const svg = document.getElementById(svgId);
+  if (!svg || !scores) return;
+  const W=450, H=390, cx=225, cy=185, R=130;
+  const domainAvg = {};
+  DOMAINS.forEach(d => {
+    const ds = scores.filter(s=>s.domein===d);
+    domainAvg[d] = {
+      h: ds.length ? ds.reduce((s,r)=>s+r.huidige_score,0)/ds.length : 1,
+      a: ds.length ? ds.reduce((s,r)=>s+r.ambitie_score,0)/ds.length : 1,
+    };
+  });
+  const angles = { 'Data Management':-Math.PI/2, 'Datageletterdheid':0, 'Talent & Cultuur':Math.PI/2, 'Strategie & Output':Math.PI };
+  const pt = (d,v) => {
+    const r = (Math.max(1,Math.min(4,v))/4)*R;
+    return { x: cx+r*Math.cos(angles[d]), y: cy+r*Math.sin(angles[d]) };
+  };
+  let html = '';
+  // Grid
+  [1,2,3,4].forEach(lvl => {
+    const pts = DOMAINS.map(d=>{const p=pt(d,lvl);return `${p.x},${p.y}`;}).join(' ');
+    html += `<polygon points="${pts}" fill="none" stroke="#E5E5E5" stroke-width="1"/>`;
+  });
+  // Axis lines
+  DOMAINS.forEach(d => {
+    const p=pt(d,4); html+=`<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="#E5E5E5" stroke-width="1.5" stroke-dasharray="3,3"/>`;
+  });
+  // Level labels
+  [1,2,3,4].forEach(lvl => {
+    const p=pt('Data Management',lvl);
+    html+=`<rect x="${p.x-10}" y="${p.y-8}" width="20" height="14" fill="white" opacity="0.9"/>`;
+    html+=`<text x="${p.x}" y="${p.y+4}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="#999" font-weight="600">${lvl}</text>`;
+  });
+  // Nulmeting
+  const nPts = DOMAINS.map(d=>{const p=pt(d,domainAvg[d].h);return `${p.x},${p.y}`;}).join(' ');
+  html+=`<polygon points="${nPts}" fill="#C8102E" fill-opacity="0.2" stroke="#C8102E" stroke-width="2.5"/>`;
+  // Ambitie
+  const aPts = DOMAINS.map(d=>{const p=pt(d,domainAvg[d].a);return `${p.x},${p.y}`;}).join(' ');
+  html+=`<polygon points="${aPts}" fill="none" stroke="#1A1A1A" stroke-width="2.5" stroke-dasharray="5,4"/>`;
+  // Dots
+  DOMAINS.forEach(d => {
+    const nh=pt(d,domainAvg[d].h); html+=`<circle cx="${nh.x}" cy="${nh.y}" r="5" fill="#C8102E" stroke="white" stroke-width="2"/>`;
+    const na=pt(d,domainAvg[d].a);
+    html+=`<rect x="${na.x-4}" y="${na.y-4}" width="8" height="8" fill="#1A1A1A" stroke="white" stroke-width="1.5" transform="rotate(45,${na.x},${na.y})"/>`;
+  });
+  // Labels
+  const labelOff = {
+    'Data Management': { x:cx, y:cy-R-22, anchor:'middle' },
+    'Datageletterdheid': { x:cx+R+16, y:cy+4, anchor:'start' },
+    'Talent & Cultuur': { x:cx, y:cy+R+28, anchor:'middle' },
+    'Strategie & Output': { x:cx-R-16, y:cy+4, anchor:'end' },
+  };
+  DOMAINS.forEach(d => {
+    const o=labelOff[d];
+    html+=`<text x="${o.x}" y="${o.y}" text-anchor="${o.anchor}" font-size="11" font-family="Inter,sans-serif" font-weight="700" fill="#1A1A1A">${d}</text>`;
+    html+=`<text x="${o.x}" y="${o.y+14}" text-anchor="${o.anchor}" font-size="9" font-family="JetBrains Mono,monospace" fill="#888">H:${domainAvg[d].h.toFixed(1)} | A:${domainAvg[d].a.toFixed(1)}</text>`;
+  });
+  svg.innerHTML = html;
+}
+
+function sortTable(field) {
+  if (sortField === field) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  else { sortField = field; sortDir = 'desc'; }
+  ['gap','domein','naam'].forEach(f => {
+    const btn = document.getElementById('sort-'+f);
+    if (btn) btn.classList.toggle('active', f===field);
+  });
+  renderGapTable();
+}
+
+function renderGapTable() {
+  if (!scores) return;
+  const sorted = scores.map((s,i)=>({...s, origIdx:i})).sort((a,b)=>{
+    let cmp = 0;
+    if (sortField==='gap') cmp = (a.ambitie_score-a.huidige_score)-(b.ambitie_score-b.huidige_score);
+    else if (sortField==='domein') cmp = a.domein.localeCompare(b.domein);
+    else cmp = a.naam.localeCompare(b.naam);
+    return sortDir==='asc' ? cmp : -cmp;
+  });
+
+  const tbody = document.getElementById('gap-tbody');
+  tbody.innerHTML = sorted.map((r, visIdx) => {
+    const gap = r.ambitie_score - r.huidige_score;
+    const hDesc = LEVEL_DESC[r.naam]?.[r.huidige_score] || '';
+    const nDesc = r.huidige_score < 4 ? LEVEL_DESC[r.naam]?.[r.huidige_score+1] || '' : 'Reeds op het hoogste niveau (Leading).';
+    const rowId = `gap-row-${r.naam.replace(/[^a-z]/gi,'_')}`;
+    const expId = `gap-exp-${r.naam.replace(/[^a-z]/gi,'_')}`;
+    return `
+    <tr id="${rowId}">
+      <td><button class="expand-btn" onclick="toggleGapRow('${rowId}','${expId}',this)">▸</button></td>
+      <td><strong title="${hDesc}">${r.naam}</strong></td>
+      <td style="color:#888;">${r.domein}</td>
+      <td style="text-align:center;">
+        <select class="mono" style="width:50px;padding:4px;color:var(--red);font-weight:700;border-color:var(--black);" onchange="updateScore(${r.origIdx},'huidige_score',this.value)">
+          ${[1,2,3,4].map(n=>`<option value="${n}" ${r.huidige_score==n?'selected':''}>${n}</option>`).join('')}
+        </select>
+      </td>
+      <td style="text-align:center;">
+        <select class="mono" style="width:50px;padding:4px;font-weight:700;border-color:var(--black);" onchange="updateScore(${r.origIdx},'ambitie_score',this.value)">
+          ${[1,2,3,4].map(n=>`<option value="${n}" ${r.ambitie_score==n?'selected':''}>${n}</option>`).join('')}
+        </select>
+      </td>
+      <td style="text-align:center; font-weight:700;" class="mono">${gap>0?'+'+gap:gap}</td>
+      <td style="text-align:center;">${getPriorityEl(gap)}</td>
+    </tr>
+    <tr id="${expId}" style="display:none;">
+      <td></td>
+      <td colspan="6" style="background:#FFF5F6; padding:14px;">
+        <div class="expanded-grid">
+          <div class="expanded-card"><div class="card-label">Huidig niveau: ${MATURITY_LEVELS[r.huidige_score]}</div><div>${hDesc}</div></div>
+          <div class="expanded-card" style="border-left:2px solid var(--red);"><div class="card-label next">Volgende stap: ${r.huidige_score<4?MATURITY_LEVELS[r.huidige_score+1]:'Leading'}</div><div style="font-style:italic;">${nDesc}</div></div>
+        </div>
+        ${r.toelichting ? `<div style="margin-top:10px; background:white; border:1px solid rgba(0,0,0,0.08); padding:10px;">
+          <div class="label" style="margin-bottom:4px;">Consultant toelichting</div>
+          <input type="text" value="${r.toelichting.replace(/"/g,'&quot;')}" class="toelichting-input" onchange="updateScoreNote(${r.origIdx},this.value)" />
+        </div>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Stats
+  const high = scores.filter(s=>(s.ambitie_score-s.huidige_score)>=2).length;
+  const med = scores.filter(s=>(s.ambitie_score-s.huidige_score)===1).length;
+  const ok = scores.filter(s=>(s.ambitie_score-s.huidige_score)<=0).length;
+  document.getElementById('dash-total-caps').textContent = `${scores.length} capabilities geanalyseerd`;
+  document.getElementById('prio-stats').innerHTML = `
+    <div class="prio-stat"><div class="prio-dot" style="background:#8B0000;"></div><span style="font-size:9px;font-weight:700;color:#8B0000;text-transform:uppercase;letter-spacing:0.08em;">${high} Hoog</span></div>
+    <div class="prio-stat"><div class="prio-dot" style="background:#F5A623;"></div><span style="font-size:9px;font-weight:700;color:#D78A00;text-transform:uppercase;letter-spacing:0.08em;">${med} Gemiddeld</span></div>
+    <div class="prio-stat"><div class="prio-dot" style="background:#2E7D32;"></div><span style="font-size:9px;font-weight:700;color:#2E7D32;text-transform:uppercase;letter-spacing:0.08em;">${ok} Op schema</span></div>`;
+}
+
+function toggleGapRow(rowId, expId, btn) {
+  const row = document.getElementById(expId);
+  const open = row.style.display !== 'none' && row.style.display !== '';
+  row.style.display = open ? 'none' : 'table-row';
+  btn.textContent = open ? '▸' : '▾';
+}
+
+function updateScore(idx, field, val) {
+  if (!scores) return;
+  scores[idx][field] = parseInt(val, 10);
+  localStorage.setItem('eiffel_scores', JSON.stringify(scores));
+  renderDashboard();
+}
+
+function updateScoreNote(idx, val) {
+  if (!scores) return;
+  scores[idx].toelichting = val;
+  localStorage.setItem('eiffel_scores', JSON.stringify(scores));
+}
+
+// ============================================================
+// EXPORT
+// ============================================================
+function renderExport() {
+  if (!scores) {
+    document.getElementById('export-empty').style.display = 'block';
+    document.getElementById('export-main').style.display = 'none';
+    return;
+  }
+  document.getElementById('export-empty').style.display = 'none';
+  document.getElementById('export-main').style.display = 'block';
+
+  const avgH = scores.reduce((s,r)=>s+r.huidige_score,0)/scores.length;
+  const avgA = scores.reduce((s,r)=>s+r.ambitie_score,0)/scores.length;
+  const mH = getMaturityInfo(avgH);
+  const mA = getMaturityInfo(avgA);
+  const dateStr = metadata.datum ? new Date(metadata.datum+'T00:00:00').toLocaleDateString('nl-NL',{day:'numeric',month:'long',year:'numeric'}) : '—';
+
+  document.getElementById('pdf-meta').innerHTML = `
+    <div class="pdf-meta-item"><span class="label">Organisatie</span><span class="value">${metadata.organisatie||'Niet gespecificeerd'}</span></div>
+    <div class="pdf-meta-item"><span class="label">Datum scan</span><span class="value">${dateStr}</span></div>
+    <div class="pdf-meta-item"><span class="label">Eiffel Consultant</span><span class="value">${metadata.consultant||'Niet gespecificeerd'}</span></div>`;
+
+  document.getElementById('pdf-scores').innerHTML = `
+    <div class="pdf-score-item"><span class="label">Gemiddeld Huidig</span><span class="big" style="color:var(--black)">${avgH.toFixed(1)}</span><span class="label" style="margin-top:4px; color:${mH.color}">${mH.label}</span></div>
+    <div class="pdf-divider"></div>
+    <div class="pdf-score-item"><span class="label">Gemiddelde Ambitie</span><span class="big" style="color:#555">${avgA.toFixed(1)}</span><span class="label" style="margin-top:4px; color:${mA.color}">${mA.label}</span></div>`;
+
+  const gapTbody = document.getElementById('pdf-gap-tbody');
+  gapTbody.innerHTML = scores.map((r,i) => {
+    const gap = r.ambitie_score - r.huidige_score;
+    const pColor = gap>=2 ? 'color:#8B0000;font-weight:700;' : gap===1 ? 'color:#D78A00;font-weight:600;' : 'color:#2E7D32;';
+    const pLabel = gap>=2?'Hoog':gap===1?'Gemiddeld':'Op schema';
+    return `<tr style="${i%2===1?'background:var(--gray-bg);':''}">
+      <td>${r.naam}</td><td style="color:#888;">${r.domein}</td>
+      <td style="text-align:center;color:var(--red);font-weight:700;" class="mono">${r.huidige_score}</td>
+      <td style="text-align:center;font-weight:700;" class="mono">${r.ambitie_score}</td>
+      <td style="text-align:center;font-weight:700;" class="mono">${gap>0?'+'+gap:gap}</td>
+      <td style="text-align:center; ${pColor} font-size:10px; text-transform:uppercase; letter-spacing:0.06em;">${pLabel}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('pdf-roadmap').innerHTML = scores.filter(s=>s.ambitie_score>s.huidige_score).map(r => {
+    const dH = LEVEL_DESC[r.naam]?.[r.huidige_score] || '';
+    const dN = r.huidige_score<4 ? LEVEL_DESC[r.naam]?.[r.huidige_score+1]||'' : '';
+    return `<div class="pdf-roadmap-item">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding-bottom:6px;margin-bottom:8px;">
+        <strong style="font-size:12px;">${r.naam}</strong>
+        <span style="font-size:9px;color:var(--red);background:#FFF5F6;border:1px solid rgba(200,16,46,0.2);padding:2px 8px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Groei: ${r.huidige_score} → ${r.ambitie_score}</span>
+      </div>
+      <div class="pdf-roadmap-grid">
+        <div><div class="label" style="margin-bottom:4px;">Huidig (${MATURITY_LEVELS[r.huidige_score]})</div><div style="color:#555;font-style:italic;font-size:11px;line-height:1.6;">"${dH}"</div></div>
+        <div style="border-left:1px solid #eee;padding-left:12px;"><div class="label" style="margin-bottom:4px;color:var(--red);">Volgende stap (${MATURITY_LEVELS[r.huidige_score+1]||'Leading'})</div><div style="font-size:11px;line-height:1.6;font-weight:500;">"${dN}"</div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('pdf-year').textContent = new Date().getFullYear();
+  document.getElementById('pdf-date').textContent = new Date().toLocaleDateString('nl-NL');
+  renderRadar('radar-svg-pdf');
+}
+
+function exportCSV() {
+  if (!scores) return;
+  const rows = ['Capability;Domein;Nulmeting;Ambitie;Gap;Prioriteit;Toelichting'];
+  scores.forEach(r => {
+    const gap = r.ambitie_score-r.huidige_score;
+    const p = gap>=2?'Hoog':gap===1?'Gemiddeld':'Op schema';
+    rows.push(`"${r.naam}";"${r.domein}";${r.huidige_score};${r.ambitie_score};${gap};"${p}";"${r.toelichting.replace(/"/g,'""')}"`);
+  });
+  const blob = new Blob(['\uFEFF'+rows.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url;
+  const org = metadata.organisatie ? metadata.organisatie.replace(/[^a-z0-9]/gi,'_') : 'EIFFEL';
+  a.download = `MaturityScan_Scores_${org}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+async function exportPDF() {
+  const btn = document.getElementById('pdf-btn');
+  const errEl = document.getElementById('pdf-error');
+  errEl.style.display = 'none';
+  btn.textContent = '⏳ PDF genereren...'; btn.disabled = true;
+  const scrollX = window.scrollX, scrollY = window.scrollY;
+  try {
+    window.scrollTo(0,0);
+    const el = document.getElementById('printable-report');
+    const canvas = await html2canvas(el, { scale:2, useCORS:true, logging:false, backgroundColor:'#FFFFFF', scrollX:0, scrollY:0, windowWidth:el.scrollWidth, windowHeight:el.scrollHeight });
+    window.scrollTo(scrollX, scrollY);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p','mm','a4');
+    const imgW=210, pageH=297;
+    const imgH = (canvas.height*imgW)/canvas.width;
+    let left = imgH, pos=0;
+    pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,pos,imgW,imgH);
+    left -= pageH;
+    while (left >= 0) { pos=left-imgH; pdf.addPage(); pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,pos,imgW,imgH); left-=pageH; }
+    const org = metadata.organisatie ? metadata.organisatie.replace(/[^a-z0-9]/gi,'_') : 'Organisatie';
+    pdf.save(`MaturityScan_Rapport_${org}.pdf`);
+    btn.textContent = '✓ PDF gedownload!';
+    setTimeout(()=>{ btn.textContent='↓ Download PDF Rapport'; btn.disabled=false; }, 2500);
+  } catch(err) {
+    window.scrollTo(scrollX, scrollY);
+    errEl.textContent = 'Fout bij genereren PDF: ' + err.message + ' — Probeer de app in een nieuw tabblad te openen.';
+    errEl.style.display = 'block';
+    btn.textContent='↓ Download PDF Rapport'; btn.disabled=false;
+  }
+}
+
+// ============================================================
+// SESSION EXPORT / IMPORT
+// ============================================================
+function exportSession() {
+  if (!scores) return;
+  const session = {
+    version: '1.0',
+    exported: new Date().toISOString(),
+    metadata,
+    scores,
+  };
+  const org = metadata.organisatie ? metadata.organisatie.replace(/[^a-z0-9]/gi, '_') : 'EIFFEL';
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const blob = new Blob([JSON.stringify(session, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `MaturityScan_Sessie_${org}_${dateStr}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  showAutosaveIndicator('↓ Sessie gedownload');
+}
+
+function importSession(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const session = JSON.parse(ev.target.result);
+      // Validate structure
+      if (!session.scores || !Array.isArray(session.scores)) {
+        throw new Error('Ongeldig sessiebestand: geen scores gevonden.');
+      }
+      if (!session.metadata || typeof session.metadata !== 'object') {
+        throw new Error('Ongeldig sessiebestand: geen metadata gevonden.');
+      }
+      // Validate score structure
+      const valid = session.scores.every(s =>
+        s.naam && s.domein &&
+        typeof s.huidige_score === 'number' &&
+        typeof s.ambitie_score === 'number'
+      );
+      if (!valid) throw new Error('Sessiebestand bevat ongeldige scoredata.');
+      // Apply
+      metadata = session.metadata;
+      setScores(session.scores);
+      localStorage.setItem('eiffel_meta', JSON.stringify(metadata));
+      showAutosaveIndicator('✓ Sessie hersteld');
+      goToDashboard();
+    } catch(err) {
+      alert('Fout bij het laden van de sessie: ' + err.message);
+    }
+    // Reset file input so same file can be re-imported
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function showAutosaveIndicator(text) {
+  const el = document.getElementById('autosave-indicator');
+  el.textContent = text;
+  el.style.display = 'inline';
+  el.classList.remove('autosave-flash');
+  void el.offsetWidth; // force reflow to restart animation
+  el.classList.add('autosave-flash');
+  setTimeout(() => { el.style.display = 'none'; el.classList.remove('autosave-flash'); }, 2600);
+}
+
+</script>
+</body>
+</html>
