@@ -1,0 +1,154 @@
+{
+  "capabilities": [
+    { "id": "vi", "naam": "Vindbaarheid Informatie", "domein": "Informatie & Communicatie" },
+    { "id": "cw", "naam": "Communicatie bij Wijzigingen", "domein": "Informatie & Communicatie" },
+    { "id": "di", "naam": "Duidelijkheid Instructies", "domein": "Informatie & Communicatie" },
+    { "id": "ab", "naam": "Aanspreekpunt & Bereikbaarheid", "domein": "Informatie & Communicatie" },
+    { "id": "bv", "naam": "Bewustzijn Tijdige Registratie", "domein": "Eigenaarschap & Cultuur" },
+    { "id": "pv", "naam": "Persoonlijke Verantwoordelijkheid", "domein": "Eigenaarschap & Cultuur" },
+    { "id": "pi", "naam": "Proactief Indienen", "domein": "Eigenaarschap & Cultuur" },
+    { "id": "fc", "naam": "Open Fout- en Leercultuur", "domein": "Eigenaarschap & Cultuur" },
+    { "id": "wa", "naam": "Duidelijkheid Werkafspraken", "domein": "Proces & Werkafspraken" },
+    { "id": "oc", "naam": "Ondersteuning Collega's & Leiding", "domein": "Proces & Werkafspraken" },
+    { "id": "kc", "naam": "Kennis Codes & Projectnummers", "domein": "Proces & Werkafspraken" },
+    { "id": "ir", "naam": "Inzicht Eigen Registratie", "domein": "Transparantie & Inzicht" },
+    { "id": "cr", "naam": "Correctheid Registratie", "domein": "Transparantie & Inzicht" },
+    { "id": "fb", "naam": "Feedback bij Afkeuring", "domein": "Transparantie & Inzicht" },
+    { "id": "sg", "naam": "Gebruiksvriendelijkheid Systemen", "domein": "Systeem & Tooling" },
+    { "id": "oi", "naam": "Onkosten Indienen", "domein": "Systeem & Tooling" },
+    { "id": "ss", "naam": "Systeemstabiliteit & Correctie", "domein": "Systeem & Tooling" },
+    { "id": "et", "naam": "Eigenaarschap Team", "domein": "Beoordeling & Sturing" },
+    { "id": "tb", "naam": "Tijdig Beoordelen", "domein": "Beoordeling & Sturing" },
+    { "id": "sr", "naam": "Stuurinformatie & Rapportages", "domein": "Beoordeling & Sturing" }
+  ],
+  "domains": [
+    "Informatie & Communicatie",
+    "Eigenaarschap & Cultuur",
+    "Proces & Werkafspraken",
+    "Transparantie & Inzicht",
+    "Systeem & Tooling",
+    "Beoordeling & Sturing"
+  ],
+  "levelDesc": {
+    "Vindbaarheid Informatie": {
+      "1": "Informatie over uren- en onkostenregistratie is niet centraal beschikbaar; medewerkers moeten zelf zoeken",
+      "2": "Basisinformatie staat op WeToday/TBI-leerportaal maar is niet altijd actueel of makkelijk te vinden",
+      "3": "Alle relevante informatie is centraal vindbaar, actueel en goed gecategoriseerd",
+      "4": "Proactieve informatievoorziening via pushnotificaties, FAQ's en contextgevoelige hulp in de systemen"
+    },
+    "Communicatie bij Wijzigingen": {
+      "1": "Wijzigingen in processen of regels worden niet of laat gecommuniceerd",
+      "2": "Communicatie vindt plaats maar niet altijd tijdig of via het juiste kanaal",
+      "3": "Structurele communicatie bij wijzigingen via vaste kanalen met bevestiging van ontvangst",
+      "4": "Proactieve, gepersonaliseerde communicatie met impact-analyse en ondersteuning bij veranderingen"
+    },
+    "Duidelijkheid Instructies": {
+      "1": "Geen of onduidelijke instructies; medewerkers weten niet hoe ze moeten registreren",
+      "2": "Basisinstructies beschikbaar maar niet altijd compleet of begrijpelijk voor alle doelgroepen",
+      "3": "Heldere, doelgroepgerichte instructies met visuele ondersteuning en voorbeelden",
+      "4": "Interactieve, contextgevoelige instructies ingebed in het systeem met in-app begeleiding"
+    },
+    "Aanspreekpunt & Bereikbaarheid": {
+      "1": "Onduidelijk bij wie je terecht kunt met vragen; geen vast aanspreekpunt",
+      "2": "Er is een aanspreekpunt maar niet altijd bereikbaar of bekend bij alle medewerkers",
+      "3": "Duidelijke aanspreekpunten per afdeling/regio, goed bereikbaar en bekend",
+      "4": "Multikanaal ondersteuning (chat, telefoon, portal) met gegarandeerde responstijden en kennisbank"
+    },
+    "Bewustzijn Tijdige Registratie": {
+      "1": "Medewerkers zien het belang van tijdige registratie niet in; registratie wordt als last ervaren",
+      "2": "Basisbewustzijn aanwezig maar registratie wordt regelmatig uitgesteld of vergeten",
+      "3": "Medewerkers begrijpen het belang en registreren structureel op tijd",
+      "4": "Tijdige registratie is vanzelfsprekend onderdeel van de dagelijkse werkroutine"
+    },
+    "Persoonlijke Verantwoordelijkheid": {
+      "1": "Medewerkers voelen zich niet verantwoordelijk voor correcte registratie",
+      "2": "Basale verantwoordelijkheid maar fouten worden niet zelf opgepakt",
+      "3": "Medewerkers nemen eigenaarschap over hun registratie en corrigeren fouten proactief",
+      "4": "Volledig eigenaarschap met zelfreflectie op kwaliteit en actieve bijdrage aan procesverbetering"
+    },
+    "Proactief Indienen": {
+      "1": "Declaraties en uren worden pas ingediend na herhaald verzoek of helemaal niet",
+      "2": "Indienen gebeurt maar vaak te laat of onvolledig",
+      "3": "Medewerkers dienen structureel en tijdig in zonder reminder",
+      "4": "Proactief indienen met correcte onderbouwing; medewerkers signaleren zelf afwijkingen"
+    },
+    "Open Fout- en Leercultuur": {
+      "1": "Fouten worden verborgen of afgeschoven; geen veilige omgeving om fouten te bespreken",
+      "2": "Fouten worden benoemd maar niet structureel besproken of als leermoment gebruikt",
+      "3": "Open cultuur waarin fouten worden besproken en gebruikt om processen te verbeteren",
+      "4": "Systematische feedbackloops met root-cause analyse en continue verbetering als kernwaarde"
+    },
+    "Duidelijkheid Werkafspraken": {
+      "1": "Geen vastgelegde werkafspraken rondom registratie; ieder doet het op eigen manier",
+      "2": "Werkafspraken bestaan maar worden niet consequent gevolgd of gehandhaafd",
+      "3": "Eenduidige, gedocumenteerde werkafspraken die actief worden nageleefd",
+      "4": "Werkafspraken zijn geïntegreerd in de dagelijkse workflow met automatische compliance-monitoring"
+    },
+    "Ondersteuning Collega's & Leiding": {
+      "1": "Geen ondersteuning beschikbaar; medewerkers moeten het zelf uitzoeken",
+      "2": "Collega's helpen incidenteel maar leidinggevenden zijn niet actief betrokken",
+      "3": "Leidinggevenden faciliteren actief en er is peer-support structureel ingericht",
+      "4": "Coachende leiderschapsstijl met buddy-systemen en kennisdeling als vaste praktijk"
+    },
+    "Kennis Codes & Projectnummers": {
+      "1": "Medewerkers kennen de juiste codes/projectnummers niet en boeken willekeurig",
+      "2": "Basiskennis aanwezig maar frequente fouten door onduidelijke of veranderende codes",
+      "3": "Codes zijn helder gedocumenteerd en medewerkers weten correct te boeken",
+      "4": "Systeem biedt automatische suggesties op basis van context; foutboekingen worden real-time gesignaleerd"
+    },
+    "Inzicht Eigen Registratie": {
+      "1": "Medewerkers hebben geen inzicht in hun eigen uren- en onkostengegevens",
+      "2": "Beperkt inzicht mogelijk via het systeem maar niet gebruiksvriendelijk of actueel",
+      "3": "Medewerkers kunnen eenvoudig hun eigen registratie inzien en controleren",
+      "4": "Persoonlijk dashboard met real-time inzicht, trends en automatische signalering van afwijkingen"
+    },
+    "Correctheid Registratie": {
+      "1": "Registratie bevat frequent fouten; geen controle op juistheid",
+      "2": "Basiscontroles aanwezig maar fouten worden pas laat ontdekt",
+      "3": "Structurele validatie bij invoer met directe feedback aan medewerker",
+      "4": "Voorspellende controle met AI-gestuurde anomaliedetectie en automatische correctiesuggesties"
+    },
+    "Feedback bij Afkeuring": {
+      "1": "Bij afkeuring geen of onduidelijke terugkoppeling; medewerker weet niet wat fout is",
+      "2": "Terugkoppeling vindt plaats maar is niet altijd constructief of tijdig",
+      "3": "Duidelijke, constructieve feedback bij afkeuring met concrete instructies voor verbetering",
+      "4": "Geautomatiseerde feedback met in-app toelichting en directe link naar correcte werkwijze"
+    },
+    "Gebruiksvriendelijkheid Systemen": {
+      "1": "Systemen (PSM/FSM) zijn moeilijk te gebruiken; veel klachten over usability",
+      "2": "Basissystemen functioneren maar zijn niet intuïtief; veel handleidingen nodig",
+      "3": "Systemen zijn gebruiksvriendelijk met goede UX en minimale training nodig",
+      "4": "Naadloze, intuïtieve ervaring met mobiele toegang, auto-fill en slimme defaults"
+    },
+    "Onkosten Indienen": {
+      "1": "Onkostenregistratie is omslachtig; bonnen raken kwijt, proces is onduidelijk",
+      "2": "Proces is bekend maar vereist veel handmatige stappen en papierwerk",
+      "3": "Digitaal onkostenproces met foto-upload en gestructureerde categorieën",
+      "4": "Volledig geautomatiseerd met OCR-scanning, automatische categorisering en directe verwerking"
+    },
+    "Systeemstabiliteit & Correctie": {
+      "1": "Systemen vallen regelmatig uit; correcties en herindieningen zijn problematisch",
+      "2": "Systemen zijn redelijk stabiel maar correcties vergen veel moeite",
+      "3": "Stabiele systemen met eenvoudig correctie- en herindienmechanisme",
+      "4": "Hoge beschikbaarheid met automatische foutdetectie, rollback en proactief onderhoud"
+    },
+    "Eigenaarschap Team": {
+      "1": "Geen teamverantwoordelijkheid voor registratiekwaliteit; ieder voor zich",
+      "2": "Leidinggevende is formeel verantwoordelijk maar stuurt niet actief",
+      "3": "Teamleiders nemen actief eigenaarschap en monitoren registratiekwaliteit",
+      "4": "Gedeeld eigenaarschap in het team met zelfsturende verbeterinitiatieven"
+    },
+    "Tijdig Beoordelen": {
+      "1": "Beoordeling van ingediende uren/onkosten vindt niet of zeer laat plaats",
+      "2": "Beoordeling vindt plaats maar doorlooptijden zijn wisselend en vaak te lang",
+      "3": "Structureel tijdige beoordeling binnen afgesproken SLA's",
+      "4": "Real-time beoordeling met automatische goedkeuring voor standaardpatronen en escalatie voor uitzonderingen"
+    },
+    "Stuurinformatie & Rapportages": {
+      "1": "Geen managementrapportages beschikbaar over registratiekwaliteit of compliance",
+      "2": "Basisrapportages beschikbaar maar niet actueel of moeilijk te interpreteren",
+      "3": "Actuele dashboards met KPI's over compliance, doorlooptijden en kwaliteit",
+      "4": "Voorspellende analytics met automatische signalering, benchmarking en trendanalyse"
+    }
+  }
+}
