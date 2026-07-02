@@ -282,6 +282,32 @@
     @keyframes fadeInOut { 0%{opacity:0} 10%{opacity:1} 80%{opacity:1} 100%{opacity:0} }
     .autosave-flash { animation: fadeInOut 2.5s ease forwards; }
 
+    /* Capabilities Editor */
+    .cap-editor-list { display: flex; flex-direction: column; gap: 8px; }
+    .cap-editor-row { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: white; border: 1px solid var(--gray-border); font-size: 12px; }
+    .cap-editor-row:hover { border-color: #bbb; }
+    .cap-editor-row input[type="text"] { border: 1px solid #ddd; padding: 5px 8px; font-size: 11px; font-family: inherit; flex: 1; }
+    .cap-editor-row input[type="text"]:focus { border-color: var(--red); outline: none; }
+    .cap-editor-row select { border: 1px solid #ddd; padding: 5px 8px; font-size: 11px; font-family: inherit; min-width: 150px; }
+    .cap-editor-row select:focus { border-color: var(--red); outline: none; }
+    .cap-editor-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .cap-editor-btn { padding: 4px 10px; font-size: 10px; font-weight: 700; border: 1px solid #ddd; background: white; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; }
+    .cap-editor-btn:hover { border-color: #999; }
+    .cap-editor-btn.danger { color: var(--red); border-color: rgba(200,16,46,0.3); }
+    .cap-editor-btn.danger:hover { background: #FFF5F6; border-color: var(--red); }
+    .cap-level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .cap-level-item { padding: 8px; background: var(--gray-bg); border: 1px solid var(--gray-border); }
+    .cap-level-item .label { font-size: 9px; margin-bottom: 4px; }
+    .cap-level-item textarea { width: 100%; min-height: 50px; font-size: 11px; font-family: inherit; line-height: 1.5; border: 1px solid #ddd; padding: 6px; resize: vertical; }
+    .cap-level-item textarea:focus { border-color: var(--red); outline: none; }
+    .cap-expand-body { border-top: 1px solid var(--gray-border); padding: 12px; background: var(--gray-bg); display: none; }
+    .cap-expand-body.open { display: block; }
+    .domain-tag { display: inline-block; padding: 2px 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; border-radius: 2px; background: #f0f0f0; color: #666; }
+    .cap-domain-section { margin-bottom: 16px; }
+    .cap-domain-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--red); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 2px solid var(--red); }
+    .cap-editor-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .template-info-box { background: #f8f8f8; border: 1px solid var(--gray-border); padding: 12px; margin-bottom: 16px; font-size: 11px; line-height: 1.7; color: #555; }
+
     @media (max-width: 768px) {
       .dashboard-top { grid-template-columns: 1fr; }
       .grid-2 { grid-template-columns: 1fr; }
@@ -370,6 +396,7 @@
     <div class="sub-tabs" style="margin-top:16px;">
       <button class="sub-tab active" onclick="switchSubTab('upload', event)">TAB A — Upload (CSV / Excel)</button>
       <button class="sub-tab" onclick="switchSubTab('ai', event)">✦ TAB B — Interview Notities (AI-analyse)</button>
+      <button class="sub-tab" onclick="switchSubTab('editor', event)">⚙ TAB C — Capabilities Beheren</button>
     </div>
 
     <!-- TAB A: Upload -->
@@ -378,8 +405,14 @@
         <div class="grid-2" style="gap:24px;">
           <div>
             <div class="section-title" style="margin-bottom:8px;">Stap 1 — Download template</div>
-            <div style="font-size:11px; color:#555; line-height:1.7; margin-bottom:16px;">Gebruik de gestandaardiseerde CSV-template. Voeg extra regels toe voor meerdere respondenten — de app berekent automatisch het gemiddelde.</div>
-            <button class="btn btn-outline" onclick="downloadTemplate()">↓ Download invultemplate</button>
+            <div style="font-size:11px; color:#555; line-height:1.7; margin-bottom:16px;">Download de invultemplate met scoringsgids. Bevat alle capabilities, domeinen en niveaubeschrijvingen. Template voor 3 respondenten — voeg rijen toe voor meer.</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-outline" onclick="downloadTemplate()">↓ Excel template (.xlsx)</button>
+              <button class="btn btn-outline" onclick="downloadTemplateCSV()" style="font-size:10px;">↓ CSV template</button>
+            </div>
+            <div id="export-template-btn" style="margin-top:10px; display:none;">
+              <button class="btn btn-outline" onclick="exportScanAsTemplate()" style="font-size:10px;">↓ Huidige scores als template exporteren</button>
+            </div>
           </div>
           <div style="border-left:1px solid var(--gray-border); padding-left:24px;">
             <div class="section-title" style="margin-bottom:8px;">Stap 2 — Upload ingevulde template</div>
@@ -446,6 +479,24 @@
             <tbody id="ai-tbody"></tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- TAB C: Capabilities Editor -->
+    <div id="sub-editor" class="sub-content" style="display:none;">
+      <div class="card mt-4">
+        <div class="section-title" style="margin-bottom:6px;">Capabilities & Scoringsmodel Beheren</div>
+        <div style="font-size:11px; color:#555; margin-bottom:14px; line-height:1.7;">Pas het scan-framework aan: voeg capabilities toe, wijzig domeinen, of pas de niveaubeschrijvingen aan. Wijzigingen worden opgeslagen in uw browser en gebruikt bij alle toekomstige scans.</div>
+        <div class="cap-editor-toolbar">
+          <button class="btn btn-red" onclick="addCapability()">+ Capability toevoegen</button>
+          <button class="btn btn-outline" onclick="addDomain()">+ Domein toevoegen</button>
+          <button class="btn btn-outline" onclick="resetCapabilitiesToDefaults()">↻ Standaard herstellen</button>
+          <button class="btn btn-outline" onclick="exportCapabilitiesJSON()">↓ Framework exporteren</button>
+          <input type="file" id="import-caps-input" accept=".json" style="display:none;" onchange="importCapabilitiesJSON(event)" />
+          <button class="btn btn-outline" onclick="document.getElementById('import-caps-input').click()">↑ Framework importeren</button>
+        </div>
+        <div class="template-info-box" id="cap-editor-stats"></div>
+        <div id="cap-editor-container"></div>
       </div>
     </div>
   </div>
@@ -695,7 +746,7 @@
 // ============================================================
 // DATA
 // ============================================================
-const CAPABILITIES = [
+const DEFAULT_CAPABILITIES = [
   { id:'dg',  naam:'Data Governance',                          domein:'Data Management' },
   { id:'dq',  naam:'Data Quality',                             domein:'Data Management' },
   { id:'mm',  naam:'Metadata Management',                      domein:'Data Management' },
@@ -713,13 +764,9 @@ const CAPABILITIES = [
   { id:'rv',  naam:'Rapportage & Visualisatie',                domein:'Strategie & Output' },
 ];
 
-const DOMAINS = ['Data Management','Datageletterdheid','Talent & Cultuur','Strategie & Output'];
+const DEFAULT_DOMAINS = ['Data Management','Datageletterdheid','Talent & Cultuur','Strategie & Output'];
 
-const MATURITY_LEVELS = { 1:'Basic "Survive"', 2:'Moderate "Maintain"', 3:'Advanced "Build"', 4:'Leading "Evolve"' };
-
-const LEVEL_COLORS = { 1:'#8B0000', 2:'#F5A623', 3:'#C8102E', 4:'#2E7D32' };
-
-const LEVEL_DESC = {
+const DEFAULT_LEVEL_DESC = {
   'Data Governance':{ 1:'Geen formeel beleid; dataverantwoordelijkheid is ad hoc en persoonsafhankelijk', 2:'Eerste beleidsdocumenten aanwezig; data ownership deels belegd maar niet consequent nageleefd', 3:'Governance-structuur actief met data owners, stewards en een duidelijk besluitvormingsproces', 4:'Enterprise-brede governance met meetbare naleving, continue verbetering en bestuurlijke verankering' },
   'Data Quality':{ 1:'Datakwaliteit wordt reactief opgepakt; fouten worden pas opgemerkt bij gebruik', 2:'Basiskwaliteitsregels gedefinieerd; periodieke controles maar geen geautomatiseerd monitoren', 3:'Geautomatiseerde kwaliteitsmonitoring actief; eigenaarschap belegd; structurele root-cause analyse', 4:'Proactief kwaliteitsmanagement met voorspellende signalering en organisatiebrede kwaliteitscultuur' },
   'Metadata Management':{ 1:'Geen centrale metadataregistratie; kennis over databronnen is impliciet en persoonsgebonden', 2:'Decentrale metadataregistratie in losse documenten of spreadsheets', 3:'Centrale datacatalogus actief gevuld en raadpleegbaar; businessglosarium in gebruik', 4:'Automatisch gegenereerde metadata; datacatalogus geïntegreerd in dagelijkse werkprocessen' },
@@ -736,6 +783,29 @@ const LEVEL_DESC = {
   'Talent & Cultuur':{ 1:'Datagedreven werken is geen onderdeel van de organisatiecultuur; weerstand of onverschilligheid', 2:'Groeiend bewustzijn; eilanden van enthousiasme maar geen organisatiebrede beweging', 3:'Datagedreven werken is de norm in kernprocessen; cultuurverandering zichtbaar en meetbaar', 4:'Volledig data-gedreven organisatie; experimenteren met data is structureel onderdeel van werkwijze' },
   'Rapportage & Visualisatie':{ 1:'Statische rapporten; handmatig samengesteld; weinig visuele duiding', 2:'Eerste dashboards actief; beperkte interactiviteit; niet breed toegankelijk', 3:'Interactieve, self-service dashboards breed beschikbaar; afgestemd op besluitvormingsbehoeften', 4:'Geïntegreerde rapportageomgeving met real-time data, drill-down en voorspellende signalering' },
 };
+
+function loadCustomFramework() {
+  try {
+    const stored = localStorage.getItem('eiffel_custom_framework');
+    if (stored) {
+      const fw = JSON.parse(stored);
+      return { capabilities: fw.capabilities || DEFAULT_CAPABILITIES, domains: fw.domains || DEFAULT_DOMAINS, levelDesc: fw.levelDesc || DEFAULT_LEVEL_DESC };
+    }
+  } catch {}
+  return null;
+}
+
+function saveCustomFramework() {
+  localStorage.setItem('eiffel_custom_framework', JSON.stringify({ capabilities: CAPABILITIES, domains: DOMAINS, levelDesc: LEVEL_DESC }));
+}
+
+const customFw = loadCustomFramework();
+let CAPABILITIES = customFw ? customFw.capabilities : JSON.parse(JSON.stringify(DEFAULT_CAPABILITIES));
+let DOMAINS = customFw ? customFw.domains : [...DEFAULT_DOMAINS];
+let LEVEL_DESC = customFw ? customFw.levelDesc : JSON.parse(JSON.stringify(DEFAULT_LEVEL_DESC));
+
+const MATURITY_LEVELS = { 1:'Basic "Survive"', 2:'Moderate "Maintain"', 3:'Advanced "Build"', 4:'Leading "Evolve"' };
+const LEVEL_COLORS = { 1:'#8B0000', 2:'#F5A623', 3:'#C8102E', 4:'#2E7D32' };
 
 // ============================================================
 // STATE
@@ -769,6 +839,8 @@ if (storedScores) {
   setTimeout(() => {
     document.getElementById('reset-btn').style.display = 'block';
     document.getElementById('session-save-btn').style.display = 'inline';
+    const etBtn = document.getElementById('export-template-btn');
+    if (etBtn) etBtn.style.display = 'block';
   }, 0);
 }
 const storedMeta = localStorage.getItem('eiffel_meta');
@@ -792,6 +864,7 @@ function switchSubTab(tab, e) {
   document.querySelectorAll('.sub-content').forEach(c => c.style.display = 'none');
   if (e && e.target) e.target.classList.add('active');
   document.getElementById('sub-' + tab).style.display = 'block';
+  if (tab === 'editor') renderCapEditor();
 }
 
 // ============================================================
@@ -812,16 +885,227 @@ function saveApiKey() {
 }
 
 // ============================================================
-// TEMPLATE DOWNLOAD
+// TEMPLATE DOWNLOAD (Enhanced Excel with scoring guide)
 // ============================================================
 function downloadTemplate() {
-  const rows = ['Respondent;Capability;Huidige score (1-4);Ambitiescore (1-4)'];
-  CAPABILITIES.forEach(c => rows.push(`Respondent 1;${c.naam};1;2`));
+  const wb = XLSX.utils.book_new();
+
+  // Sheet 1: Invultemplate
+  const headerRow = ['Respondent', 'Capability', 'Domein', 'Huidige score (1-4)', 'Ambitiescore (1-4)', 'Toelichting'];
+  const dataRows = [];
+  for (let r = 1; r <= 3; r++) {
+    CAPABILITIES.forEach(c => {
+      dataRows.push([`Respondent ${r}`, c.naam, c.domein, '', '', '']);
+    });
+  }
+  const ws1 = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows]);
+  ws1['!cols'] = [{ wch: 16 }, { wch: 42 }, { wch: 24 }, { wch: 20 }, { wch: 20 }, { wch: 50 }];
+  XLSX.utils.book_append_sheet(wb, ws1, 'Invultemplate');
+
+  // Sheet 2: Scoringsgids
+  const guideRows = [
+    ['EIFFEL Datagedreven Werken \u2014 Scoringsgids'],
+    [],
+    ['Niveau', 'Label', 'Beschrijving'],
+    [1, 'Basic "Survive"', 'Ad hoc, reactief, geen formeel beleid of eigenaarschap'],
+    [2, 'Moderate "Maintain"', 'Eerste processen gedefinieerd, deels belegd, maar gefragmenteerd'],
+    [3, 'Advanced "Build"', 'Gestandaardiseerd, centraal beheerd, structureel geborgd'],
+    [4, 'Leading "Evolve"', 'Volledig geautomatiseerd, voorspellend, verankerd in cultuur en strategie'],
+    [],
+    ['Capability', 'Domein', 'Niveau 1', 'Niveau 2', 'Niveau 3', 'Niveau 4'],
+  ];
+  CAPABILITIES.forEach(c => {
+    const ld = LEVEL_DESC[c.naam] || {};
+    guideRows.push([c.naam, c.domein, ld[1] || '', ld[2] || '', ld[3] || '', ld[4] || '']);
+  });
+  const ws2 = XLSX.utils.aoa_to_sheet(guideRows);
+  ws2['!cols'] = [{ wch: 42 }, { wch: 24 }, { wch: 50 }, { wch: 50 }, { wch: 50 }, { wch: 50 }];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Scoringsgids');
+
+  XLSX.writeFile(wb, 'EIFFEL_Datagedreven_Werken_Template.xlsx');
+}
+
+function downloadTemplateCSV() {
+  const rows = ['Respondent;Capability;Domein;Huidige score (1-4);Ambitiescore (1-4);Toelichting'];
+  for (let r = 1; r <= 3; r++) {
+    CAPABILITIES.forEach(c => rows.push(`Respondent ${r};"${c.naam}";"${c.domein}";;;""`));
+  }
   const blob = new Blob(['\uFEFF' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url;
   a.download = 'EIFFEL_Datagedreven_Werken_Template.csv';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function exportScanAsTemplate() {
+  if (!scores) return;
+  const wb = XLSX.utils.book_new();
+  const headerRow = ['Respondent', 'Capability', 'Domein', 'Huidige score (1-4)', 'Ambitiescore (1-4)', 'Toelichting'];
+  const dataRows = scores.map(s => ['Respondent 1', s.naam, s.domein, s.huidige_score, s.ambitie_score, s.toelichting || '']);
+  const ws = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows]);
+  ws['!cols'] = [{ wch: 16 }, { wch: 42 }, { wch: 24 }, { wch: 20 }, { wch: 20 }, { wch: 50 }];
+  XLSX.utils.book_append_sheet(wb, ws, 'Invultemplate');
+  const org = metadata.organisatie ? metadata.organisatie.replace(/[^a-z0-9]/gi, '_') : 'EIFFEL';
+  XLSX.writeFile(wb, `MaturityScan_Template_${org}.xlsx`);
+}
+
+// ============================================================
+// CAPABILITIES EDITOR
+// ============================================================
+function renderCapEditor() {
+  const container = document.getElementById('cap-editor-container');
+  const stats = document.getElementById('cap-editor-stats');
+  if (!container) return;
+
+  const isCustom = !!localStorage.getItem('eiffel_custom_framework');
+  stats.innerHTML = `<strong>${CAPABILITIES.length}</strong> capabilities in <strong>${DOMAINS.length}</strong> domeinen (${DOMAINS.join(', ')}).
+    ${isCustom ? '<span style="color:var(--red); font-weight:700;"> Aangepast framework actief.</span>' : 'Standaard framework actief.'}`;
+
+  let html = '';
+  DOMAINS.forEach(domain => {
+    const caps = CAPABILITIES.filter(c => c.domein === domain);
+    html += `<div class="cap-domain-section">
+      <div class="cap-domain-header">${domain} (${caps.length})</div>
+      <div class="cap-editor-list">`;
+    caps.forEach((cap, _) => {
+      const idx = CAPABILITIES.indexOf(cap);
+      const isExpanded = expandedEditorRows[cap.id];
+      html += `<div>
+        <div class="cap-editor-row">
+          <span style="font-weight:700; color:var(--red); min-width:40px; font-size:10px; font-family:'JetBrains Mono',monospace;">${cap.id}</span>
+          <input type="text" value="${cap.naam.replace(/"/g, '&quot;')}" onchange="updateCapName(${idx}, this.value)" style="flex:2;" />
+          <select onchange="updateCapDomain(${idx}, this.value)">
+            ${DOMAINS.map(d => `<option value="${d}" ${d === cap.domein ? 'selected' : ''}>${d}</option>`).join('')}
+          </select>
+          <div class="cap-editor-actions">
+            <button class="cap-editor-btn" onclick="toggleEditorExpand('${cap.id}')">${isExpanded ? '\u25BE' : '\u25B8'}</button>
+            <button class="cap-editor-btn danger" onclick="removeCapability(${idx})">\u00D7</button>
+          </div>
+        </div>
+        <div class="cap-expand-body ${isExpanded ? 'open' : ''}" id="cap-expand-${cap.id}">
+          <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#888; margin-bottom:8px;">Niveaubeschrijvingen \u2014 ${cap.naam}</div>
+          <div class="cap-level-grid">
+            ${[1,2,3,4].map(lvl => `<div class="cap-level-item">
+              <div class="label">Niveau ${lvl}: ${MATURITY_LEVELS[lvl]}</div>
+              <textarea onchange="updateCapLevelDesc('${cap.naam.replace(/'/g, "\\'")}', ${lvl}, this.value)">${(LEVEL_DESC[cap.naam] && LEVEL_DESC[cap.naam][lvl]) || ''}</textarea>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+    });
+    html += '</div></div>';
+  });
+
+  container.innerHTML = html;
+}
+
+let expandedEditorRows = {};
+
+function toggleEditorExpand(capId) {
+  expandedEditorRows[capId] = !expandedEditorRows[capId];
+  renderCapEditor();
+}
+
+function updateCapName(idx, newName) {
+  newName = newName.trim();
+  if (!newName) return;
+  const oldName = CAPABILITIES[idx].naam;
+  if (LEVEL_DESC[oldName]) {
+    LEVEL_DESC[newName] = LEVEL_DESC[oldName];
+    if (newName !== oldName) delete LEVEL_DESC[oldName];
+  }
+  CAPABILITIES[idx].naam = newName;
+  saveCustomFramework();
+  renderCapEditor();
+}
+
+function updateCapDomain(idx, newDomain) {
+  CAPABILITIES[idx].domein = newDomain;
+  saveCustomFramework();
+  renderCapEditor();
+}
+
+function updateCapLevelDesc(capName, level, text) {
+  if (!LEVEL_DESC[capName]) LEVEL_DESC[capName] = {};
+  LEVEL_DESC[capName][level] = text.trim();
+  saveCustomFramework();
+}
+
+function addCapability() {
+  const id = 'c' + Date.now().toString(36).slice(-4);
+  const naam = 'Nieuwe Capability';
+  const domein = DOMAINS[0] || 'Onbekend';
+  CAPABILITIES.push({ id, naam, domein });
+  LEVEL_DESC[naam] = { 1: '', 2: '', 3: '', 4: '' };
+  expandedEditorRows[id] = true;
+  saveCustomFramework();
+  renderCapEditor();
+}
+
+function removeCapability(idx) {
+  const cap = CAPABILITIES[idx];
+  if (!confirm(`Capability "${cap.naam}" verwijderen?`)) return;
+  delete LEVEL_DESC[cap.naam];
+  CAPABILITIES.splice(idx, 1);
+  saveCustomFramework();
+  renderCapEditor();
+}
+
+function addDomain() {
+  const name = prompt('Naam van het nieuwe domein:');
+  if (!name || !name.trim()) return;
+  const trimmed = name.trim();
+  if (DOMAINS.includes(trimmed)) { alert('Dit domein bestaat al.'); return; }
+  DOMAINS.push(trimmed);
+  saveCustomFramework();
+  renderCapEditor();
+}
+
+function resetCapabilitiesToDefaults() {
+  if (!confirm('Weet u zeker dat u het standaard framework wilt herstellen? Alle aanpassingen gaan verloren.')) return;
+  CAPABILITIES = JSON.parse(JSON.stringify(DEFAULT_CAPABILITIES));
+  DOMAINS.length = 0;
+  DEFAULT_DOMAINS.forEach(d => DOMAINS.push(d));
+  LEVEL_DESC = JSON.parse(JSON.stringify(DEFAULT_LEVEL_DESC));
+  localStorage.removeItem('eiffel_custom_framework');
+  expandedEditorRows = {};
+  renderCapEditor();
+}
+
+function exportCapabilitiesJSON() {
+  const fw = { version: '1.0', exportedAt: new Date().toISOString(), capabilities: CAPABILITIES, domains: DOMAINS, levelDesc: LEVEL_DESC };
+  const blob = new Blob([JSON.stringify(fw, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = 'EIFFEL_Framework_Export.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function importCapabilitiesJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const fw = JSON.parse(ev.target.result);
+      if (!fw.capabilities || !Array.isArray(fw.capabilities)) throw new Error('Ongeldig framework: geen capabilities.');
+      if (!fw.domains || !Array.isArray(fw.domains)) throw new Error('Ongeldig framework: geen domeinen.');
+      CAPABILITIES.length = 0;
+      fw.capabilities.forEach(c => CAPABILITIES.push(c));
+      DOMAINS.length = 0;
+      fw.domains.forEach(d => DOMAINS.push(d));
+      Object.keys(LEVEL_DESC).forEach(k => delete LEVEL_DESC[k]);
+      if (fw.levelDesc) Object.assign(LEVEL_DESC, fw.levelDesc);
+      saveCustomFramework();
+      expandedEditorRows = {};
+      renderCapEditor();
+      showAutosaveIndicator('\u2713 Framework ge\u00EFmporteerd');
+    } catch (err) {
+      alert('Fout bij importeren: ' + err.message);
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
 }
 
 // ============================================================
@@ -973,7 +1257,7 @@ Schrijf in de toelichting (max 1 zin) wat de concrete tekstevidentie is voor de 
 OUTPUT: Geef je antwoord ALLEEN als JSON zonder uitleg of markdown backticks:
 {"capabilities":[{"naam":"[capability naam]","huidige_score":[1-4],"ambitie_score":[1-4],"toelichting":"[max 1 zin met tekstevidentie]"}]}
 
-De 15 capabilities zijn: Data Governance, Data Quality, Metadata Management, Data Security, Data Storage & Operations, Reference & Master Data Management, Data Integration & Interoperability, Data Modeling & Design, Data Warehousing & Business Intelligence, Data Ethiek, Communicatie & Training, Wervingsstrategie, Data Leiderschap, Talent & Cultuur, Rapportage & Visualisatie`;
+De ${CAPABILITIES.length} capabilities zijn: ${CAPABILITIES.map(c => c.naam).join(', ')}`;
 
   try {
     const currentKey = apiKey || localStorage.getItem('eiffel_anthropic_key') || '';
@@ -1107,6 +1391,8 @@ function setScores(s) {
   localStorage.setItem('eiffel_scores', JSON.stringify(s));
   document.getElementById('reset-btn').style.display = 'block';
   document.getElementById('session-save-btn').style.display = 'inline';
+  const etBtn = document.getElementById('export-template-btn');
+  if (etBtn) etBtn.style.display = 'block';
 }
 
 function resetScores() {
@@ -1116,6 +1402,8 @@ function resetScores() {
   document.getElementById('reset-btn').style.display = 'none';
   document.getElementById('session-save-btn').style.display = 'none';
   document.getElementById('autosave-indicator').style.display = 'none';
+  const etBtn = document.getElementById('export-template-btn');
+  if (etBtn) etBtn.style.display = 'none';
   switchTabById('invoer');
 }
 
