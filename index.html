@@ -253,6 +253,32 @@
     .compare-delta-zero { color: #aaa; }
     .save-scan-bar { background: var(--gray-bg); border: 1px solid var(--gray-border); padding: 12px 16px; margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 
+    /* KLANT OVERZICHT */
+    .klant-card { background: white; border: 1px solid var(--black); margin-bottom: 12px; }
+    .klant-header { padding: 16px; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: background 0.1s; }
+    .klant-header:hover { background: var(--gray-bg); }
+    .klant-score-block { min-width: 56px; text-align: center; }
+    .klant-score-big { font-size: 24px; font-weight: 900; font-family: 'JetBrains Mono', monospace; line-height: 1; }
+    .klant-level-tag { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+    .klant-info { flex: 1; min-width: 0; }
+    .klant-name { font-size: 14px; font-weight: 900; letter-spacing: 0.02em; }
+    .klant-stats { display: flex; gap: 16px; margin-top: 4px; flex-wrap: wrap; }
+    .klant-stat { font-size: 10px; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .klant-trend { display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+    .klant-trend-up { color: var(--green); }
+    .klant-trend-down { color: var(--red); }
+    .klant-trend-flat { color: #aaa; }
+    .klant-expand-icon { font-size: 16px; color: #aaa; transition: transform 0.2s; flex-shrink: 0; }
+    .klant-expand-icon.open { transform: rotate(90deg); }
+    .klant-body { border-top: 1px solid var(--gray-border); padding: 16px; display: none; background: var(--gray-bg); }
+    .klant-body.open { display: block; }
+    .klant-scan-row { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: white; border: 1px solid var(--gray-border); margin-bottom: 6px; font-size: 12px; }
+    .klant-scan-row:last-child { margin-bottom: 0; }
+    .klant-scan-score { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; min-width: 32px; text-align: center; }
+    .klant-scan-label { font-weight: 600; flex: 1; }
+    .klant-scan-date { color: #888; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+    .klant-compare-check { width: 16px; height: 16px; accent-color: var(--red); cursor: pointer; flex-shrink: 0; }
+
     @keyframes fadeInOut { 0%{opacity:0} 10%{opacity:1} 80%{opacity:1} 100%{opacity:0} }
     .autosave-flash { animation: fadeInOut 2.5s ease forwards; }
 
@@ -530,29 +556,63 @@
       <div class="empty-text">Bewaar een scan via het <strong>Dashboard</strong>-tabblad om de voortgang over tijd bij te houden. Dit is optioneel — de tool werkt ook prima voor eenmalige metingen.</div>
     </div>
     <div id="historie-main" style="display:none;">
-      <!-- Compare bar -->
-      <div class="compare-bar" id="compare-bar" style="display:none;">
-        <div class="compare-bar-text">Vergelijking: selecteer precies 2 scans</div>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-red" id="compare-btn" onclick="showComparison()" disabled>Vergelijk geselecteerde scans</button>
-          <button class="btn btn-outline" style="color:white; border-color:rgba(255,255,255,0.3);" onclick="cancelCompare()">Annuleer</button>
-        </div>
+      <!-- Sub-tabs -->
+      <div class="sub-tabs" style="margin-bottom:16px;">
+        <button class="sub-tab active" onclick="switchHistorieView('klanten', event)">Klantoverzicht</button>
+        <button class="sub-tab" onclick="switchHistorieView('scans', event)">Alle scans</button>
       </div>
 
-      <!-- Actions bar -->
-      <div class="flex items-center justify-between" style="margin-bottom:16px; flex-wrap:wrap; gap:12px;">
-        <div>
-          <div class="section-title">Opgeslagen Scans</div>
-          <div style="font-size:11px; color:#888; margin-top:4px;" id="historie-count"></div>
+      <!-- ===== VIEW: KLANTOVERZICHT ===== -->
+      <div id="historie-view-klanten">
+        <!-- Client compare bar -->
+        <div class="compare-bar" id="klant-compare-bar" style="display:none;">
+          <div class="compare-bar-text" id="klant-compare-text">Selecteer 2 klanten om te vergelijken</div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-red" id="klant-compare-btn" onclick="showClientComparison()" disabled>Vergelijk klanten</button>
+            <button class="btn btn-outline" style="color:white; border-color:rgba(255,255,255,0.3);" onclick="cancelClientCompare()">Annuleer</button>
+          </div>
         </div>
-        <button class="btn btn-outline" id="compare-mode-btn" onclick="toggleCompareMode()">Scans vergelijken</button>
+
+        <div class="flex items-center justify-between" style="margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+          <div>
+            <div class="section-title">Klantoverzicht</div>
+            <div style="font-size:11px; color:#888; margin-top:4px;" id="klant-count"></div>
+          </div>
+          <button class="btn btn-outline" id="klant-compare-mode-btn" onclick="toggleClientCompareMode()">Klanten vergelijken</button>
+        </div>
+
+        <div id="klant-list"></div>
+        <div id="klant-compare-result" style="display:none; margin-top:24px;"></div>
       </div>
 
-      <!-- Scan list -->
-      <div id="historie-list"></div>
+      <!-- ===== VIEW: ALLE SCANS ===== -->
+      <div id="historie-view-scans" style="display:none;">
+        <!-- Compare bar -->
+        <div class="compare-bar" id="compare-bar" style="display:none;">
+          <div class="compare-bar-text">Vergelijking: selecteer precies 2 scans</div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-red" id="compare-btn" onclick="showComparison()" disabled>Vergelijk geselecteerde scans</button>
+            <button class="btn btn-outline" style="color:white; border-color:rgba(255,255,255,0.3);" onclick="cancelCompare()">Annuleer</button>
+          </div>
+        </div>
 
-      <!-- Comparison result -->
-      <div id="compare-result" style="display:none; margin-top:24px;"></div>
+        <div class="flex items-center justify-between" style="margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+          <div>
+            <div class="section-title">Alle Opgeslagen Scans</div>
+            <div style="font-size:11px; color:#888; margin-top:4px;" id="historie-count"></div>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <label class="label" style="white-space:nowrap;">Filter klant:</label>
+            <select id="scan-filter-org" onchange="renderScanList()" style="width:180px; font-size:11px;">
+              <option value="">Alle klanten</option>
+            </select>
+            <button class="btn btn-outline" id="compare-mode-btn" onclick="toggleCompareMode()">Scans vergelijken</button>
+          </div>
+        </div>
+
+        <div id="historie-list"></div>
+        <div id="compare-result" style="display:none; margin-top:24px;"></div>
+      </div>
     </div>
   </div>
 
@@ -1466,6 +1526,10 @@ function showAutosaveIndicator(text) {
 // ============================================================
 let compareMode = false;
 let compareSelection = [];
+let clientCompareMode = false;
+let clientCompareSelection = [];
+let expandedClients = {};
+let activeHistorieView = 'klanten';
 
 function getScanLibrary() {
   try { return JSON.parse(localStorage.getItem('eiffel_scan_library') || '[]'); }
@@ -1493,6 +1557,39 @@ function saveToHistory() {
   showAutosaveIndicator('✓ Scan bewaard in historie');
 }
 
+function switchHistorieView(view, e) {
+  activeHistorieView = view;
+  document.querySelectorAll('#tab-historie .sub-tab').forEach(b => b.classList.remove('active'));
+  if (e && e.target) e.target.classList.add('active');
+  document.getElementById('historie-view-klanten').style.display = view === 'klanten' ? 'block' : 'none';
+  document.getElementById('historie-view-scans').style.display = view === 'scans' ? 'block' : 'none';
+  if (view === 'klanten') renderKlantOverzicht();
+  if (view === 'scans') renderScanList();
+}
+
+// ============================================================
+// KLANTOVERZICHT
+// ============================================================
+function getClientGroups() {
+  const lib = getScanLibrary();
+  const groups = {};
+  lib.forEach(scan => {
+    const org = (scan.metadata.organisatie || '').trim() || 'Geen organisatie';
+    if (!groups[org]) groups[org] = [];
+    groups[org].push(scan);
+  });
+  Object.values(groups).forEach(scans => scans.sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt)));
+  return groups;
+}
+
+function getScanAvg(scan) {
+  return scan.scores.reduce((s, r) => s + r.huidige_score, 0) / scan.scores.length;
+}
+
+function getScanAmbitieAvg(scan) {
+  return scan.scores.reduce((s, r) => s + r.ambitie_score, 0) / scan.scores.length;
+}
+
 function renderHistorie() {
   const lib = getScanLibrary();
   if (lib.length === 0) {
@@ -1502,14 +1599,208 @@ function renderHistorie() {
   }
   document.getElementById('historie-empty').style.display = 'none';
   document.getElementById('historie-main').style.display = 'block';
-  document.getElementById('historie-count').textContent = `${lib.length} scan${lib.length===1?'':'s'} opgeslagen`;
+  if (activeHistorieView === 'klanten') renderKlantOverzicht();
+  else renderScanList();
+}
+
+function renderKlantOverzicht() {
+  const groups = getClientGroups();
+  const orgNames = Object.keys(groups).sort((a, b) => {
+    if (a === 'Geen organisatie') return 1;
+    if (b === 'Geen organisatie') return -1;
+    return a.localeCompare(b);
+  });
+
+  document.getElementById('klant-count').textContent = `${orgNames.length} klant${orgNames.length === 1 ? '' : 'en'} — ${getScanLibrary().length} scans totaal`;
+  document.getElementById('klant-compare-mode-btn').style.display = orgNames.length >= 2 ? '' : 'none';
+
+  const list = document.getElementById('klant-list');
+  list.innerHTML = orgNames.map(org => {
+    const scans = groups[org];
+    const latest = scans[0];
+    const latestAvg = getScanAvg(latest);
+    const latestAmb = getScanAmbitieAvg(latest);
+    const mH = getMaturityInfo(latestAvg);
+    const isExpanded = expandedClients[org];
+    const checked = clientCompareSelection.includes(org) ? 'checked' : '';
+
+    let trendHtml = '';
+    if (scans.length >= 2) {
+      const oldest = scans[scans.length - 1];
+      const oldestAvg = getScanAvg(oldest);
+      const delta = latestAvg - oldestAvg;
+      const cls = delta > 0 ? 'klant-trend-up' : delta < 0 ? 'klant-trend-down' : 'klant-trend-flat';
+      const arrow = delta > 0 ? '↑' : delta < 0 ? '↓' : '→';
+      trendHtml = `<span class="klant-trend ${cls}">${arrow} ${delta > 0 ? '+' : ''}${delta.toFixed(1)}</span>`;
+    }
+
+    const latestDate = new Date(latest.savedAt).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+
+    let bodyHtml = '';
+    if (isExpanded) {
+      bodyHtml = `<div class="klant-body open">
+        <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#888; margin-bottom:8px;">Scanhistorie (${scans.length} metingen)</div>
+        ${scans.map((scan, i) => {
+          const avg = getScanAvg(scan);
+          const m = getMaturityInfo(avg);
+          const d = new Date(scan.savedAt).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+          let deltaBadge = '';
+          if (i < scans.length - 1) {
+            const prevAvg = getScanAvg(scans[i + 1]);
+            const delta = avg - prevAvg;
+            if (delta !== 0) {
+              const cls = delta > 0 ? 'compare-delta-pos' : 'compare-delta-neg';
+              deltaBadge = `<span class="mono ${cls}" style="font-size:10px;">${delta > 0 ? '+' : ''}${delta.toFixed(1)}</span>`;
+            }
+          }
+          return `<div class="klant-scan-row">
+            <div class="klant-scan-score" style="color:${m.color};">${avg.toFixed(1)}</div>
+            <div class="klant-scan-label">${scan.label}</div>
+            ${deltaBadge}
+            <div class="klant-scan-date">${d}</div>
+            <button class="historie-action-btn" onclick="loadScanFromHistory('${scan.id}')" style="padding:3px 8px;">Laden</button>
+            <button class="historie-action-btn danger" onclick="deleteScanFromHistory('${scan.id}')" style="padding:3px 8px;">×</button>
+          </div>`;
+        }).join('')}
+        ${scans.length >= 2 ? `<div style="margin-top:10px;">
+          <button class="btn btn-outline" style="font-size:10px; padding:6px 12px;" onclick="compareClientScans('${org.replace(/'/g, "\\'")}')">Voortgang vergelijken (eerste ↔ laatste)</button>
+        </div>` : ''}
+      </div>`;
+    }
+
+    return `<div class="klant-card">
+      <div class="klant-header" onclick="${clientCompareMode ? '' : `toggleClientExpand('${org.replace(/'/g, "\\'")}')`}">
+        ${clientCompareMode ? `<input type="checkbox" class="klant-compare-check compare-check" ${checked} onclick="event.stopPropagation()" onchange="toggleClientCompareSelect('${org.replace(/'/g, "\\'")}')" />` : ''}
+        <div class="klant-score-block">
+          <div class="klant-score-big" style="color:${mH.color};">${latestAvg.toFixed(1)}</div>
+          <div class="klant-level-tag" style="color:${mH.color};">${mH.label.split('"')[0].trim()}</div>
+        </div>
+        <div class="klant-info">
+          <div class="klant-name">${org}</div>
+          <div class="klant-stats">
+            <span class="klant-stat">${scans.length} scan${scans.length === 1 ? '' : 's'}</span>
+            <span class="klant-stat">Laatste: ${latestDate}</span>
+            <span class="klant-stat">Ambitie: ${latestAmb.toFixed(1)}</span>
+            <span class="klant-stat">Gap: ${(latestAmb - latestAvg).toFixed(1)}</span>
+            ${trendHtml}
+          </div>
+        </div>
+        ${!clientCompareMode ? `<span class="klant-expand-icon ${isExpanded ? 'open' : ''}">▸</span>` : ''}
+      </div>
+      ${bodyHtml}
+    </div>`;
+  }).join('');
+
+  updateClientCompareBar();
+}
+
+function toggleClientExpand(org) {
+  expandedClients[org] = !expandedClients[org];
+  renderKlantOverzicht();
+}
+
+function compareClientScans(org) {
+  const groups = getClientGroups();
+  const scans = groups[org];
+  if (!scans || scans.length < 2) return;
+  compareMode = false;
+  compareSelection = [scans[scans.length - 1].id, scans[0].id];
+  switchHistorieView('scans');
+  document.querySelectorAll('#tab-historie .sub-tab').forEach((b, i) => b.classList.toggle('active', i === 1));
+  compareMode = true;
+  document.getElementById('compare-mode-btn').textContent = 'Vergelijking annuleren';
+  renderScanList();
+  showComparison();
+}
+
+function toggleClientCompareMode() {
+  clientCompareMode = !clientCompareMode;
+  clientCompareSelection = [];
+  document.getElementById('klant-compare-result').style.display = 'none';
+  document.getElementById('klant-compare-result').innerHTML = '';
+  document.getElementById('klant-compare-mode-btn').textContent = clientCompareMode ? 'Vergelijking annuleren' : 'Klanten vergelijken';
+  renderKlantOverzicht();
+}
+
+function cancelClientCompare() {
+  clientCompareMode = false;
+  clientCompareSelection = [];
+  document.getElementById('klant-compare-result').style.display = 'none';
+  document.getElementById('klant-compare-result').innerHTML = '';
+  document.getElementById('klant-compare-mode-btn').textContent = 'Klanten vergelijken';
+  renderKlantOverzicht();
+}
+
+function toggleClientCompareSelect(org) {
+  const idx = clientCompareSelection.indexOf(org);
+  if (idx >= 0) clientCompareSelection.splice(idx, 1);
+  else if (clientCompareSelection.length < 2) clientCompareSelection.push(org);
+  else {
+    clientCompareSelection.shift();
+    clientCompareSelection.push(org);
+  }
+  renderKlantOverzicht();
+}
+
+function updateClientCompareBar() {
+  const bar = document.getElementById('klant-compare-bar');
+  if (!clientCompareMode) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  const btn = document.getElementById('klant-compare-btn');
+  const text = document.getElementById('klant-compare-text');
+  if (clientCompareSelection.length === 2) {
+    btn.disabled = false;
+    text.textContent = `${clientCompareSelection[0]} vs ${clientCompareSelection[1]}`;
+  } else {
+    btn.disabled = true;
+    text.textContent = `Selecteer ${2 - clientCompareSelection.length} klant${clientCompareSelection.length === 1 ? '' : 'en'}`;
+  }
+}
+
+function showClientComparison() {
+  if (clientCompareSelection.length !== 2) return;
+  const groups = getClientGroups();
+  const scansA = groups[clientCompareSelection[0]];
+  const scansB = groups[clientCompareSelection[1]];
+  if (!scansA || !scansB) return;
+
+  const latestA = scansA[0];
+  const latestB = scansB[0];
+  const nameA = clientCompareSelection[0];
+  const nameB = clientCompareSelection[1];
+
+  const container = document.getElementById('klant-compare-result');
+  container.style.display = 'block';
+  container.innerHTML = buildComparisonHTML(latestA, latestB, nameA, nameB, 'klant-compare-radar-svg');
+  renderCompareRadar(latestA, latestB, 'klant-compare-radar-svg');
+}
+
+// ============================================================
+// ALLE SCANS (FLAT LIST)
+// ============================================================
+function renderScanList() {
+  const lib = getScanLibrary();
+  const filterOrg = document.getElementById('scan-filter-org')?.value || '';
+
+  const orgs = [...new Set(lib.map(s => (s.metadata.organisatie || '').trim() || 'Geen organisatie'))].sort();
+  const filterEl = document.getElementById('scan-filter-org');
+  if (filterEl) {
+    const current = filterEl.value;
+    filterEl.innerHTML = '<option value="">Alle klanten</option>' + orgs.map(o => `<option value="${o}" ${o === current ? 'selected' : ''}>${o}</option>`).join('');
+  }
+
+  const filtered = filterOrg ? lib.filter(s => ((s.metadata.organisatie || '').trim() || 'Geen organisatie') === filterOrg) : lib;
+
+  document.getElementById('historie-count').textContent = filterOrg
+    ? `${filtered.length} van ${lib.length} scans — gefilterd op "${filterOrg}"`
+    : `${lib.length} scan${lib.length === 1 ? '' : 's'} opgeslagen`;
 
   const list = document.getElementById('historie-list');
-  list.innerHTML = lib.map((scan, i) => {
-    const avgH = scan.scores.reduce((s,r) => s + r.huidige_score, 0) / scan.scores.length;
-    const avgA = scan.scores.reduce((s,r) => s + r.ambitie_score, 0) / scan.scores.length;
+  list.innerHTML = filtered.map(scan => {
+    const avgH = getScanAvg(scan);
+    const avgA = getScanAmbitieAvg(scan);
     const mH = getMaturityInfo(avgH);
-    const date = new Date(scan.savedAt).toLocaleDateString('nl-NL', { day:'numeric', month:'short', year:'numeric' });
+    const date = new Date(scan.savedAt).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
     const org = scan.metadata.organisatie || 'Geen organisatie';
     const consultant = scan.metadata.consultant || '—';
     const checked = compareSelection.includes(scan.id) ? 'checked' : '';
@@ -1565,14 +1856,16 @@ function deleteScanFromHistory(id) {
   renderHistorie();
 }
 
+// ============================================================
+// SCAN COMPARISON (periodic / cross-scan)
+// ============================================================
 function toggleCompareMode() {
   compareMode = !compareMode;
   compareSelection = [];
   document.getElementById('compare-result').style.display = 'none';
   document.getElementById('compare-result').innerHTML = '';
-  const btn = document.getElementById('compare-mode-btn');
-  btn.textContent = compareMode ? 'Vergelijking annuleren' : 'Scans vergelijken';
-  renderHistorie();
+  document.getElementById('compare-mode-btn').textContent = compareMode ? 'Vergelijking annuleren' : 'Scans vergelijken';
+  renderScanList();
 }
 
 function cancelCompare() {
@@ -1581,7 +1874,7 @@ function cancelCompare() {
   document.getElementById('compare-result').style.display = 'none';
   document.getElementById('compare-result').innerHTML = '';
   document.getElementById('compare-mode-btn').textContent = 'Scans vergelijken';
-  renderHistorie();
+  renderScanList();
 }
 
 function toggleCompareSelect(id) {
@@ -1591,7 +1884,7 @@ function toggleCompareSelect(id) {
   else {
     compareSelection.shift();
     compareSelection.push(id);
-    renderHistorie();
+    renderScanList();
     return;
   }
   updateCompareBar();
@@ -1602,10 +1895,10 @@ function updateCompareBar() {
   if (!compareMode) { bar.style.display = 'none'; return; }
   bar.style.display = 'flex';
   const btn = document.getElementById('compare-btn');
-  const text = document.querySelector('.compare-bar-text');
+  const text = bar.querySelector('.compare-bar-text');
   if (compareSelection.length === 2) {
     btn.disabled = false;
-    text.textContent = `2 scans geselecteerd — klaar om te vergelijken`;
+    text.textContent = '2 scans geselecteerd — klaar om te vergelijken';
   } else {
     btn.disabled = true;
     text.textContent = `Selecteer ${2 - compareSelection.length} scan${compareSelection.length === 1 ? '' : 's'}`;
@@ -1622,121 +1915,117 @@ function showComparison() {
   const older = new Date(scanA.savedAt) <= new Date(scanB.savedAt) ? scanA : scanB;
   const newer = older === scanA ? scanB : scanA;
 
-  const avgHA = older.scores.reduce((s,r) => s + r.huidige_score, 0) / older.scores.length;
-  const avgHB = newer.scores.reduce((s,r) => s + r.huidige_score, 0) / newer.scores.length;
-  const avgAA = older.scores.reduce((s,r) => s + r.ambitie_score, 0) / older.scores.length;
-  const avgAB = newer.scores.reduce((s,r) => s + r.ambitie_score, 0) / newer.scores.length;
+  const container = document.getElementById('compare-result');
+  container.style.display = 'block';
+  container.innerHTML = buildComparisonHTML(older, newer, older.label, newer.label, 'compare-radar-svg');
+  renderCompareRadar(older, newer, 'compare-radar-svg');
+}
+
+// ============================================================
+// SHARED COMPARISON RENDERING
+// ============================================================
+function buildComparisonHTML(scanA, scanB, labelA, labelB, radarId) {
+  const avgHA = getScanAvg(scanA);
+  const avgHB = getScanAvg(scanB);
   const mA = getMaturityInfo(avgHA);
   const mB = getMaturityInfo(avgHB);
   const scoreDelta = avgHB - avgHA;
 
-  const container = document.getElementById('compare-result');
-  container.style.display = 'block';
-
   let html = `
-    <div class="section-title" style="margin-bottom:16px;">Vergelijking: ${older.label} → ${newer.label}</div>
+    <div class="section-title" style="margin-bottom:16px;">Vergelijking: ${labelA} vs ${labelB}</div>
     <div class="grid-3" style="margin-bottom:20px;">
       <div class="card" style="text-align:center; padding:16px;">
-        <div class="label" style="margin-bottom:8px;">${older.label}</div>
+        <div class="label" style="margin-bottom:8px;">${labelA}</div>
         <div style="font-size:32px; font-weight:900; font-family:'JetBrains Mono',monospace; color:${mA.color};">${avgHA.toFixed(1)}</div>
         <div style="font-size:9px; font-weight:700; color:${mA.color}; text-transform:uppercase; margin-top:4px;">${mA.label}</div>
       </div>
       <div class="card" style="text-align:center; padding:16px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
         <div class="label" style="margin-bottom:8px;">Verschil</div>
         <div style="font-size:32px; font-weight:900; font-family:'JetBrains Mono',monospace; color:${scoreDelta > 0 ? 'var(--green)' : scoreDelta < 0 ? 'var(--red)' : '#aaa'};">${scoreDelta > 0 ? '+' : ''}${scoreDelta.toFixed(1)}</div>
-        <div style="font-size:9px; font-weight:700; text-transform:uppercase; margin-top:4px; color:#888;">${scoreDelta > 0 ? 'Vooruitgang' : scoreDelta < 0 ? 'Achteruitgang' : 'Geen verandering'}</div>
+        <div style="font-size:9px; font-weight:700; text-transform:uppercase; margin-top:4px; color:#888;">${Math.abs(scoreDelta) < 0.05 ? 'Geen verschil' : scoreDelta > 0 ? 'Hoger' : 'Lager'}</div>
       </div>
       <div class="card" style="text-align:center; padding:16px;">
-        <div class="label" style="margin-bottom:8px;">${newer.label}</div>
+        <div class="label" style="margin-bottom:8px;">${labelB}</div>
         <div style="font-size:32px; font-weight:900; font-family:'JetBrains Mono',monospace; color:${mB.color};">${avgHB.toFixed(1)}</div>
         <div style="font-size:9px; font-weight:700; color:${mB.color}; text-transform:uppercase; margin-top:4px;">${mB.label}</div>
       </div>
-    </div>`;
-
-  // Comparison radar
-  html += `
+    </div>
     <div class="grid-2" style="margin-bottom:20px;">
       <div class="compare-radar-card">
-        <div class="radar-title">Vergelijkingsradar — Nulmeting scores</div>
-        <svg id="compare-radar-svg" viewBox="0 0 450 390" style="width:100%; max-width:420px; height:auto;"></svg>
+        <div class="radar-title">Vergelijkingsradar</div>
+        <svg id="${radarId}" viewBox="0 0 450 390" style="width:100%; max-width:420px; height:auto;"></svg>
         <div class="compare-legend">
-          <div class="legend-item"><span style="width:16px; height:3px; background:var(--red); display:inline-block;"></span> ${older.label}</div>
-          <div class="legend-item"><span style="width:16px; height:3px; background:var(--green); display:inline-block;"></span> ${newer.label}</div>
+          <div class="legend-item"><span style="width:16px; height:3px; background:var(--red); display:inline-block;"></span> ${labelA}</div>
+          <div class="legend-item"><span style="width:16px; height:3px; background:var(--green); display:inline-block;"></span> ${labelB}</div>
         </div>
       </div>
       <div class="card" style="padding:16px;">
         <div class="section-title" style="margin-bottom:12px; font-size:12px;">Domein Vergelijking</div>
         ${DOMAINS.map(d => {
-          const dOld = older.scores.filter(s => s.domein === d);
-          const dNew = newer.scores.filter(s => s.domein === d);
-          const oldAvg = dOld.length ? dOld.reduce((s,r) => s + r.huidige_score, 0) / dOld.length : 1;
-          const newAvg = dNew.length ? dNew.reduce((s,r) => s + r.huidige_score, 0) / dNew.length : 1;
-          const delta = newAvg - oldAvg;
+          const dA = scanA.scores.filter(s => s.domein === d);
+          const dB = scanB.scores.filter(s => s.domein === d);
+          const aAvg = dA.length ? dA.reduce((s,r) => s + r.huidige_score, 0) / dA.length : 1;
+          const bAvg = dB.length ? dB.reduce((s,r) => s + r.huidige_score, 0) / dB.length : 1;
+          const delta = bAvg - aAvg;
           const deltaClass = delta > 0 ? 'compare-delta-pos' : delta < 0 ? 'compare-delta-neg' : 'compare-delta-zero';
           return `<div style="display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0f0f0;">
             <span style="font-size:11px; font-weight:600;">${d}</span>
             <div style="display:flex; gap:12px; align-items:center;">
-              <span class="mono" style="font-size:11px; color:#888;">${oldAvg.toFixed(1)}</span>
-              <span style="color:#ccc;">→</span>
-              <span class="mono" style="font-size:11px; font-weight:700;">${newAvg.toFixed(1)}</span>
+              <span class="mono" style="font-size:11px; color:#888;">${aAvg.toFixed(1)}</span>
+              <span style="color:#ccc;">vs</span>
+              <span class="mono" style="font-size:11px; font-weight:700;">${bAvg.toFixed(1)}</span>
               <span class="mono ${deltaClass}" style="font-size:11px; min-width:40px; text-align:right;">${delta > 0 ? '+' : ''}${delta.toFixed(1)}</span>
             </div>
           </div>`;
         }).join('')}
       </div>
-    </div>`;
-
-  // Detailed delta table
-  html += `
+    </div>
     <div class="section-title" style="margin-bottom:12px; font-size:12px;">Capability Detail</div>
     <div class="table-wrap">
       <table>
         <thead><tr>
           <th>Capability</th>
           <th>Domein</th>
-          <th style="text-align:center">${older.label}</th>
-          <th style="text-align:center">${newer.label}</th>
+          <th style="text-align:center">${labelA}</th>
+          <th style="text-align:center">${labelB}</th>
           <th style="text-align:center">Delta</th>
         </tr></thead>
         <tbody>${CAPABILITIES.map(cap => {
-          const sOld = older.scores.find(s => s.naam === cap.naam);
-          const sNew = newer.scores.find(s => s.naam === cap.naam);
-          const hOld = sOld ? sOld.huidige_score : 1;
-          const hNew = sNew ? sNew.huidige_score : 1;
-          const delta = hNew - hOld;
+          const sA = scanA.scores.find(s => s.naam === cap.naam);
+          const sB = scanB.scores.find(s => s.naam === cap.naam);
+          const hA = sA ? sA.huidige_score : 1;
+          const hB = sB ? sB.huidige_score : 1;
+          const delta = hB - hA;
           const deltaClass = delta > 0 ? 'compare-delta-pos' : delta < 0 ? 'compare-delta-neg' : 'compare-delta-zero';
           return `<tr>
             <td><strong>${cap.naam}</strong></td>
             <td style="color:#888;">${cap.domein}</td>
-            <td style="text-align:center;" class="mono"><span class="score-huidige">${hOld}</span></td>
-            <td style="text-align:center;" class="mono"><span class="score-ambitie">${hNew}</span></td>
+            <td style="text-align:center;" class="mono"><span class="score-huidige">${hA}</span></td>
+            <td style="text-align:center;" class="mono"><span class="score-ambitie">${hB}</span></td>
             <td style="text-align:center;" class="mono ${deltaClass}">${delta > 0 ? '+' : ''}${delta}</td>
           </tr>`;
         }).join('')}</tbody>
       </table>
     </div>`;
 
-  container.innerHTML = html;
-
-  // Render comparison radar
-  renderCompareRadar(older, newer);
+  return html;
 }
 
-function renderCompareRadar(scanA, scanB) {
-  const svg = document.getElementById('compare-radar-svg');
+function renderCompareRadar(scanA, scanB, svgId) {
+  const svg = document.getElementById(svgId || 'compare-radar-svg');
   if (!svg) return;
-  const W=450, H=390, cx=225, cy=185, R=130;
-  const angles = { 'Data Management':-Math.PI/2, 'Datageletterdheid':0, 'Talent & Cultuur':Math.PI/2, 'Strategie & Output':Math.PI };
-  const pt = (d,v) => {
-    const r = (Math.max(1,Math.min(4,v))/4)*R;
-    return { x: cx+r*Math.cos(angles[d]), y: cy+r*Math.sin(angles[d]) };
+  const cx = 225, cy = 185, R = 130;
+  const angles = { 'Data Management': -Math.PI/2, 'Datageletterdheid': 0, 'Talent & Cultuur': Math.PI/2, 'Strategie & Output': Math.PI };
+  const pt = (d, v) => {
+    const r = (Math.max(1, Math.min(4, v)) / 4) * R;
+    return { x: cx + r * Math.cos(angles[d]), y: cy + r * Math.sin(angles[d]) };
   };
 
   const domAvg = (scores) => {
     const result = {};
     DOMAINS.forEach(d => {
       const ds = scores.filter(s => s.domein === d);
-      result[d] = ds.length ? ds.reduce((s,r) => s + r.huidige_score, 0) / ds.length : 1;
+      result[d] = ds.length ? ds.reduce((s, r) => s + r.huidige_score, 0) / ds.length : 1;
     });
     return result;
   };
@@ -1745,37 +2034,37 @@ function renderCompareRadar(scanA, scanB) {
   const avgB = domAvg(scanB.scores);
 
   let html = '';
-  [1,2,3,4].forEach(lvl => {
-    const pts = DOMAINS.map(d => { const p = pt(d,lvl); return `${p.x},${p.y}`; }).join(' ');
+  [1, 2, 3, 4].forEach(lvl => {
+    const pts = DOMAINS.map(d => { const p = pt(d, lvl); return `${p.x},${p.y}`; }).join(' ');
     html += `<polygon points="${pts}" fill="none" stroke="#E5E5E5" stroke-width="1"/>`;
   });
   DOMAINS.forEach(d => {
-    const p = pt(d,4);
+    const p = pt(d, 4);
     html += `<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="#E5E5E5" stroke-width="1.5" stroke-dasharray="3,3"/>`;
   });
-  [1,2,3,4].forEach(lvl => {
-    const p = pt('Data Management',lvl);
+  [1, 2, 3, 4].forEach(lvl => {
+    const p = pt('Data Management', lvl);
     html += `<rect x="${p.x-10}" y="${p.y-8}" width="20" height="14" fill="white" opacity="0.9"/>`;
     html += `<text x="${p.x}" y="${p.y+4}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="#999" font-weight="600">${lvl}</text>`;
   });
 
-  const ptsA = DOMAINS.map(d => { const p = pt(d,avgA[d]); return `${p.x},${p.y}`; }).join(' ');
+  const ptsA = DOMAINS.map(d => { const p = pt(d, avgA[d]); return `${p.x},${p.y}`; }).join(' ');
   html += `<polygon points="${ptsA}" fill="#C8102E" fill-opacity="0.15" stroke="#C8102E" stroke-width="2"/>`;
-  const ptsB = DOMAINS.map(d => { const p = pt(d,avgB[d]); return `${p.x},${p.y}`; }).join(' ');
+  const ptsB = DOMAINS.map(d => { const p = pt(d, avgB[d]); return `${p.x},${p.y}`; }).join(' ');
   html += `<polygon points="${ptsB}" fill="#2E7D32" fill-opacity="0.15" stroke="#2E7D32" stroke-width="2.5"/>`;
 
   DOMAINS.forEach(d => {
-    const na = pt(d,avgA[d]);
+    const na = pt(d, avgA[d]);
     html += `<circle cx="${na.x}" cy="${na.y}" r="4" fill="#C8102E" stroke="white" stroke-width="1.5"/>`;
-    const nb = pt(d,avgB[d]);
+    const nb = pt(d, avgB[d]);
     html += `<circle cx="${nb.x}" cy="${nb.y}" r="4" fill="#2E7D32" stroke="white" stroke-width="1.5"/>`;
   });
 
   const labelOff = {
-    'Data Management': { x:cx, y:cy-R-22, anchor:'middle' },
-    'Datageletterdheid': { x:cx+R+16, y:cy+4, anchor:'start' },
-    'Talent & Cultuur': { x:cx, y:cy+R+28, anchor:'middle' },
-    'Strategie & Output': { x:cx-R-16, y:cy+4, anchor:'end' },
+    'Data Management': { x: cx, y: cy - R - 22, anchor: 'middle' },
+    'Datageletterdheid': { x: cx + R + 16, y: cy + 4, anchor: 'start' },
+    'Talent & Cultuur': { x: cx, y: cy + R + 28, anchor: 'middle' },
+    'Strategie & Output': { x: cx - R - 16, y: cy + 4, anchor: 'end' },
   };
   DOMAINS.forEach(d => {
     const o = labelOff[d];
