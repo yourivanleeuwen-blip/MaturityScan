@@ -282,6 +282,19 @@
     @keyframes fadeInOut { 0%{opacity:0} 10%{opacity:1} 80%{opacity:1} 100%{opacity:0} }
     .autosave-flash { animation: fadeInOut 2.5s ease forwards; }
 
+    /* Source list (multi-upload) */
+    .source-list { display: flex; flex-direction: column; gap: 6px; }
+    .source-card { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: white; border: 1px solid var(--gray-border); font-size: 12px; }
+    .source-card:hover { border-color: #bbb; }
+    .source-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 16px; background: var(--gray-bg); border: 1px solid var(--gray-border); flex-shrink: 0; }
+    .source-icon.ai { background: #FFF5F6; border-color: rgba(200,16,46,0.2); color: var(--red); }
+    .source-info { flex: 1; min-width: 0; }
+    .source-name { font-weight: 700; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .source-meta { font-size: 10px; color: #888; margin-top: 2px; }
+    .source-remove { padding: 4px 8px; font-size: 10px; font-weight: 700; border: 1px solid #ddd; background: white; cursor: pointer; color: var(--red); }
+    .source-remove:hover { background: #FFF5F6; border-color: var(--red); }
+    .source-count-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; background: var(--gray-bg); border: 1px solid var(--gray-border); color: #555; text-transform: uppercase; letter-spacing: 0.06em; }
+
     /* Capabilities Editor */
     .cap-editor-list { display: flex; flex-direction: column; gap: 8px; }
     .cap-editor-row { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: white; border: 1px solid var(--gray-border); font-size: 12px; }
@@ -405,7 +418,7 @@
         <div class="grid-2" style="gap:24px;">
           <div>
             <div class="section-title" style="margin-bottom:8px;">Stap 1 — Download template</div>
-            <div style="font-size:11px; color:#555; line-height:1.7; margin-bottom:16px;">Download de invultemplate met scoringsgids. Bevat alle capabilities, domeinen en niveaubeschrijvingen. Template voor 3 respondenten — voeg rijen toe voor meer.</div>
+            <div style="font-size:11px; color:#555; line-height:1.7; margin-bottom:16px;">Download de invultemplate met scoringsgids. Stuur het template naar de klant of stakeholder ter invulling — elk ingevuld bestand is één respondent.</div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
               <button class="btn btn-outline" onclick="downloadTemplate()">↓ Excel template (.xlsx)</button>
               <button class="btn btn-outline" onclick="downloadTemplateCSV()" style="font-size:10px;">↓ CSV template</button>
@@ -415,13 +428,28 @@
             </div>
           </div>
           <div style="border-left:1px solid var(--gray-border); padding-left:24px;">
-            <div class="section-title" style="margin-bottom:8px;">Stap 2 — Upload ingevulde template</div>
-            <div style="font-size:11px; color:#555; line-height:1.7; margin-bottom:16px;">Upload het ingevulde bestand in <strong>.csv</strong> of <strong>.xlsx</strong> formaat. De app parseert en aggregeert de scores automatisch.</div>
-            <input type="file" id="file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleFileUpload(event)" />
-            <button class="btn btn-red" onclick="document.getElementById('file-input').click()">↑ Kies bestand en importeer</button>
+            <div class="section-title" style="margin-bottom:8px;">Stap 2 — Upload ingevulde bestanden</div>
+            <div style="font-size:11px; color:#555; line-height:1.7; margin-bottom:16px;">Upload één of meerdere ingevulde bestanden. Elk bestand telt als één bron. De app combineert alle bronnen (bestanden + AI-analyse) tot een gemiddelde score.</div>
+            <input type="file" id="file-input" accept=".csv,.xlsx,.xls" multiple style="display:none;" onchange="handleMultiFileUpload(event)" />
+            <button class="btn btn-red" onclick="document.getElementById('file-input').click()">↑ Bestanden toevoegen</button>
             <div class="error-msg" id="upload-error" style="display:none;"></div>
           </div>
         </div>
+      </div>
+
+      <!-- Source list -->
+      <div id="source-list-container" style="display:none; margin-top:16px;">
+        <div class="flex items-center justify-between" style="margin-bottom:10px;">
+          <div>
+            <div class="section-title">Bronnen <span class="source-count-badge" id="source-count">0 bronnen</span></div>
+            <div style="font-size:11px; color:#888; margin-top:4px;">Alle bronnen worden gecombineerd tot één gemiddelde score per capability.</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-outline" onclick="clearAllSources()" style="font-size:10px;">Alles wissen</button>
+            <button class="btn btn-red" id="combine-btn" onclick="combineAndPreview()">Combineer & bekijk resultaat</button>
+          </div>
+        </div>
+        <div class="source-list" id="source-list"></div>
       </div>
 
       <!-- Upload warnings -->
@@ -433,7 +461,10 @@
       <!-- Preview table -->
       <div id="upload-preview" style="display:none; margin-top:16px;">
         <div class="flex items-center justify-between" style="margin-bottom:12px;">
-          <div class="section-title">Voorbeeld — geïmporteerde scores</div>
+          <div>
+            <div class="section-title">Gecombineerd resultaat</div>
+            <div style="font-size:11px; color:#888; margin-top:4px;" id="preview-subtitle"></div>
+          </div>
           <button class="btn btn-red" onclick="applyUploadedScores()">Scores toepassen → Dashboard</button>
         </div>
         <div class="table-wrap">
@@ -449,7 +480,7 @@
     <div id="sub-ai" class="sub-content" style="display:none;">
       <div class="card mt-4">
         <div class="section-title" style="margin-bottom:6px;">Interviewnotities analyseren met AI</div>
-        <div style="font-size:11px; color:#555; margin-bottom:14px; line-height:1.7;">Plak ruwe interviewnotities, gespreksverslagen of Microsoft Copilot-samenvattingen hieronder. De AI leest de tekst en stelt scores vast voor alle 15 capabilities.</div>
+        <div style="font-size:11px; color:#555; margin-bottom:14px; line-height:1.7;">Plak ruwe interviewnotities, gespreksverslagen of Microsoft Copilot-samenvattingen hieronder. De AI leest de tekst en stelt scores vast voor alle capabilities. U kunt het resultaat direct toepassen óf toevoegen als bron om te combineren met ingevulde templates.</div>
         <textarea id="interview-notes" rows="10" style="resize:vertical; font-size:12px; line-height:1.7;" placeholder="Plak hier uw interviewnotities of Copilot-output van gesprekken met stakeholders. Beschrijf de situatie per thema: beleid, tools, cultuur, datakwaliteit, leiderschap..."></textarea>
         <div class="flex items-center justify-between" style="margin-top:14px; flex-wrap:wrap; gap:10px;">
           <button class="btn btn-red" id="ai-btn" onclick="runAIAnalysis()">✦ Analyseer met AI</button>
@@ -471,6 +502,7 @@
             <div class="section-title">AI-geadviseerde scores — controleer &amp; corrigeer</div>
             <div style="font-size:11px; color:#888; margin-top:4px;">Pas aan waar de AI een verkeerde inschatting maakt op basis van uw kennis van de situatie.</div>
           </div>
+          <button class="btn btn-outline" onclick="addAIAsSource()">+ Toevoegen als bron</button>
           <button class="btn btn-red" onclick="applyAIScores()">Scores bevestigen → Dashboard</button>
         </div>
         <div class="table-wrap">
@@ -906,16 +938,11 @@ function saveApiKey() {
 function downloadTemplate() {
   const wb = XLSX.utils.book_new();
 
-  // Sheet 1: Invultemplate
-  const headerRow = ['Respondent', 'Capability', 'Domein', 'Huidige score (1-4)', 'Ambitiescore (1-4)', 'Toelichting'];
-  const dataRows = [];
-  for (let r = 1; r <= 3; r++) {
-    CAPABILITIES.forEach(c => {
-      dataRows.push([`Respondent ${r}`, c.naam, c.domein, '', '', '']);
-    });
-  }
+  // Sheet 1: Invultemplate (one file per respondent, no Respondent column)
+  const headerRow = ['Capability', 'Domein', 'Huidige score (1-4)', 'Ambitiescore (1-4)', 'Toelichting'];
+  const dataRows = CAPABILITIES.map(c => [c.naam, c.domein, '', '', '']);
   const ws1 = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows]);
-  ws1['!cols'] = [{ wch: 16 }, { wch: 42 }, { wch: 24 }, { wch: 20 }, { wch: 20 }, { wch: 50 }];
+  ws1['!cols'] = [{ wch: 42 }, { wch: 24 }, { wch: 20 }, { wch: 20 }, { wch: 50 }];
   XLSX.utils.book_append_sheet(wb, ws1, 'Invultemplate');
 
   // Sheet 2: Scoringsgids
@@ -942,10 +969,8 @@ function downloadTemplate() {
 }
 
 function downloadTemplateCSV() {
-  const rows = ['Respondent;Capability;Domein;Huidige score (1-4);Ambitiescore (1-4);Toelichting'];
-  for (let r = 1; r <= 3; r++) {
-    CAPABILITIES.forEach(c => rows.push(`Respondent ${r};"${c.naam}";"${c.domein}";;;""`));
-  }
+  const rows = ['Capability;Domein;Huidige score (1-4);Ambitiescore (1-4);Toelichting'];
+  CAPABILITIES.forEach(c => rows.push(`"${c.naam}";"${c.domein}";;;""`));
   const blob = new Blob(['\uFEFF' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url;
@@ -956,10 +981,10 @@ function downloadTemplateCSV() {
 function exportScanAsTemplate() {
   if (!scores) return;
   const wb = XLSX.utils.book_new();
-  const headerRow = ['Respondent', 'Capability', 'Domein', 'Huidige score (1-4)', 'Ambitiescore (1-4)', 'Toelichting'];
-  const dataRows = scores.map(s => ['Respondent 1', s.naam, s.domein, s.huidige_score, s.ambitie_score, s.toelichting || '']);
+  const headerRow = ['Capability', 'Domein', 'Huidige score (1-4)', 'Ambitiescore (1-4)', 'Toelichting'];
+  const dataRows = scores.map(s => [s.naam, s.domein, s.huidige_score, s.ambitie_score, s.toelichting || '']);
   const ws = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows]);
-  ws['!cols'] = [{ wch: 16 }, { wch: 42 }, { wch: 24 }, { wch: 20 }, { wch: 20 }, { wch: 50 }];
+  ws['!cols'] = [{ wch: 42 }, { wch: 24 }, { wch: 20 }, { wch: 20 }, { wch: 50 }];
   XLSX.utils.book_append_sheet(wb, ws, 'Invultemplate');
   const org = metadata.organisatie ? metadata.organisatie.replace(/[^a-z0-9]/gi, '_') : 'EIFFEL';
   XLSX.writeFile(wb, `MaturityScan_Template_${org}.xlsx`);
@@ -1156,31 +1181,188 @@ function importCapabilitiesJSON(e) {
 }
 
 // ============================================================
-// FILE UPLOAD
+// MULTI-SOURCE UPLOAD
 // ============================================================
-function handleFileUpload(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  clearUploadUI();
-  const ext = file.name.split('.').pop().toLowerCase();
-  if (ext === 'csv') {
-    Papa.parse(file, { header: true, skipEmptyLines: true,
-      complete: r => processRows(r.data),
-      error: err => showUploadError('CSV parse fout: ' + err.message)
-    });
-  } else if (ext === 'xlsx' || ext === 'xls') {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const wb = XLSX.read(new Uint8Array(ev.target.result), { type:'array' });
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        processRows(XLSX.utils.sheet_to_json(ws));
-      } catch(err) { showUploadError('Excel leesfout: ' + err.message); }
+let scoreSources = [];
+
+function handleMultiFileUpload(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  document.getElementById('upload-error').style.display = 'none';
+  let pending = files.length;
+  files.forEach(file => {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext === 'csv') {
+      Papa.parse(file, { header: true, skipEmptyLines: true,
+        complete: r => { addFileSource(file.name, r.data); if (--pending === 0) renderSourceList(); },
+        error: err => { showUploadError(`${file.name}: CSV parse fout — ${err.message}`); pending--; }
+      });
+    } else if (ext === 'xlsx' || ext === 'xls') {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const wb = XLSX.read(new Uint8Array(ev.target.result), { type:'array' });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          addFileSource(file.name, XLSX.utils.sheet_to_json(ws));
+        } catch(err) { showUploadError(`${file.name}: Excel leesfout — ${err.message}`); }
+        if (--pending === 0) renderSourceList();
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      showUploadError(`${file.name}: ongeldig formaat. Gebruik .csv of .xlsx.`);
+      pending--;
+    }
+  });
+  e.target.value = '';
+}
+
+function addFileSource(filename, rows) {
+  const parsed = parseFileRows(filename, rows);
+  if (!parsed) return;
+  scoreSources.push({ type: 'file', name: filename, scores: parsed.scores, warnings: parsed.warnings, addedAt: new Date().toISOString() });
+}
+
+function parseFileRows(filename, rows) {
+  if (!rows || rows.length === 0) { showUploadError(`${filename}: bevat geen gegevens.`); return null; }
+  const keys = Object.keys(rows[0] || {});
+  const capH = keys.find(k => k.toLowerCase().includes('capability'));
+  const huidH = keys.find(k => k.toLowerCase().includes('huidige') || k.toLowerCase() === 'score');
+  const ambH = keys.find(k => k.toLowerCase().includes('ambitie') || k.toLowerCase() === 'ambitie');
+  if (!capH) { showUploadError(`${filename}: kolom "Capability" ontbreekt.`); return null; }
+  const warnings = [];
+  const capScores = {};
+  CAPABILITIES.forEach(c => { capScores[c.naam.toLowerCase()] = { h: null, a: null }; });
+  rows.forEach((row, idx) => {
+    const rn = idx + 2;
+    const capRaw = String(row[capH] || '').trim();
+    const capLow = capRaw.toLowerCase();
+    if (!capLow) return;
+    const match = CAPABILITIES.find(c => c.naam.toLowerCase() === capLow || c.naam.toLowerCase().includes(capLow) || capLow.includes(c.naam.toLowerCase()));
+    if (!match) { warnings.push(`${filename} rij ${rn}: onbekende capability '${capRaw}'.`); return; }
+    const key = match.naam.toLowerCase();
+    const parseScore = (raw, label) => {
+      if (raw === undefined || raw === null || String(raw).trim() === '') return null;
+      const n = Number(raw);
+      if (isNaN(n)) { warnings.push(`${filename} rij ${rn} [${match.naam}]: ${label} '${raw}' is geen getal.`); return null; }
+      return Math.max(1, Math.min(4, Math.round(n)));
     };
-    reader.readAsArrayBuffer(file);
-  } else {
-    showUploadError('Ongeldig bestandsformaat. Upload een .csv of .xlsx bestand.');
+    const h = parseScore(huidH ? row[huidH] : undefined, 'huidige score');
+    const a = parseScore(ambH ? row[ambH] : undefined, 'ambitiescore');
+    if (h !== null) capScores[key].h = h;
+    if (a !== null) capScores[key].a = a;
+  });
+  const scores = CAPABILITIES.map(c => {
+    const d = capScores[c.naam.toLowerCase()];
+    return { naam: c.naam, domein: c.domein, huidige_score: d.h !== null ? d.h : 1, ambitie_score: d.a !== null ? d.a : 1 };
+  });
+  return { scores, warnings };
+}
+
+function addAIAsSource() {
+  if (!aiExtractedScores) return;
+  scoreSources.push({
+    type: 'ai',
+    name: 'AI-analyse (interviewnotities)',
+    scores: JSON.parse(JSON.stringify(aiExtractedScores)),
+    warnings: [],
+    addedAt: new Date().toISOString()
+  });
+  renderSourceList();
+  switchSubTab('upload');
+  document.querySelectorAll('.sub-tab').forEach((b, i) => b.classList.toggle('active', i === 0));
+  showAutosaveIndicator('✓ AI-analyse toegevoegd als bron');
+}
+
+function removeSource(idx) {
+  scoreSources.splice(idx, 1);
+  renderSourceList();
+  if (scoreSources.length === 0) {
+    document.getElementById('upload-preview').style.display = 'none';
+    uploadPreviewScores = null;
   }
+}
+
+function clearAllSources() {
+  scoreSources = [];
+  renderSourceList();
+  document.getElementById('upload-preview').style.display = 'none';
+  document.getElementById('upload-warnings-box').style.display = 'none';
+  uploadPreviewScores = null;
+}
+
+function renderSourceList() {
+  const container = document.getElementById('source-list-container');
+  const list = document.getElementById('source-list');
+  const countEl = document.getElementById('source-count');
+
+  if (scoreSources.length === 0) {
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = 'block';
+  countEl.textContent = `${scoreSources.length} bron${scoreSources.length === 1 ? '' : 'nen'}`;
+
+  list.innerHTML = scoreSources.map((src, i) => {
+    const icon = src.type === 'ai' ? '<div class="source-icon ai">✦</div>' : '<div class="source-icon">📄</div>';
+    const typeLabel = src.type === 'ai' ? 'AI-analyse' : 'Bestand';
+    const avgH = src.scores.reduce((s, r) => s + r.huidige_score, 0) / src.scores.length;
+    const time = new Date(src.addedAt).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    return `<div class="source-card">
+      ${icon}
+      <div class="source-info">
+        <div class="source-name">${src.name}</div>
+        <div class="source-meta">${typeLabel} · ${src.scores.length} capabilities · Gem. score: ${avgH.toFixed(1)} · ${time}</div>
+      </div>
+      <button class="source-remove" onclick="removeSource(${i})">×</button>
+    </div>`;
+  }).join('');
+}
+
+function combineAndPreview() {
+  if (scoreSources.length === 0) return;
+
+  const allWarnings = [];
+  scoreSources.forEach(src => { if (src.warnings) allWarnings.push(...src.warnings); });
+
+  const combined = CAPABILITIES.map(c => {
+    const hValues = [];
+    const aValues = [];
+    const toelichting = [];
+    scoreSources.forEach((src, si) => {
+      const match = src.scores.find(s => s.naam === c.naam);
+      if (match) {
+        hValues.push(match.huidige_score);
+        aValues.push(match.ambitie_score);
+        if (match.toelichting) toelichting.push(`[${src.type === 'ai' ? 'AI' : 'B' + (si + 1)}] ${match.toelichting}`);
+      }
+    });
+    const avgH = hValues.length ? hValues.reduce((a, b) => a + b, 0) / hValues.length : 1;
+    const avgA = aValues.length ? aValues.reduce((a, b) => a + b, 0) / aValues.length : 1;
+    const bronLabel = scoreSources.length > 1 ? `Gemiddelde van ${scoreSources.length} bronnen.` : scoreSources[0].type === 'ai' ? 'Geanalyseerd via AI.' : 'Geïmporteerd via bestand.';
+    return {
+      naam: c.naam, domein: c.domein,
+      huidige_score: Math.round(avgH), ambitie_score: Math.round(avgA),
+      toelichting: toelichting.length ? toelichting.join(' ') : bronLabel
+    };
+  });
+
+  uploadPreviewScores = combined;
+
+  if (allWarnings.length) {
+    document.getElementById('upload-warnings-box').style.display = 'block';
+    document.getElementById('upload-warnings-list').innerHTML = allWarnings.map(w => `<div class="warn-item">${w}</div>`).join('');
+  } else {
+    document.getElementById('upload-warnings-box').style.display = 'none';
+  }
+
+  const fileCount = scoreSources.filter(s => s.type === 'file').length;
+  const aiCount = scoreSources.filter(s => s.type === 'ai').length;
+  const parts = [];
+  if (fileCount) parts.push(`${fileCount} bestand${fileCount > 1 ? 'en' : ''}`);
+  if (aiCount) parts.push(`${aiCount} AI-analyse${aiCount > 1 ? 's' : ''}`);
+  document.getElementById('preview-subtitle').textContent = `Gecombineerd uit ${parts.join(' + ')} — scores zijn het gemiddelde van alle bronnen.`;
+
+  renderPreviewTable(combined);
 }
 
 function clearUploadUI() {
@@ -1193,53 +1375,6 @@ function clearUploadUI() {
 function showUploadError(msg) {
   const el = document.getElementById('upload-error');
   el.textContent = '⚠ ' + msg; el.style.display = 'flex';
-}
-
-function processRows(rows) {
-  if (!rows || rows.length === 0) { showUploadError('Het bestand bevat geen gegevens.'); return; }
-  const keys = Object.keys(rows[0] || {});
-  const capH = keys.find(k => k.toLowerCase().includes('capability'));
-  const huidH = keys.find(k => k.toLowerCase().includes('huidige') || k.toLowerCase() === 'score');
-  const ambH = keys.find(k => k.toLowerCase().includes('ambitie') || k.toLowerCase() === 'ambitie');
-  if (!capH) { showUploadError('Kolom "Capability" ontbreekt. Download de invultemplate en gebruik die als basis.'); return; }
-  const warnings = [];
-  const capMap = {};
-  CAPABILITIES.forEach(c => { capMap[c.naam.toLowerCase()] = { huidige:[], ambitie:[], count:0 }; });
-  rows.forEach((row, idx) => {
-    const rn = idx + 2;
-    const capRaw = String(row[capH] || '').trim();
-    const capLow = capRaw.toLowerCase();
-    if (!capLow) { warnings.push(`Rij ${rn}: lege capability-naam overgeslagen.`); return; }
-    const match = CAPABILITIES.find(c => c.naam.toLowerCase() === capLow || c.naam.toLowerCase().includes(capLow) || capLow.includes(c.naam.toLowerCase()));
-    if (!match) { warnings.push(`Rij ${rn}: onbekende capability '${capRaw}' overgeslagen.`); return; }
-    const key = match.naam.toLowerCase();
-    const parseScore = (raw, label) => {
-      if (raw === undefined || raw === null || String(raw).trim() === '') { warnings.push(`Rij ${rn} [${match.naam}]: geen ${label} ingevuld. Standaard: 1.`); return 1; }
-      const n = Number(raw);
-      if (isNaN(n)) { warnings.push(`Rij ${rn} [${match.naam}]: ${label} '${raw}' is geen getal. Standaard: 1.`); return 1; }
-      if (n < 1 || n > 4) { const c = Math.max(1, Math.min(4, Math.round(n))); warnings.push(`Rij ${rn} [${match.naam}]: ${label} buiten 1-4 bereik, gecorrigeerd naar ${c}.`); return c; }
-      return Math.round(n);
-    };
-    const h = parseScore(huidH ? row[huidH] : undefined, 'huidige score');
-    const a = parseScore(ambH ? row[ambH] : undefined, 'ambitiescore');
-    if (a < h) warnings.push(`Rij ${rn} [${match.naam}]: ambitie (${a}) lager dan huidig (${h}).`);
-    capMap[key].huidige.push(h); capMap[key].ambitie.push(a); capMap[key].count++;
-  });
-  const missing = CAPABILITIES.filter(c => capMap[c.naam.toLowerCase()].count === 0);
-  if (missing.length) warnings.push(`Ontbrekende capabilities ingesteld op niveau 1: ${missing.map(c=>c.naam).join(', ')}.`);
-  const finalScores = CAPABILITIES.map(c => {
-    const d = capMap[c.naam.toLowerCase()];
-    const avgH = d.huidige.length ? d.huidige.reduce((a,b)=>a+b,0)/d.huidige.length : 1;
-    const avgA = d.ambitie.length ? d.ambitie.reduce((a,b)=>a+b,0)/d.ambitie.length : 1;
-    return { naam:c.naam, domein:c.domein, huidige_score:Math.round(avgH), ambitie_score:Math.round(avgA), toelichting: d.count > 1 ? `Gemiddelde van ${d.count} respondenten.` : d.count === 1 ? 'Geïmporteerd via bestand.' : 'Ontbrak in bestand; ingesteld op niveau 1.' };
-  });
-  uploadPreviewScores = finalScores;
-  if (warnings.length) {
-    document.getElementById('upload-warnings-box').style.display = 'block';
-    const list = document.getElementById('upload-warnings-list');
-    list.innerHTML = warnings.map(w => `<div class="warn-item">${w}</div>`).join('');
-  }
-  renderPreviewTable(finalScores);
 }
 
 function renderPreviewTable(data) {
