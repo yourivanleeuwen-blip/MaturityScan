@@ -1240,6 +1240,21 @@ function importCapabilitiesJSON(e) {
   reader.readAsText(file);
 }
 
+function extractJSON(text) {
+  let clean = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+  const starts = clean.startsWith('[') ? ['[', ']'] : ['{', '}'];
+  const startIdx = clean.indexOf(starts[0]);
+  if (startIdx < 0) throw new Error('Geen JSON gevonden in AI-antwoord.');
+  let depth = 0;
+  let endIdx = -1;
+  for (let i = startIdx; i < clean.length; i++) {
+    if (clean[i] === starts[0]) depth++;
+    else if (clean[i] === starts[1]) { depth--; if (depth === 0) { endIdx = i; break; } }
+  }
+  if (endIdx < 0) throw new Error('Onvolledige JSON in AI-antwoord.');
+  return JSON.parse(clean.slice(startIdx, endIdx + 1));
+}
+
 async function generateFrameworkAI() {
   const apiKey = localStorage.getItem('eiffel_anthropic_key');
   if (!apiKey) { alert('Stel eerst een Anthropic API-key in via het AI-tabblad.'); return; }
@@ -1258,28 +1273,28 @@ async function generateFrameworkAI() {
   const prompt = `Je bent een expert organisatieadviseur. Genereer een maturity-framework voor het thema: "${scanThema}".
 ${context ? 'Extra context: ' + context : ''}
 
-Geef precies 15-25 capabilities verdeeld over 4-7 logische domeinen.
-Per capability geef een korte niveaubeschrijving voor niveau 1 t/m 4 (Basic/Moderate/Advanced/Leading).
+Geef 15-25 capabilities verdeeld over 4-7 logische domeinen.
+Per capability geef een KORTE niveaubeschrijving (max 15 woorden) voor niveau 1 t/m 4.
 
-Antwoord ALLEEN met valid JSON in dit formaat:
-{
-  "capabilities": [{"id": "c01", "naam": "Naam", "domein": "Domein"}],
-  "domains": ["Domein1", "Domein2"],
-  "levelDesc": {"Naam": {"1": "...", "2": "...", "3": "...", "4": "..."}}
-}`;
+BELANGRIJK: Antwoord met ALLEEN raw JSON, geen markdown, geen backticks, geen uitleg.
+Het JSON-formaat:
+{"capabilities":[{"id":"c01","naam":"Naam","domein":"Domein"}],"domains":["Domein1","Domein2"],"levelDesc":{"Naam":{"1":"kort","2":"kort","3":"kort","4":"kort"}}}`;
 
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 4096, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 8192, messages: [{ role: 'user', content: prompt }] })
     });
-    if (!resp.ok) throw new Error(`API fout: ${resp.status}`);
+    if (!resp.ok) {
+      const errBody = await resp.text().catch(() => '');
+      throw new Error(`API fout ${resp.status}: ${errBody.slice(0, 200)}`);
+    }
     const data = await resp.json();
     const text = data.content[0].text;
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('Geen geldig JSON in AI-antwoord.');
-    const fw = JSON.parse(jsonMatch[0]);
+    const fw = extractJSON(text);
+    if (!fw.capabilities || !Array.isArray(fw.capabilities)) throw new Error('AI-antwoord mist capabilities array.');
+    if (!fw.domains || !Array.isArray(fw.domains)) throw new Error('AI-antwoord mist domains array.');
 
     CAPABILITIES.length = 0;
     fw.capabilities.forEach(c => CAPABILITIES.push(c));
@@ -1335,9 +1350,7 @@ Antwoord ALLEEN met valid JSON array:
     if (!resp.ok) throw new Error(`API fout: ${resp.status}`);
     const data = await resp.json();
     const text = data.content[0].text;
-    const jsonMatch = text.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) throw new Error('Geen geldig JSON in AI-antwoord.');
-    generatedQuestions = JSON.parse(jsonMatch[0]);
+    generatedQuestions = extractJSON(text);
     renderQuestionnaireEditor();
     status.textContent = `${generatedQuestions.length} stellingen gegenereerd.`;
   } catch (err) {
