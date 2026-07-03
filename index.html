@@ -400,27 +400,13 @@
     <!-- TAB A: Upload -->
     <div id="sub-upload" class="sub-content">
       <div class="card" style="margin-top:0; border-top:none;">
-        <div style="display:flex; align-items:flex-start; gap:24px; flex-wrap:wrap;">
-          <div style="flex:1; min-width:220px;">
-            <div class="label" style="margin-bottom:8px;">1. Template downloaden</div>
-            <div style="font-size:11px; color:#555; line-height:1.6; margin-bottom:12px;">Download en stuur naar respondenten. Eén bestand per respondent.</div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button class="btn btn-outline" onclick="downloadTemplate()">Excel (.xlsx)</button>
-              <button class="btn btn-outline" onclick="downloadTemplateCSV()" style="font-size:10px;">CSV</button>
-            </div>
-            <div id="export-template-btn" style="margin-top:8px; display:none;">
-              <button class="btn btn-outline" onclick="exportScanAsTemplate()" style="font-size:10px;">Huidige scores als template</button>
-            </div>
-          </div>
-          <div style="width:1px; background:var(--gray-border); align-self:stretch; min-height:60px;"></div>
-          <div style="flex:1; min-width:220px;">
-            <div class="label" style="margin-bottom:8px;">2. Ingevulde bestanden uploaden</div>
-            <div style="font-size:11px; color:#555; line-height:1.6; margin-bottom:12px;">Upload meerdere bestanden. Bronnen worden gecombineerd tot een gemiddelde.</div>
-            <input type="file" id="file-input" accept=".csv,.xlsx,.xls" multiple style="display:none;" onchange="handleMultiFileUpload(event)" />
-            <button class="btn btn-red" onclick="document.getElementById('file-input').click()">Bestanden uploaden</button>
-            <div class="error-msg" id="upload-error" style="display:none;"></div>
-          </div>
+        <div class="label" style="margin-bottom:8px;">Ingevulde bestanden uploaden</div>
+        <div style="font-size:11px; color:#555; line-height:1.6; margin-bottom:12px;">Upload ingevulde vragenlijsten of scorebestanden (.xlsx / .csv). Meerdere bestanden worden gecombineerd tot een gemiddelde.</div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <input type="file" id="file-input" accept=".csv,.xlsx,.xls" multiple style="display:none;" onchange="handleMultiFileUpload(event)" />
+          <button class="btn btn-red" onclick="document.getElementById('file-input').click()">Bestanden uploaden</button>
         </div>
+        <div class="error-msg" id="upload-error" style="display:none;"></div>
       </div>
 
       <!-- Source list -->
@@ -894,9 +880,9 @@ let CAPABILITIES = customFw ? customFw.capabilities : JSON.parse(JSON.stringify(
 let DOMAINS = customFw ? customFw.domains : [...DEFAULT_DOMAINS];
 let LEVEL_DESC = customFw ? customFw.levelDesc : JSON.parse(JSON.stringify(DEFAULT_LEVEL_DESC));
 
-const MATURITY_LEVELS = { 1:'Basic "Survive"', 2:'Moderate "Maintain"', 3:'Advanced "Build"', 4:'Leading "Evolve"', 5:'Excellent "Thrive"' };
+const MATURITY_LEVELS = { 1:'Basic "Survive"', 2:'Developing "Maintain"', 3:'Moderate "Stabilize"', 4:'Advanced "Build"', 5:'Leading "Evolve"' };
 const LEVEL_COLORS = { 1:'#8B0000', 2:'#F5A623', 3:'#C8102E', 4:'#2E7D32', 5:'#1565C0' };
-let MAX_SCORE = 4;
+let MAX_SCORE = 5;
 
 // ============================================================
 // STATE
@@ -1014,15 +1000,16 @@ function downloadTemplate() {
     [],
     ['Niveau', 'Label', 'Beschrijving'],
     [1, 'Basic "Survive"', 'Ad hoc, reactief, geen formeel beleid of eigenaarschap'],
-    [2, 'Moderate "Maintain"', 'Eerste processen gedefinieerd, deels belegd, maar gefragmenteerd'],
-    [3, 'Advanced "Build"', 'Gestandaardiseerd, centraal beheerd, structureel geborgd'],
-    [4, 'Leading "Evolve"', 'Volledig geautomatiseerd, voorspellend, verankerd in cultuur en strategie'],
+    [2, 'Developing "Maintain"', 'Eerste processen gedefinieerd, deels belegd, maar gefragmenteerd'],
+    [3, 'Moderate "Stabilize"', 'Processen aanwezig en herkenbaar, wisselend toegepast'],
+    [4, 'Advanced "Build"', 'Gestandaardiseerd, centraal beheerd, structureel geborgd'],
+    [5, 'Leading "Evolve"', 'Volledig geautomatiseerd, voorspellend, verankerd in cultuur en strategie'],
     [],
-    ['Capability', 'Domein', 'Niveau 1', 'Niveau 2', 'Niveau 3', 'Niveau 4'],
+    ['Capability', 'Domein', 'Niveau 1', 'Niveau 2', 'Niveau 3', 'Niveau 4', 'Niveau 5'],
   ];
   CAPABILITIES.forEach(c => {
     const ld = LEVEL_DESC[c.naam] || {};
-    guideRows.push([c.naam, c.domein, ld[1] || '', ld[2] || '', ld[3] || '', ld[4] || '']);
+    guideRows.push([c.naam, c.domein, ld[1] || '', ld[2] || '', ld[3] || '', ld[4] || '', ld[5] || '']);
   });
   const ws2 = XLSX.utils.aoa_to_sheet(guideRows);
   ws2['!cols'] = [{ wch: 42 }, { wch: 24 }, { wch: 50 }, { wch: 50 }, { wch: 50 }, { wch: 50 }];
@@ -1292,11 +1279,11 @@ async function generateFrameworkAI() {
 ${context ? 'Extra context: ' + context : ''}
 
 Geef 15-25 capabilities verdeeld over 4-7 logische domeinen.
-Per capability geef een KORTE niveaubeschrijving (max 15 woorden) voor niveau 1 t/m 4.
+Per capability geef een KORTE niveaubeschrijving (max 15 woorden) voor niveau 1 t/m 5.
 
 BELANGRIJK: Antwoord met ALLEEN raw JSON, geen markdown, geen backticks, geen uitleg.
 Het JSON-formaat:
-{"capabilities":[{"id":"c01","naam":"Naam","domein":"Domein"}],"domains":["Domein1","Domein2"],"levelDesc":{"Naam":{"1":"kort","2":"kort","3":"kort","4":"kort"}}}`;
+{"capabilities":[{"id":"c01","naam":"Naam","domein":"Domein"}],"domains":["Domein1","Domein2"],"levelDesc":{"Naam":{"1":"kort","2":"kort","3":"kort","4":"kort","5":"kort"}}}`;
 
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
@@ -1542,7 +1529,7 @@ function parseFileRows(filename, rows) {
   const capScores = {};
   CAPABILITIES.forEach(c => { capScores[c.naam.toLowerCase()] = { h: null, a: null }; });
 
-  let detectedMax = 4;
+  let detectedMax = 5;
   rows.forEach((row, idx) => {
     const rn = idx + 2;
     const capRaw = String(row[capH] || '').trim();
@@ -1555,7 +1542,6 @@ function parseFileRows(filename, rows) {
       if (raw === undefined || raw === null || String(raw).trim() === '') return null;
       const n = Number(raw);
       if (isNaN(n)) { warnings.push(`${filename} rij ${rn} [${match.naam}]: ${label} '${raw}' is geen getal.`); return null; }
-      if (n > 4) detectedMax = 5;
       return Math.max(1, Math.min(5, Math.round(n)));
     };
     const h = parseScore(huidH ? row[huidH] : undefined, 'huidige score');
@@ -1721,13 +1707,14 @@ async function runAIAnalysis() {
   const btn = document.getElementById('ai-btn');
   btn.textContent = '✦ AI analyseert...'; btn.disabled = true;
 
-  const systemPrompt = `Je bent een expert in volwassenheidsanalyse op het gebied van "${scanThema}" die interviewnotities analyseert voor een management consultant. Geef per capability een huidige score én ambitiescore op schaal 1–4.
+  const systemPrompt = `Je bent een expert in volwassenheidsanalyse op het gebied van "${scanThema}" die interviewnotities analyseert voor een management consultant. Geef per capability een huidige score én ambitiescore op schaal 1–5.
 
 SCORESCHAAL:
 1 = Basic "Survive": ad hoc, reactief, geen formeel beleid of eigenaarschap
-2 = Moderate "Maintain": eerste processen gedefinieerd, deels belegd, maar gefragmenteerd
-3 = Advanced "Build": gestandaardiseerd, centraal beheerd, structureel geborgd
-4 = Leading "Evolve": volledig geautomatiseerd, voorspellend, verankerd in cultuur en strategie
+2 = Developing "Maintain": eerste processen gedefinieerd, deels belegd, maar gefragmenteerd
+3 = Moderate "Stabilize": processen aanwezig en herkenbaar, wisselend toegepast
+4 = Advanced "Build": gestandaardiseerd, centraal beheerd, structureel geborgd
+5 = Leading "Evolve": volledig geautomatiseerd, voorspellend, verankerd in cultuur en strategie
 
 SCORINGSREGELS — volg deze strikt:
 
@@ -1735,22 +1722,22 @@ REGEL 1 — Alleen scoren op basis van expliciete tekstevidentie:
 Stel een huidige score uitsluitend vast op basis van wat er letterlijk in de notities staat. Interpreteer niet, vul niet aan vanuit aannames. Als een capability niet of nauwelijks wordt besproken, stel dan huidige_score op 1 en schrijf in toelichting: "Niet besproken in het interview — score vereist verificatie door consultant." Stel in dat geval ambitie_score ook op 1.
 
 REGEL 2 — Ambitie conservatief en onderbouwd scoren:
-Stel ambitie_score alleen op 4 als de tekst expliciet wijst op een Leading-ambitie: volledige automatisering, organisatiebrede cultuurverandering, of vergelijkbare concrete Leading-kenmerken. Een algemene wens zoals "we willen beter worden" of "we willen dashboards" = ambitie_score 3, niet 4. Wanneer geen ambitie wordt uitgesproken voor een capability EN er ook geen organisatiebrede ambitie in de tekst staat, stel ambitie_score gelijk aan huidige_score.
+Stel ambitie_score alleen op 5 als de tekst expliciet wijst op een Leading-ambitie: volledige automatisering, organisatiebrede cultuurverandering, of vergelijkbare concrete Leading-kenmerken. Een algemene wens zoals "we willen beter worden" of "we willen dashboards" = ambitie_score 3 of 4, niet 5. Wanneer geen ambitie wordt uitgesproken voor een capability EN er ook geen organisatiebrede ambitie in de tekst staat, stel ambitie_score gelijk aan huidige_score.
 
 REGEL 2B — Organisatiebrede ambitie geldt als minimumambitie voor besproken capabilities:
-Als de tekst een algemene organisatiebrede ambitie uitspreekt (bijv. "we willen volwassener worden", "ambitie 2027", "alle afdelingen moeten meedoen"), gebruik dan ambitie_score minimaal 3 voor alle capabilities die wel expliciet besproken worden in de notities. De organisatiebrede ambitie impliceert vooruitgang op alle besproken terreinen. Alleen voor capabilities die helemaal niet besproken zijn, blijft ambitie_score gelijk aan huidige_score (zie regel 1).
+Als de tekst een algemene organisatiebrede ambitie uitspreekt (bijv. "we willen volwassener worden", "ambitie 2027", "alle afdelingen moeten meedoen"), gebruik dan ambitie_score minimaal 3 of 4 voor alle capabilities die wel expliciet besproken worden in de notities. De organisatiebrede ambitie impliceert vooruitgang op alle besproken terreinen. Alleen voor capabilities die helemaal niet besproken zijn, blijft ambitie_score gelijk aan huidige_score (zie regel 1).
 
 REGEL 2C — Capabilities bijna op ambitieniveau krijgen hogere ambitiescore:
 Als de huidige score al 2 of 3 is en er concrete acties lopen (bijv. uitrol, aanstelling, audit afgerond), stel ambitie_score dan minimaal één niveau hoger dan de huidige score. Een organisatie die actief bezig is met implementatie heeft per definitie een hogere ambitie dan waar ze nu staan.
 
 REGEL 3 — Consistentie: meer bewezen actie = hogere huidige score:
-Weeg concrete bewezen acties (aanstellingen, afgeronde audits, lopende uitrollen) zwaarder dan intenties en plannen. Een CISO die is aangesteld en een audit heeft afgerond en RBAC uitrolt = huidige score 2 a 3, niet 1. Een plan zonder uitvoering = huidige score 1.
+Weeg concrete bewezen acties (aanstellingen, afgeronde audits, lopende uitrollen) zwaarder dan intenties en plannen. Een CISO die is aangesteld en een audit heeft afgerond en RBAC uitrolt = huidige score 2 a 4, niet 1. Een plan zonder uitvoering = huidige score 1.
 
 REGEL 4 — Toelichting is altijd bewijsgebonden:
 Schrijf in de toelichting (max 1 zin) wat de concrete tekstevidentie is voor de score. Noem nooit iets wat niet in de notities staat. Voor niet-besproken capabilities schrijf: "Niet besproken in het interview - score vereist verificatie door consultant." 
 
 OUTPUT: Geef je antwoord ALLEEN als JSON zonder uitleg of markdown backticks:
-{"capabilities":[{"naam":"[capability naam]","huidige_score":[1-4],"ambitie_score":[1-4],"toelichting":"[max 1 zin met tekstevidentie]"}]}
+{"capabilities":[{"naam":"[capability naam]","huidige_score":[1-5],"ambitie_score":[1-5],"toelichting":"[max 1 zin met tekstevidentie]"}]}
 
 De ${CAPABILITIES.length} capabilities zijn: ${CAPABILITIES.map(c => c.naam).join(', ')}`;
 
@@ -1782,8 +1769,8 @@ function processAIResponse(aiRows) {
   const mapped = CAPABILITIES.map(cap => {
     const match = aiRows.find(r => r && r.naam && (r.naam.toLowerCase() === cap.naam.toLowerCase() || cap.naam.toLowerCase().includes(r.naam.toLowerCase()) || r.naam.toLowerCase().includes(cap.naam.toLowerCase())));
     if (!match) { warnings.push(`'${cap.naam}' niet gedetecteerd; ingesteld op niveau 1.`); return { naam:cap.naam, domein:cap.domein, huidige_score:1, ambitie_score:1, toelichting:'Niet besproken in de aangeleverde notities.' }; }
-    let h = parseInt(match.huidige_score, 10); if (isNaN(h)||h<1||h>4) { warnings.push(`Ongeldig huidig score voor '${cap.naam}', gecorrigeerd naar 1.`); h=Math.max(1,Math.min(4,h||1)); }
-    let a = parseInt(match.ambitie_score, 10); if (isNaN(a)||a<1||a>4) { warnings.push(`Ongeldig ambitiescore voor '${cap.naam}', gecorrigeerd naar 1.`); a=Math.max(1,Math.min(4,a||1)); }
+    let h = parseInt(match.huidige_score, 10); if (isNaN(h)||h<1||h>5) { warnings.push(`Ongeldig huidig score voor '${cap.naam}', gecorrigeerd naar 1.`); h=Math.max(1,Math.min(5,h||1)); }
+    let a = parseInt(match.ambitie_score, 10); if (isNaN(a)||a<1||a>5) { warnings.push(`Ongeldig ambitiescore voor '${cap.naam}', gecorrigeerd naar 1.`); a=Math.max(1,Math.min(5,a||1)); }
     if (a < h) warnings.push(`Ambitie (${a}) lager dan huidig (${h}) voor '${cap.naam}'.`);
     return { naam:cap.naam, domein:cap.domein, huidige_score:h, ambitie_score:a, toelichting: match.toelichting || 'Geanalyseerd via AI.' };
   });
