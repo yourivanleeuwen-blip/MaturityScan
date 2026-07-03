@@ -1074,7 +1074,11 @@ function renderFrameworkTable() {
   else if (isCustom) statusText = '<span style="color:var(--red); font-weight:700;">Aangepast framework actief.</span>';
   else if (hasSavedDefault) statusText = 'Eigen standaard actief.';
 
-  if (stats) stats.innerHTML = `<strong>${CAPABILITIES.length}</strong> capabilities in <strong>${DOMAINS.length}</strong> domeinen (${DOMAINS.join(', ')}). ${statusText}`;
+  const domainTags = DOMAINS.map(d => {
+    const count = CAPABILITIES.filter(c => c.domein === d).length;
+    return `<span style="display:inline-flex; align-items:center; gap:2px; background:#f0f0f0; border:1px solid #ddd; border-radius:3px; padding:2px 8px; font-size:11px; margin:2px; cursor:pointer;" ondblclick="renameDomain('${d.replace(/'/g, "\\'")}')" title="Dubbelklik om te hernoemen">${d} <span style="color:#888; font-size:10px;">(${count})</span><button onclick="event.stopPropagation();removeDomain('${d.replace(/'/g, "\\'")}')" style="background:none; border:none; color:#ccc; cursor:pointer; font-size:14px; line-height:1; padding:0 0 0 4px; margin:0;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='#ccc'">&times;</button></span>`;
+  }).join('');
+  if (stats) stats.innerHTML = `<strong>${CAPABILITIES.length}</strong> capabilities in <strong>${DOMAINS.length}</strong> domeinen: ${domainTags} ${statusText}`;
 
   let html = '';
   CAPABILITIES.forEach((cap, idx) => {
@@ -1134,6 +1138,36 @@ function addDomain() {
   const trimmed = name.trim();
   if (DOMAINS.includes(trimmed)) { alert('Dit domein bestaat al.'); return; }
   DOMAINS.push(trimmed);
+  saveCustomFramework();
+  renderFrameworkTable();
+}
+
+function removeDomain(domainName) {
+  const caps = CAPABILITIES.filter(c => c.domein === domainName);
+  const msg = caps.length > 0
+    ? `Domein "${domainName}" verwijderen inclusief ${caps.length} capability(s)?`
+    : `Domein "${domainName}" verwijderen?`;
+  if (!confirm(msg)) return;
+  for (let i = CAPABILITIES.length - 1; i >= 0; i--) {
+    if (CAPABILITIES[i].domein === domainName) {
+      delete LEVEL_DESC[CAPABILITIES[i].naam];
+      CAPABILITIES.splice(i, 1);
+    }
+  }
+  const idx = DOMAINS.indexOf(domainName);
+  if (idx >= 0) DOMAINS.splice(idx, 1);
+  saveCustomFramework();
+  renderFrameworkTable();
+}
+
+function renameDomain(oldName) {
+  const newName = prompt(`Hernoem domein "${oldName}":`, oldName);
+  if (!newName || !newName.trim() || newName.trim() === oldName) return;
+  const trimmed = newName.trim();
+  if (DOMAINS.includes(trimmed)) { alert('Dit domein bestaat al.'); return; }
+  const idx = DOMAINS.indexOf(oldName);
+  if (idx >= 0) DOMAINS[idx] = trimmed;
+  CAPABILITIES.forEach(c => { if (c.domein === oldName) c.domein = trimmed; });
   saveCustomFramework();
   renderFrameworkTable();
 }
@@ -1238,7 +1272,7 @@ Antwoord ALLEEN met valid JSON in dit formaat:
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 4096, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 4096, messages: [{ role: 'user', content: prompt }] })
     });
     if (!resp.ok) throw new Error(`API fout: ${resp.status}`);
     const data = await resp.json();
@@ -1296,7 +1330,7 @@ Antwoord ALLEEN met valid JSON array:
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 4096, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 4096, messages: [{ role: 'user', content: prompt }] })
     });
     if (!resp.ok) throw new Error(`API fout: ${resp.status}`);
     const data = await resp.json();
