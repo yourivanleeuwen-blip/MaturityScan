@@ -601,7 +601,7 @@
         </div>
         <div class="radar-card">
           <div class="radar-title">Domein Volwassenheidsradar</div>
-          <svg id="radar-svg" viewBox="0 0 450 390" style="width:100%; max-width:420px; height:auto;"></svg>
+          <svg id="radar-svg" viewBox="0 0 500 440" style="width:100%; max-width:420px; height:auto;"></svg>
           <div class="radar-legend">
             <div class="legend-item"><span class="legend-fill"></span> Nulmeting</div>
             <div class="legend-item"><span class="legend-dash"></span> Ambitie</div>
@@ -770,7 +770,7 @@
               <div class="pdf-score-box" id="pdf-scores"></div>
             </div>
             <div style="border:1px solid rgba(0,0,0,0.1);">
-              <svg id="radar-svg-pdf" viewBox="0 0 450 390" style="width:100%; height:auto;"></svg>
+              <svg id="radar-svg-pdf" viewBox="0 0 500 440" style="width:100%; height:auto;"></svg>
               <div class="radar-legend" style="padding:8px 14px;"><div class="legend-item"><span class="legend-fill"></span> Nulmeting</div><div class="legend-item"><span class="legend-dash"></span> Ambitie</div></div>
             </div>
           </div>
@@ -1806,7 +1806,7 @@ function renderAITable(data) {
       <td colspan="5" style="background:#FFF5F6; padding:14px;">
         <div class="expanded-grid">
           <div class="expanded-card"><div class="card-label">Huidig niveau</div><div id="ai-desc-h-${i}">${LEVEL_DESC[r.naam]?.[r.huidige_score]||''}</div></div>
-          <div class="expanded-card"><div class="card-label next">Volgende stap</div><div id="ai-desc-n-${i}">${r.huidige_score<4?LEVEL_DESC[r.naam]?.[r.huidige_score+1]||'':'Reeds op Leading-niveau.'}</div></div>
+          <div class="expanded-card"><div class="card-label next">Volgende stap</div><div id="ai-desc-n-${i}">${r.huidige_score<MAX_SCORE?LEVEL_DESC[r.naam]?.[r.huidige_score+1]||'':'Reeds op Leading-niveau.'}</div></div>
         </div>
       </td>
     </tr>`).join('');
@@ -1830,7 +1830,7 @@ function updateAIScore(i, field, val) {
     const hEl = document.getElementById(`ai-desc-h-${i}`);
     const nEl = document.getElementById(`ai-desc-n-${i}`);
     if (hEl) hEl.textContent = LEVEL_DESC[r.naam]?.[r.huidige_score] || '';
-    if (nEl) nEl.textContent = r.huidige_score < 4 ? LEVEL_DESC[r.naam]?.[r.huidige_score+1] || '' : 'Reeds op Leading-niveau.';
+    if (nEl) nEl.textContent = r.huidige_score < MAX_SCORE ? LEVEL_DESC[r.naam]?.[r.huidige_score+1] || '' : 'Reeds op Leading-niveau.';
   }
 }
 
@@ -1844,23 +1844,13 @@ function applyAIScores() {
 // DEMO DATA
 // ============================================================
 function loadDemoData() {
-  const demo = [
-    { naam:'Data Governance', domein:'Data Management', huidige_score:2, ambitie_score:3, toelichting:'Rollen en verantwoordelijkheden zijn ad-hoc belegd; business toont beperkte betrokkenheid.' },
-    { naam:'Data Quality', domein:'Data Management', huidige_score:1, ambitie_score:3, toelichting:'Kwaliteitsproblemen worden reactief gecorrigeerd zodra rapportages fouten vertonen.' },
-    { naam:'Metadata Management', domein:'Data Management', huidige_score:1, ambitie_score:2, toelichting:'Kennis over bronbestanden is niet gecentraliseerd en berust op individuen.' },
-    { naam:'Data Security', domein:'Data Management', huidige_score:3, ambitie_score:4, toelichting:'Toegangsbeheer is rolgebaseerd ingericht; AVG-richtlijnen worden nageleefd.' },
-    { naam:'Data Storage & Operations', domein:'Data Management', huidige_score:2, ambitie_score:3, toelichting:'Lokale servers met handmatige back-ups; capaciteitslimieten worden regelmatig bereikt.' },
-    { naam:'Reference & Master Data Management', domein:'Data Management', huidige_score:1, ambitie_score:2, toelichting:'Meerdere inconsistente versies van stamdata in omloop over afdelingen.' },
-    { naam:'Data Integration & Interoperability', domein:'Data Management', huidige_score:2, ambitie_score:3, toelichting:'Koppelingen zijn voornamelijk point-to-point scripts en handmatige downloads.' },
-    { naam:'Data Modeling & Design', domein:'Data Management', huidige_score:2, ambitie_score:3, toelichting:'Datamodellen worden ad-hoc per applicatie ontworpen zonder overkoepelend referentiemodel.' },
-    { naam:'Data Warehousing & Business Intelligence', domein:'Data Management', huidige_score:2, ambitie_score:3, toelichting:'Dashboards direct gekoppeld aan operationele database; trage performance.' },
-    { naam:'Data Ethiek', domein:'Datageletterdheid', huidige_score:1, ambitie_score:2, toelichting:'Ethiek en verantwoord datagebruik worden niet expliciet getoetst bij initiatieven.' },
-    { naam:'Communicatie & Training', domein:'Datageletterdheid', huidige_score:1, ambitie_score:3, toelichting:'Geen actieve trainingsprogramma\'s om datagebruik te stimuleren bij de business.' },
-    { naam:'Wervingsstrategie', domein:'Datageletterdheid', huidige_score:2, ambitie_score:3, toelichting:'Data-gerelateerde vacatures worden ad-hoc uitgezet; focus op traditionele IT-profielen.' },
-    { naam:'Data Leiderschap', domein:'Datageletterdheid', huidige_score:1, ambitie_score:3, toelichting:'Besluitvorming vindt primair plaats op basis van ervaring en intuïtie.' },
-    { naam:'Talent & Cultuur', domein:'Talent & Cultuur', huidige_score:2, ambitie_score:3, toelichting:'Medewerkers zijn nieuwsgierig maar drempels in tool-toegang remmen exploratie.' },
-    { naam:'Rapportage & Visualisatie', domein:'Strategie & Output', huidige_score:2, ambitie_score:4, toelichting:'Merendeel van rapportages is statisch (Excel/PDF) met veel handmatige bewerkingstijd.' },
-  ];
+  const demo = CAPABILITIES.map(c => ({
+    naam: c.naam,
+    domein: c.domein,
+    huidige_score: Math.floor(Math.random() * 3) + 1,
+    ambitie_score: Math.floor(Math.random() * 2) + 3,
+    toelichting: ''
+  }));
   setScores(demo);
   goToDashboard();
 }
@@ -1917,10 +1907,11 @@ function updateMeta() {
 // MATURITY HELPERS
 // ============================================================
 function getMaturityInfo(score) {
-  if (score < 1.75) return { label:'Basic "Survive"', color:'#8B0000' };
-  if (score < 2.75) return { label:'Moderate "Maintain"', color:'#F5A623' };
-  if (score < 3.75) return { label:'Advanced "Build"', color:'#C8102E' };
-  return { label:'Leading "Evolve"', color:'#2E7D32' };
+  if (score < 1.5) return { label:'Basic "Survive"', color:'#8B0000' };
+  if (score < 2.5) return { label:'Developing "Maintain"', color:'#F5A623' };
+  if (score < 3.5) return { label:'Moderate "Stabilize"', color:'#C8102E' };
+  if (score < 4.5) return { label:'Advanced "Build"', color:'#2E7D32' };
+  return { label:'Leading "Evolve"', color:'#1565C0' };
 }
 
 function getPriorityEl(gap) {
@@ -1966,7 +1957,7 @@ function renderDashboard() {
 function renderRadar(svgId) {
   const svg = document.getElementById(svgId);
   if (!svg || !scores) return;
-  const W=450, H=390, cx=225, cy=185, R=130;
+  const W=500, H=440, cx=250, cy=210, R=130;
   const domainAvg = {};
   DOMAINS.forEach(d => {
     const ds = scores.filter(s=>s.domein===d);
@@ -1975,7 +1966,8 @@ function renderRadar(svgId) {
       a: ds.length ? ds.reduce((s,r)=>s+r.ambitie_score,0)/ds.length : 1,
     };
   });
-  const angles = { 'Data Management':-Math.PI/2, 'Datageletterdheid':0, 'Talent & Cultuur':Math.PI/2, 'Strategie & Output':Math.PI };
+  const angles = {};
+  DOMAINS.forEach((d, i) => { angles[d] = -Math.PI/2 + (2*Math.PI*i/DOMAINS.length); });
   const pt = (d,v) => {
     const r = (Math.max(1,Math.min(MAX_SCORE,v))/MAX_SCORE)*R;
     return { x: cx+r*Math.cos(angles[d]), y: cy+r*Math.sin(angles[d]) };
@@ -1988,11 +1980,11 @@ function renderRadar(svgId) {
   });
   // Axis lines
   DOMAINS.forEach(d => {
-    const p=pt(d,4); html+=`<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="#E5E5E5" stroke-width="1.5" stroke-dasharray="3,3"/>`;
+    const p=pt(d,MAX_SCORE); html+=`<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="#E5E5E5" stroke-width="1.5" stroke-dasharray="3,3"/>`;
   });
   // Level labels
   Array.from({length:MAX_SCORE},(_,i)=>i+1).forEach(lvl => {
-    const p=pt('Data Management',lvl);
+    const p=pt(DOMAINS[0],lvl);
     html+=`<rect x="${p.x-10}" y="${p.y-8}" width="20" height="14" fill="white" opacity="0.9"/>`;
     html+=`<text x="${p.x}" y="${p.y+4}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="#999" font-weight="600">${lvl}</text>`;
   });
@@ -2009,16 +2001,15 @@ function renderRadar(svgId) {
     html+=`<rect x="${na.x-4}" y="${na.y-4}" width="8" height="8" fill="#1A1A1A" stroke="white" stroke-width="1.5" transform="rotate(45,${na.x},${na.y})"/>`;
   });
   // Labels
-  const labelOff = {
-    'Data Management': { x:cx, y:cy-R-22, anchor:'middle' },
-    'Datageletterdheid': { x:cx+R+16, y:cy+4, anchor:'start' },
-    'Talent & Cultuur': { x:cx, y:cy+R+28, anchor:'middle' },
-    'Strategie & Output': { x:cx-R-16, y:cy+4, anchor:'end' },
-  };
   DOMAINS.forEach(d => {
-    const o=labelOff[d];
-    html+=`<text x="${o.x}" y="${o.y}" text-anchor="${o.anchor}" font-size="11" font-family="Inter,sans-serif" font-weight="700" fill="#1A1A1A">${d}</text>`;
-    html+=`<text x="${o.x}" y="${o.y+14}" text-anchor="${o.anchor}" font-size="9" font-family="JetBrains Mono,monospace" fill="#888">H:${domainAvg[d].h.toFixed(1)} | A:${domainAvg[d].a.toFixed(1)}</text>`;
+    const a = angles[d];
+    const margin = 20;
+    const lx = cx + (R + margin) * Math.cos(a);
+    const ly = cy + (R + margin) * Math.sin(a);
+    const anchor = Math.abs(Math.cos(a)) < 0.3 ? 'middle' : (Math.cos(a) > 0 ? 'start' : 'end');
+    const yAdj = Math.sin(a) > 0.3 ? 14 : (Math.sin(a) < -0.3 ? -6 : 4);
+    html+=`<text x="${lx}" y="${ly+yAdj}" text-anchor="${anchor}" font-size="11" font-family="Inter,sans-serif" font-weight="700" fill="#1A1A1A">${d}</text>`;
+    html+=`<text x="${lx}" y="${ly+yAdj+14}" text-anchor="${anchor}" font-size="9" font-family="JetBrains Mono,monospace" fill="#888">H:${domainAvg[d].h.toFixed(1)} | A:${domainAvg[d].a.toFixed(1)}</text>`;
   });
   svg.innerHTML = html;
 }
@@ -2047,7 +2038,7 @@ function renderGapTable() {
   tbody.innerHTML = sorted.map((r, visIdx) => {
     const gap = r.ambitie_score - r.huidige_score;
     const hDesc = LEVEL_DESC[r.naam]?.[r.huidige_score] || '';
-    const nDesc = r.huidige_score < 4 ? LEVEL_DESC[r.naam]?.[r.huidige_score+1] || '' : 'Reeds op het hoogste niveau (Leading).';
+    const nDesc = r.huidige_score < MAX_SCORE ? LEVEL_DESC[r.naam]?.[r.huidige_score+1] || '' : 'Reeds op het hoogste niveau (Leading).';
     const rowId = `gap-row-${r.naam.replace(/[^a-z]/gi,'_')}`;
     const expId = `gap-exp-${r.naam.replace(/[^a-z]/gi,'_')}`;
     return `
@@ -2073,7 +2064,7 @@ function renderGapTable() {
       <td colspan="6" style="background:#FFF5F6; padding:14px;">
         <div class="expanded-grid">
           <div class="expanded-card"><div class="card-label">Huidig niveau: ${MATURITY_LEVELS[r.huidige_score]}</div><div>${hDesc}</div></div>
-          <div class="expanded-card" style="border-left:2px solid var(--red);"><div class="card-label next">Volgende stap: ${r.huidige_score<4?MATURITY_LEVELS[r.huidige_score+1]:'Leading'}</div><div style="font-style:italic;">${nDesc}</div></div>
+          <div class="expanded-card" style="border-left:2px solid var(--red);"><div class="card-label next">Volgende stap: ${r.huidige_score<MAX_SCORE?MATURITY_LEVELS[r.huidige_score+1]:'Leading'}</div><div style="font-style:italic;">${nDesc}</div></div>
         </div>
         ${r.toelichting ? `<div style="margin-top:10px; background:white; border:1px solid rgba(0,0,0,0.08); padding:10px;">
           <div class="label" style="margin-bottom:4px;">Consultant toelichting</div>
@@ -2158,7 +2149,7 @@ function renderExport() {
 
   document.getElementById('pdf-roadmap').innerHTML = scores.filter(s=>s.ambitie_score>s.huidige_score).map(r => {
     const dH = LEVEL_DESC[r.naam]?.[r.huidige_score] || '';
-    const dN = r.huidige_score<4 ? LEVEL_DESC[r.naam]?.[r.huidige_score+1]||'' : '';
+    const dN = r.huidige_score<MAX_SCORE ? LEVEL_DESC[r.naam]?.[r.huidige_score+1]||'' : '';
     return `<div class="pdf-roadmap-item">
       <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding-bottom:6px;margin-bottom:8px;">
         <strong style="font-size:12px;">${r.naam}</strong>
@@ -2730,7 +2721,7 @@ function buildComparisonHTML(scanA, scanB, labelA, labelB, radarId) {
     <div class="grid-2" style="margin-bottom:20px;">
       <div class="compare-radar-card">
         <div class="radar-title">Vergelijkingsradar</div>
-        <svg id="${radarId}" viewBox="0 0 450 390" style="width:100%; max-width:420px; height:auto;"></svg>
+        <svg id="${radarId}" viewBox="0 0 500 440" style="width:100%; max-width:420px; height:auto;"></svg>
         <div class="compare-legend">
           <div class="legend-item"><span style="width:16px; height:3px; background:var(--red); display:inline-block;"></span> ${labelA}</div>
           <div class="legend-item"><span style="width:16px; height:3px; background:var(--green); display:inline-block;"></span> ${labelB}</div>
@@ -2791,8 +2782,9 @@ function buildComparisonHTML(scanA, scanB, labelA, labelB, radarId) {
 function renderCompareRadar(scanA, scanB, svgId) {
   const svg = document.getElementById(svgId || 'compare-radar-svg');
   if (!svg) return;
-  const cx = 225, cy = 185, R = 130;
-  const angles = { 'Data Management': -Math.PI/2, 'Datageletterdheid': 0, 'Talent & Cultuur': Math.PI/2, 'Strategie & Output': Math.PI };
+  const cx = 250, cy = 210, R = 130;
+  const angles = {};
+  DOMAINS.forEach((d, i) => { angles[d] = -Math.PI/2 + (2*Math.PI*i/DOMAINS.length); });
   const pt = (d, v) => {
     const r = (Math.max(1, Math.min(MAX_SCORE, v)) / MAX_SCORE) * R;
     return { x: cx + r * Math.cos(angles[d]), y: cy + r * Math.sin(angles[d]) };
@@ -2811,16 +2803,16 @@ function renderCompareRadar(scanA, scanB, svgId) {
   const avgB = domAvg(scanB.scores);
 
   let html = '';
-  [1, 2, 3, 4].forEach(lvl => {
+  Array.from({length:MAX_SCORE},(_,i)=>i+1).forEach(lvl => {
     const pts = DOMAINS.map(d => { const p = pt(d, lvl); return `${p.x},${p.y}`; }).join(' ');
     html += `<polygon points="${pts}" fill="none" stroke="#E5E5E5" stroke-width="1"/>`;
   });
   DOMAINS.forEach(d => {
-    const p = pt(d, 4);
+    const p = pt(d, MAX_SCORE);
     html += `<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="#E5E5E5" stroke-width="1.5" stroke-dasharray="3,3"/>`;
   });
-  [1, 2, 3, 4].forEach(lvl => {
-    const p = pt('Data Management', lvl);
+  Array.from({length:MAX_SCORE},(_,i)=>i+1).forEach(lvl => {
+    const p = pt(DOMAINS[0], lvl);
     html += `<rect x="${p.x-10}" y="${p.y-8}" width="20" height="14" fill="white" opacity="0.9"/>`;
     html += `<text x="${p.x}" y="${p.y+4}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="#999" font-weight="600">${lvl}</text>`;
   });
@@ -2837,15 +2829,14 @@ function renderCompareRadar(scanA, scanB, svgId) {
     html += `<circle cx="${nb.x}" cy="${nb.y}" r="4" fill="#2E7D32" stroke="white" stroke-width="1.5"/>`;
   });
 
-  const labelOff = {
-    'Data Management': { x: cx, y: cy - R - 22, anchor: 'middle' },
-    'Datageletterdheid': { x: cx + R + 16, y: cy + 4, anchor: 'start' },
-    'Talent & Cultuur': { x: cx, y: cy + R + 28, anchor: 'middle' },
-    'Strategie & Output': { x: cx - R - 16, y: cy + 4, anchor: 'end' },
-  };
   DOMAINS.forEach(d => {
-    const o = labelOff[d];
-    html += `<text x="${o.x}" y="${o.y}" text-anchor="${o.anchor}" font-size="11" font-family="Inter,sans-serif" font-weight="700" fill="#1A1A1A">${d}</text>`;
+    const a = angles[d];
+    const margin = 20;
+    const lx = cx + (R + margin) * Math.cos(a);
+    const ly = cy + (R + margin) * Math.sin(a);
+    const anchor = Math.abs(Math.cos(a)) < 0.3 ? 'middle' : (Math.cos(a) > 0 ? 'start' : 'end');
+    const yAdj = Math.sin(a) > 0.3 ? 14 : (Math.sin(a) < -0.3 ? -6 : 4);
+    html += `<text x="${lx}" y="${ly+yAdj}" text-anchor="${anchor}" font-size="11" font-family="Inter,sans-serif" font-weight="700" fill="#1A1A1A">${d}</text>`;
   });
 
   svg.innerHTML = html;
