@@ -295,31 +295,33 @@
     .source-remove:hover { background: #FFF5F6; border-color: var(--red); }
     .source-count-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; background: var(--gray-bg); border: 1px solid var(--gray-border); color: #555; text-transform: uppercase; letter-spacing: 0.06em; }
 
-    /* Capabilities Editor */
-    .cap-editor-list { display: flex; flex-direction: column; gap: 8px; }
-    .cap-editor-row { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: white; border: 1px solid var(--gray-border); font-size: 12px; }
-    .cap-editor-row:hover { border-color: #bbb; }
-    .cap-editor-row input[type="text"] { border: 1px solid #ddd; padding: 5px 8px; font-size: 11px; font-family: inherit; flex: 1; }
-    .cap-editor-row input[type="text"]:focus { border-color: var(--red); outline: none; }
-    .cap-editor-row select { border: 1px solid #ddd; padding: 5px 8px; font-size: 11px; font-family: inherit; min-width: 150px; }
-    .cap-editor-row select:focus { border-color: var(--red); outline: none; }
-    .cap-editor-actions { display: flex; gap: 4px; flex-shrink: 0; }
-    .cap-editor-btn { padding: 4px 10px; font-size: 10px; font-weight: 700; border: 1px solid #ddd; background: white; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; }
-    .cap-editor-btn:hover { border-color: #999; }
-    .cap-editor-btn.danger { color: var(--red); border-color: rgba(200,16,46,0.3); }
-    .cap-editor-btn.danger:hover { background: #FFF5F6; border-color: var(--red); }
-    .cap-level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
-    .cap-level-item { padding: 8px; background: var(--gray-bg); border: 1px solid var(--gray-border); }
-    .cap-level-item .label { font-size: 9px; margin-bottom: 4px; }
-    .cap-level-item textarea { width: 100%; min-height: 50px; font-size: 11px; font-family: inherit; line-height: 1.5; border: 1px solid #ddd; padding: 6px; resize: vertical; }
-    .cap-level-item textarea:focus { border-color: var(--red); outline: none; }
-    .cap-expand-body { border-top: 1px solid var(--gray-border); padding: 12px; background: var(--gray-bg); display: none; }
-    .cap-expand-body.open { display: block; }
-    .domain-tag { display: inline-block; padding: 2px 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; border-radius: 2px; background: #f0f0f0; color: #666; }
-    .cap-domain-section { margin-bottom: 16px; }
-    .cap-domain-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--red); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 2px solid var(--red); }
-    .cap-editor-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-    .template-info-box { background: #f8f8f8; border: 1px solid var(--gray-border); padding: 12px; margin-bottom: 16px; font-size: 11px; line-height: 1.7; color: #555; }
+    /* Framework Editor */
+    .fw-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .fw-table th { background: var(--black); color: white; padding: 8px 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; text-align: left; position: sticky; top: 0; }
+    .fw-table td { padding: 6px 8px; border-bottom: 1px solid var(--gray-border); vertical-align: top; }
+    .fw-table tr:hover td { background: #f8f8f8; }
+    .fw-table input[type="text"], .fw-table select { border: 1px solid transparent; padding: 4px 6px; font-size: 11px; font-family: inherit; background: transparent; width: 100%; }
+    .fw-table input[type="text"]:hover, .fw-table select:hover { border-color: #ddd; }
+    .fw-table input[type="text"]:focus, .fw-table select:focus { border-color: var(--red); outline: none; background: white; }
+    .fw-table .row-delete { opacity: 0; transition: opacity 0.1s; padding: 3px 8px; font-size: 14px; color: #ccc; border: none; background: none; cursor: pointer; }
+    .fw-table tr:hover .row-delete { opacity: 1; color: var(--red); }
+    .fw-domain-chip { display: inline-block; padding: 2px 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; background: var(--gray-bg); border: 1px solid var(--gray-border); color: #666; }
+    .fw-toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .fw-stats { background: var(--gray-bg); border: 1px solid var(--gray-border); padding: 10px 14px; margin-bottom: 12px; font-size: 11px; color: #555; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .fw-generate-area { background: var(--gray-bg); border: 1px solid var(--gray-border); padding: 16px; margin-bottom: 16px; }
+    .fw-generate-area textarea { width: 100%; min-height: 60px; font-size: 11px; font-family: inherit; line-height: 1.6; border: 1px solid #ddd; padding: 8px; resize: vertical; margin-top: 8px; }
+    .fw-generate-area textarea:focus { border-color: var(--red); outline: none; }
+    /* Questionnaire editor */
+    .q-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .q-table th { background: var(--red); color: white; padding: 8px 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; text-align: left; }
+    .q-table td { padding: 5px 8px; border-bottom: 1px solid var(--gray-border); vertical-align: top; }
+    .q-table tr:hover td { background: #f8f8f8; }
+    .q-table input[type="text"] { border: 1px solid transparent; padding: 3px 6px; font-size: 11px; font-family: inherit; background: transparent; width: 100%; }
+    .q-table input[type="text"]:hover { border-color: #ddd; }
+    .q-table input[type="text"]:focus { border-color: var(--red); outline: none; background: white; }
+    .q-table .row-delete { opacity: 0; transition: opacity 0.1s; padding: 2px 6px; font-size: 13px; color: #ccc; border: none; background: none; cursor: pointer; }
+    .q-table tr:hover .row-delete { opacity: 1; color: var(--red); }
+    .q-domain-group { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--red); background: #FFF5F6; padding: 8px 10px; border-bottom: 2px solid var(--red); }
 
     @media (max-width: 768px) {
       .dashboard-top { grid-template-columns: 1fr; }
@@ -507,23 +509,70 @@
       </div>
     </div>
 
-    <!-- TAB C: Capabilities Editor -->
+    <!-- TAB C: Framework -->
     <div id="sub-editor" class="sub-content" style="display:none;">
+      <!-- AI Framework Generator -->
       <div class="card" style="margin-top:0; border-top:none;">
-        <div class="label" style="margin-bottom:8px;">Scan-framework beheren</div>
-        <div style="font-size:11px; color:#555; margin-bottom:12px; line-height:1.6;">Pas capabilities, domeinen en niveaubeschrijvingen aan. Wijzigingen worden bewaard in uw browser.</div>
-        <div class="cap-editor-toolbar">
-          <button class="btn btn-red" onclick="addCapability()">+ Capability</button>
-          <button class="btn btn-outline" onclick="addDomain()">+ Domein</button>
-          <button class="btn btn-outline" onclick="saveAsDefaultFramework()">Als standaard opslaan</button>
-          <button class="btn btn-outline" onclick="resetCapabilitiesToDefaults()">Standaard herstellen</button>
-          <button class="btn btn-outline" id="factory-reset-btn" onclick="factoryResetFramework()" style="display:none;">Fabrieksinstellingen</button>
-          <button class="btn btn-outline" onclick="exportCapabilitiesJSON()">Exporteren</button>
-          <input type="file" id="import-caps-input" accept=".json" style="display:none;" onchange="importCapabilitiesJSON(event)" />
-          <button class="btn btn-outline" onclick="document.getElementById('import-caps-input').click()">Importeren</button>
+        <div class="label" style="margin-bottom:8px;">Framework opzetten met AI</div>
+        <div style="font-size:11px; color:#555; margin-bottom:8px; line-height:1.6;">Beschrijf het thema en de context. AI genereert capabilities, domeinen en niveaubeschrijvingen.</div>
+        <textarea id="fw-context-input" rows="3" style="resize:vertical; font-size:12px; line-height:1.6;" placeholder="Optioneel: beschrijf de context, doelgroep of specifieke aandachtspunten voor het framework..."></textarea>
+        <div style="display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap;">
+          <button class="btn btn-red" id="fw-generate-btn" onclick="generateFrameworkAI()">Framework genereren</button>
+          <div class="label" id="fw-generate-status" style="display:none;"></div>
         </div>
-        <div class="template-info-box" id="cap-editor-stats"></div>
-        <div id="cap-editor-container"></div>
+        <div class="error-msg" id="fw-generate-error" style="display:none;"></div>
+      </div>
+
+      <!-- Framework Table -->
+      <div style="margin-top:16px;">
+        <div class="fw-stats" id="fw-stats"></div>
+        <div class="fw-toolbar">
+          <button class="btn btn-outline" onclick="addCapability()" style="font-size:10px;">+ Capability</button>
+          <button class="btn btn-outline" onclick="addDomain()" style="font-size:10px;">+ Domein</button>
+          <button class="btn btn-outline" onclick="saveAsDefaultFramework()" style="font-size:10px;">Als standaard opslaan</button>
+          <button class="btn btn-outline" onclick="resetCapabilitiesToDefaults()" style="font-size:10px;">Standaard herstellen</button>
+          <button class="btn btn-outline" id="factory-reset-btn" onclick="factoryResetFramework()" style="display:none; font-size:10px;">Fabrieksinstellingen</button>
+          <button class="btn btn-outline" onclick="exportCapabilitiesJSON()" style="font-size:10px;">Exporteren</button>
+          <input type="file" id="import-caps-input" accept=".json" style="display:none;" onchange="importCapabilitiesJSON(event)" />
+          <button class="btn btn-outline" onclick="document.getElementById('import-caps-input').click()" style="font-size:10px;">Importeren</button>
+        </div>
+        <div class="table-wrap" style="max-height:500px; overflow-y:auto;">
+          <table class="fw-table" id="fw-table">
+            <thead><tr><th style="width:36px;"></th><th>Capability</th><th style="width:200px;">Domein</th><th style="width:36px;"></th></tr></thead>
+            <tbody id="fw-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Vragenlijst Generator -->
+      <div style="margin-top:24px; border-top:2px solid var(--black); padding-top:20px;">
+        <div class="label" style="margin-bottom:8px;">Vragenlijst genereren</div>
+        <div style="font-size:11px; color:#555; margin-bottom:12px; line-height:1.6;">AI maakt per capability 3-5 Likert-stellingen (schaal 1-5). Pas de stellingen aan en download als Excel voor respondenten.</div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <button class="btn btn-red" id="q-generate-btn" onclick="generateQuestionnaireAI()">Vragenlijst genereren</button>
+          <div class="label" id="q-generate-status" style="display:none;"></div>
+        </div>
+        <div class="error-msg" id="q-generate-error" style="display:none;"></div>
+      </div>
+
+      <!-- Questionnaire Editor -->
+      <div id="q-editor-container" style="display:none; margin-top:16px;">
+        <div class="flex items-center justify-between" style="margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+          <div>
+            <div class="section-title">Vragenlijst — bewerk voor download</div>
+            <div style="font-size:11px; color:#888; margin-top:4px;" id="q-stats"></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-outline" onclick="addQuestionRow()" style="font-size:10px;">+ Stelling toevoegen</button>
+            <button class="btn btn-red" onclick="downloadQuestionnaire()">Excel downloaden</button>
+          </div>
+        </div>
+        <div class="table-wrap" style="max-height:500px; overflow-y:auto;">
+          <table class="q-table" id="q-table">
+            <thead><tr><th style="width:36px;">Nr</th><th>Capability</th><th>Stelling</th><th style="width:36px;"></th></tr></thead>
+            <tbody id="q-tbody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -925,7 +974,7 @@ function switchSubTab(tab, e) {
   document.querySelectorAll('.sub-content').forEach(c => c.style.display = 'none');
   if (e && e.target) e.target.classList.add('active');
   document.getElementById('sub-' + tab).style.display = 'block';
-  if (tab === 'editor') renderCapEditor();
+  if (tab === 'editor') renderFrameworkTable();
 }
 
 // ============================================================
@@ -1006,12 +1055,14 @@ function exportScanAsTemplate() {
 }
 
 // ============================================================
-// CAPABILITIES EDITOR
+// FRAMEWORK EDITOR + QUESTIONNAIRE GENERATOR
 // ============================================================
-function renderCapEditor() {
-  const container = document.getElementById('cap-editor-container');
-  const stats = document.getElementById('cap-editor-stats');
-  if (!container) return;
+let generatedQuestions = [];
+
+function renderFrameworkTable() {
+  const tbody = document.getElementById('fw-tbody');
+  const stats = document.getElementById('fw-stats');
+  if (!tbody) return;
 
   const isCustom = !!localStorage.getItem('eiffel_custom_framework');
   const hasSavedDefault = !!localStorage.getItem('eiffel_saved_default_framework');
@@ -1019,55 +1070,24 @@ function renderCapEditor() {
   if (factoryBtn) factoryBtn.style.display = hasSavedDefault ? '' : 'none';
 
   let statusText = 'Standaard framework actief.';
-  if (isCustom && hasSavedDefault) statusText = '<span style="color:var(--red); font-weight:700;">Aangepast framework actief.</span> Eigen standaard opgeslagen — "Standaard herstellen" gaat terug naar uw opgeslagen versie.';
+  if (isCustom && hasSavedDefault) statusText = '<span style="color:var(--red); font-weight:700;">Aangepast.</span> Eigen standaard opgeslagen.';
   else if (isCustom) statusText = '<span style="color:var(--red); font-weight:700;">Aangepast framework actief.</span>';
-  else if (hasSavedDefault) statusText = 'Eigen standaard actief (opgeslagen via "Als standaard opslaan").';
+  else if (hasSavedDefault) statusText = 'Eigen standaard actief.';
 
-  stats.innerHTML = `<strong>${CAPABILITIES.length}</strong> capabilities in <strong>${DOMAINS.length}</strong> domeinen (${DOMAINS.join(', ')}). ${statusText}`;
+  if (stats) stats.innerHTML = `<strong>${CAPABILITIES.length}</strong> capabilities in <strong>${DOMAINS.length}</strong> domeinen (${DOMAINS.join(', ')}). ${statusText}`;
 
   let html = '';
-  DOMAINS.forEach(domain => {
-    const caps = CAPABILITIES.filter(c => c.domein === domain);
-    html += `<div class="cap-domain-section">
-      <div class="cap-domain-header">${domain} (${caps.length})</div>
-      <div class="cap-editor-list">`;
-    caps.forEach((cap, _) => {
-      const idx = CAPABILITIES.indexOf(cap);
-      const isExpanded = expandedEditorRows[cap.id];
-      html += `<div>
-        <div class="cap-editor-row">
-          <span style="font-weight:700; color:var(--red); min-width:40px; font-size:10px; font-family:'JetBrains Mono',monospace;">${cap.id}</span>
-          <input type="text" value="${cap.naam.replace(/"/g, '&quot;')}" onchange="updateCapName(${idx}, this.value)" style="flex:2;" />
-          <select onchange="updateCapDomain(${idx}, this.value)">
-            ${DOMAINS.map(d => `<option value="${d}" ${d === cap.domein ? 'selected' : ''}>${d}</option>`).join('')}
-          </select>
-          <div class="cap-editor-actions">
-            <button class="cap-editor-btn" onclick="toggleEditorExpand('${cap.id}')">${isExpanded ? '\u25BE' : '\u25B8'}</button>
-            <button class="cap-editor-btn danger" onclick="removeCapability(${idx})">\u00D7</button>
-          </div>
-        </div>
-        <div class="cap-expand-body ${isExpanded ? 'open' : ''}" id="cap-expand-${cap.id}">
-          <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#888; margin-bottom:8px;">Niveaubeschrijvingen \u2014 ${cap.naam}</div>
-          <div class="cap-level-grid">
-            ${[1,2,3,4].map(lvl => `<div class="cap-level-item">
-              <div class="label">Niveau ${lvl}: ${MATURITY_LEVELS[lvl]}</div>
-              <textarea onchange="updateCapLevelDesc('${cap.naam.replace(/'/g, "\\'")}', ${lvl}, this.value)">${(LEVEL_DESC[cap.naam] && LEVEL_DESC[cap.naam][lvl]) || ''}</textarea>
-            </div>`).join('')}
-          </div>
-        </div>
-      </div>`;
-    });
-    html += '</div></div>';
+  CAPABILITIES.forEach((cap, idx) => {
+    html += `<tr>
+      <td style="color:var(--red); font-weight:700; font-size:10px; font-family:'JetBrains Mono',monospace;">${idx + 1}</td>
+      <td><input type="text" value="${cap.naam.replace(/"/g, '&quot;')}" onchange="updateCapName(${idx}, this.value)" /></td>
+      <td><select onchange="updateCapDomain(${idx}, this.value)">
+        ${DOMAINS.map(d => `<option value="${d}" ${d === cap.domein ? 'selected' : ''}>${d}</option>`).join('')}
+      </select></td>
+      <td><button class="row-delete" onclick="removeCapability(${idx})">&times;</button></td>
+    </tr>`;
   });
-
-  container.innerHTML = html;
-}
-
-let expandedEditorRows = {};
-
-function toggleEditorExpand(capId) {
-  expandedEditorRows[capId] = !expandedEditorRows[capId];
-  renderCapEditor();
+  tbody.innerHTML = html;
 }
 
 function updateCapName(idx, newName) {
@@ -1080,30 +1100,23 @@ function updateCapName(idx, newName) {
   }
   CAPABILITIES[idx].naam = newName;
   saveCustomFramework();
-  renderCapEditor();
 }
 
 function updateCapDomain(idx, newDomain) {
   CAPABILITIES[idx].domein = newDomain;
   saveCustomFramework();
-  renderCapEditor();
-}
-
-function updateCapLevelDesc(capName, level, text) {
-  if (!LEVEL_DESC[capName]) LEVEL_DESC[capName] = {};
-  LEVEL_DESC[capName][level] = text.trim();
-  saveCustomFramework();
 }
 
 function addCapability() {
   const id = 'c' + Date.now().toString(36).slice(-4);
-  const naam = 'Nieuwe Capability';
-  const domein = DOMAINS[0] || 'Onbekend';
-  CAPABILITIES.push({ id, naam, domein });
-  LEVEL_DESC[naam] = { 1: '', 2: '', 3: '', 4: '' };
-  expandedEditorRows[id] = true;
+  CAPABILITIES.push({ id, naam: 'Nieuwe Capability', domein: DOMAINS[0] || 'Onbekend' });
   saveCustomFramework();
-  renderCapEditor();
+  renderFrameworkTable();
+  const tbody = document.getElementById('fw-tbody');
+  if (tbody && tbody.lastElementChild) {
+    const input = tbody.lastElementChild.querySelector('input');
+    if (input) { input.focus(); input.select(); }
+  }
 }
 
 function removeCapability(idx) {
@@ -1112,7 +1125,7 @@ function removeCapability(idx) {
   delete LEVEL_DESC[cap.naam];
   CAPABILITIES.splice(idx, 1);
   saveCustomFramework();
-  renderCapEditor();
+  renderFrameworkTable();
 }
 
 function addDomain() {
@@ -1122,15 +1135,15 @@ function addDomain() {
   if (DOMAINS.includes(trimmed)) { alert('Dit domein bestaat al.'); return; }
   DOMAINS.push(trimmed);
   saveCustomFramework();
-  renderCapEditor();
+  renderFrameworkTable();
 }
 
 function saveAsDefaultFramework() {
-  if (!confirm('Huidig framework opslaan als uw standaardtemplate? "Standaard herstellen" zal voortaan naar deze versie terugkeren.')) return;
+  if (!confirm('Huidig framework opslaan als uw standaardtemplate?')) return;
   localStorage.setItem('eiffel_saved_default_framework', JSON.stringify({ capabilities: CAPABILITIES, domains: DOMAINS, levelDesc: LEVEL_DESC }));
   localStorage.removeItem('eiffel_custom_framework');
-  showAutosaveIndicator('★ Opgeslagen als standaard');
-  renderCapEditor();
+  showAutosaveIndicator('Opgeslagen als standaard');
+  renderFrameworkTable();
 }
 
 function resetCapabilitiesToDefaults() {
@@ -1143,20 +1156,18 @@ function resetCapabilitiesToDefaults() {
   defaults.domains.forEach(d => DOMAINS.push(d));
   LEVEL_DESC = JSON.parse(JSON.stringify(defaults.levelDesc));
   localStorage.removeItem('eiffel_custom_framework');
-  expandedEditorRows = {};
-  renderCapEditor();
+  renderFrameworkTable();
 }
 
 function factoryResetFramework() {
-  if (!confirm('Alles terugzetten naar de originele fabrieksinstellingen? Uw opgeslagen standaard en alle aanpassingen worden verwijderd.')) return;
+  if (!confirm('Alles terugzetten naar de originele fabrieksinstellingen?')) return;
   CAPABILITIES = JSON.parse(JSON.stringify(DEFAULT_CAPABILITIES));
   DOMAINS.length = 0;
   DEFAULT_DOMAINS.forEach(d => DOMAINS.push(d));
   LEVEL_DESC = JSON.parse(JSON.stringify(DEFAULT_LEVEL_DESC));
   localStorage.removeItem('eiffel_custom_framework');
   localStorage.removeItem('eiffel_saved_default_framework');
-  expandedEditorRows = {};
-  renderCapEditor();
+  renderFrameworkTable();
 }
 
 function exportCapabilitiesJSON() {
@@ -1176,8 +1187,8 @@ function importCapabilitiesJSON(e) {
   reader.onload = ev => {
     try {
       const fw = JSON.parse(ev.target.result);
-      if (!fw.capabilities || !Array.isArray(fw.capabilities)) throw new Error('Ongeldig framework: geen capabilities.');
-      if (!fw.domains || !Array.isArray(fw.domains)) throw new Error('Ongeldig framework: geen domeinen.');
+      if (!fw.capabilities || !Array.isArray(fw.capabilities)) throw new Error('Ongeldig framework.');
+      if (!fw.domains || !Array.isArray(fw.domains)) throw new Error('Ongeldig framework.');
       CAPABILITIES.length = 0;
       fw.capabilities.forEach(c => CAPABILITIES.push(c));
       DOMAINS.length = 0;
@@ -1185,15 +1196,188 @@ function importCapabilitiesJSON(e) {
       Object.keys(LEVEL_DESC).forEach(k => delete LEVEL_DESC[k]);
       if (fw.levelDesc) Object.assign(LEVEL_DESC, fw.levelDesc);
       saveCustomFramework();
-      expandedEditorRows = {};
-      renderCapEditor();
-      showAutosaveIndicator('\u2713 Framework ge\u00EFmporteerd');
+      renderFrameworkTable();
+      showAutosaveIndicator('Framework geimporteerd');
     } catch (err) {
       alert('Fout bij importeren: ' + err.message);
     }
     e.target.value = '';
   };
   reader.readAsText(file);
+}
+
+async function generateFrameworkAI() {
+  const apiKey = localStorage.getItem('eiffel_anthropic_key');
+  if (!apiKey) { alert('Stel eerst een Anthropic API-key in via het AI-tabblad.'); return; }
+  if (!scanThema || !scanThema.trim()) { alert('Stel eerst een scanthema in.'); return; }
+
+  const btn = document.getElementById('fw-generate-btn');
+  const status = document.getElementById('fw-generate-status');
+  const errorEl = document.getElementById('fw-generate-error');
+  const context = document.getElementById('fw-context-input')?.value || '';
+
+  btn.disabled = true;
+  btn.textContent = 'Genereren...';
+  status.style.display = ''; status.textContent = 'AI denkt na...';
+  errorEl.style.display = 'none';
+
+  const prompt = `Je bent een expert organisatieadviseur. Genereer een maturity-framework voor het thema: "${scanThema}".
+${context ? 'Extra context: ' + context : ''}
+
+Geef precies 15-25 capabilities verdeeld over 4-7 logische domeinen.
+Per capability geef een korte niveaubeschrijving voor niveau 1 t/m 4 (Basic/Moderate/Advanced/Leading).
+
+Antwoord ALLEEN met valid JSON in dit formaat:
+{
+  "capabilities": [{"id": "c01", "naam": "Naam", "domein": "Domein"}],
+  "domains": ["Domein1", "Domein2"],
+  "levelDesc": {"Naam": {"1": "...", "2": "...", "3": "...", "4": "..."}}
+}`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 4096, messages: [{ role: 'user', content: prompt }] })
+    });
+    if (!resp.ok) throw new Error(`API fout: ${resp.status}`);
+    const data = await resp.json();
+    const text = data.content[0].text;
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Geen geldig JSON in AI-antwoord.');
+    const fw = JSON.parse(jsonMatch[0]);
+
+    CAPABILITIES.length = 0;
+    fw.capabilities.forEach(c => CAPABILITIES.push(c));
+    DOMAINS.length = 0;
+    fw.domains.forEach(d => DOMAINS.push(d));
+    Object.keys(LEVEL_DESC).forEach(k => delete LEVEL_DESC[k]);
+    if (fw.levelDesc) Object.assign(LEVEL_DESC, fw.levelDesc);
+    saveCustomFramework();
+    renderFrameworkTable();
+    status.textContent = `${CAPABILITIES.length} capabilities in ${DOMAINS.length} domeinen gegenereerd.`;
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.style.display = '';
+    status.style.display = 'none';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Framework genereren';
+  }
+}
+
+async function generateQuestionnaireAI() {
+  const apiKey = localStorage.getItem('eiffel_anthropic_key');
+  if (!apiKey) { alert('Stel eerst een Anthropic API-key in via het AI-tabblad.'); return; }
+  if (CAPABILITIES.length === 0) { alert('Stel eerst een framework op.'); return; }
+
+  const btn = document.getElementById('q-generate-btn');
+  const status = document.getElementById('q-generate-status');
+  const errorEl = document.getElementById('q-generate-error');
+
+  btn.disabled = true;
+  btn.textContent = 'Genereren...';
+  status.style.display = ''; status.textContent = 'AI genereert stellingen...';
+  errorEl.style.display = 'none';
+
+  const capList = CAPABILITIES.map(c => `- ${c.naam} (${c.domein})`).join('\n');
+  const prompt = `Je bent een expert in maturity-assessments. Genereer een vragenlijst voor het thema "${scanThema}".
+
+Capabilities en domeinen:
+${capList}
+
+Maak per capability 3-5 stellingen die respondenten beoordelen op een Likert-schaal van 1 (Helemaal oneens) tot 5 (Helemaal eens).
+Stellingen moeten concreet, meetbaar en relevant zijn voor de dagelijkse praktijk.
+
+Antwoord ALLEEN met valid JSON array:
+[{"capability": "Naam", "stelling": "De stelling..."}]`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 4096, messages: [{ role: 'user', content: prompt }] })
+    });
+    if (!resp.ok) throw new Error(`API fout: ${resp.status}`);
+    const data = await resp.json();
+    const text = data.content[0].text;
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error('Geen geldig JSON in AI-antwoord.');
+    generatedQuestions = JSON.parse(jsonMatch[0]);
+    renderQuestionnaireEditor();
+    status.textContent = `${generatedQuestions.length} stellingen gegenereerd.`;
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.style.display = '';
+    status.style.display = 'none';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Vragenlijst genereren';
+  }
+}
+
+function renderQuestionnaireEditor() {
+  const container = document.getElementById('q-editor-container');
+  const tbody = document.getElementById('q-tbody');
+  const statsEl = document.getElementById('q-stats');
+  if (!container || !tbody) return;
+  container.style.display = '';
+
+  const capNames = [...new Set(generatedQuestions.map(q => q.capability))];
+  if (statsEl) statsEl.textContent = `${generatedQuestions.length} stellingen voor ${capNames.length} capabilities`;
+
+  let html = '';
+  generatedQuestions.forEach((q, idx) => {
+    html += `<tr>
+      <td style="color:#888; font-size:10px; font-family:'JetBrains Mono',monospace;">${idx + 1}</td>
+      <td style="font-size:11px; white-space:nowrap;">${q.capability}</td>
+      <td><input type="text" value="${q.stelling.replace(/"/g, '&quot;')}" onchange="generatedQuestions[${idx}].stelling=this.value" style="border:1px solid transparent; padding:4px 6px; font-size:11px; font-family:inherit; background:transparent; width:100%;" onfocus="this.style.borderColor='var(--red)';this.style.background='white'" onblur="this.style.borderColor='transparent';this.style.background='transparent'" /></td>
+      <td><button class="row-delete" onclick="generatedQuestions.splice(${idx},1);renderQuestionnaireEditor()">&times;</button></td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+function addQuestionRow() {
+  const cap = CAPABILITIES.length > 0 ? CAPABILITIES[0].naam : '';
+  generatedQuestions.push({ capability: cap, stelling: '' });
+  renderQuestionnaireEditor();
+  const tbody = document.getElementById('q-tbody');
+  if (tbody && tbody.lastElementChild) {
+    const input = tbody.lastElementChild.querySelector('input');
+    if (input) { input.focus(); }
+  }
+}
+
+function downloadQuestionnaire() {
+  if (generatedQuestions.length === 0) { alert('Genereer eerst een vragenlijst.'); return; }
+  const wb = XLSX.utils.book_new();
+
+  const instrRows = [
+    [`EIFFEL ${scanThema} - Vragenlijst`],
+    [],
+    ['Instructies voor respondenten:'],
+    ['Beoordeel elke stelling op een schaal van 1 tot 5:'],
+    ['1 = Helemaal oneens, 2 = Oneens, 3 = Neutraal, 4 = Eens, 5 = Helemaal eens'],
+    [],
+    ['Vul uw score in de kolom "Score (1-5)" in.'],
+    ['U kunt optioneel een toelichting geven.'],
+  ];
+  const wsInstr = XLSX.utils.aoa_to_sheet(instrRows);
+  wsInstr['!cols'] = [{ wch: 60 }];
+  XLSX.utils.book_append_sheet(wb, wsInstr, 'Instructies');
+
+  const header = ['Nr', 'Capability', 'Domein', 'Stelling', 'Score (1-5)', 'Toelichting'];
+  const rows = generatedQuestions.map((q, i) => {
+    const cap = CAPABILITIES.find(c => c.naam === q.capability);
+    return [i + 1, q.capability, cap ? cap.domein : '', q.stelling, '', ''];
+  });
+  const wsQ = XLSX.utils.aoa_to_sheet([header, ...rows]);
+  wsQ['!cols'] = [{ wch: 6 }, { wch: 30 }, { wch: 24 }, { wch: 60 }, { wch: 12 }, { wch: 40 }];
+  XLSX.utils.book_append_sheet(wb, wsQ, 'Vragenlijst');
+
+  const slug = scanThema.replace(/[^a-z0-9]/gi, '_') || 'MaturityScan';
+  XLSX.writeFile(wb, `EIFFEL_${slug}_Vragenlijst.xlsx`);
 }
 
 // ============================================================
