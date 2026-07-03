@@ -1,0 +1,34 @@
+Nr;Capability;Domein;Stelling;Score (1-5);Toelichting
+1;Tijdige Urenregistratie;Registratie & Invoer;Ik registreer mijn uren dagelijks of direct na afloop van werkzaamheden.;4;Ik registreer consequent
+2;Tijdige Urenregistratie;Registratie & Invoer;Er zijn duidelijke deadlines gecommuniceerd voor het indienen van uren.;4;Beleid is helder
+3;Tijdige Urenregistratie;Registratie & Invoer;Ik ervaar geen belemmeringen om mijn uren op tijd in te voeren.;4;Geen problemen vanuit kantoor
+4;Correctheid Urenboekingen;Registratie & Invoer;Ik weet altijd welke projectcode of kostenplaats ik moet gebruiken.;4;Ken mijn projecten goed
+5;Correctheid Urenboekingen;Registratie & Invoer;De uren die ik boek geven een accuraat beeld van mijn werkzaamheden.;4;Ik ben nauwkeurig
+6;Correctheid Urenboekingen;Registratie & Invoer;Ik controleer mijn boekingen voordat ik ze indien.;4;Altijd een check
+7;Onkostendeclaratie;Registratie & Invoer;Het declareren van onkosten is eenvoudig en kost weinig tijd.;3;Proces kan gestroomlijnder
+8;Onkostendeclaratie;Registratie & Invoer;Ik weet welke onkosten ik wel en niet mag declareren.;4;Duidelijk beleid
+9;Onkostendeclaratie;Registratie & Invoer;Mijn onkostendeclaraties worden binnen een redelijke termijn verwerkt.;3;Meestal snel maar soms vertraging
+10;Gebruiksvriendelijkheid Systemen;Systeem & Tooling;De systemen voor uren- en onkostenregistratie zijn intuïtief en gebruiksvriendelijk.;3;Op de laptop prima maar ik hoor klachten uit het veld
+11;Gebruiksvriendelijkheid Systemen;Systeem & Tooling;Ik kan de systemen probleemloos gebruiken op mijn telefoon of tablet.;3;Werkt voor mij maar is niet geoptimaliseerd
+12;Gebruiksvriendelijkheid Systemen;Systeem & Tooling;Het systeem biedt duidelijke foutmeldingen als ik iets verkeerd invoer.;2;Kan beter
+13;Systeemstabiliteit;Systeem & Tooling;De systemen zijn betrouwbaar en vallen zelden uit.;3;Incidenteel storingen
+14;Systeemstabiliteit;Systeem & Tooling;Ik kan eenvoudig correcties doorvoeren als ik een fout heb gemaakt.;3;Gaat wel maar niet handig
+15;Systeemstabiliteit;Systeem & Tooling;Mijn gegevens worden betrouwbaar opgeslagen en gaan niet verloren.;4;Geen problemen
+16;Goedkeuringsproces;Beoordeling & Goedkeuring;Mijn leidinggevende keurt mijn uren tijdig goed.;4;Ik keur zelf goed en doe dat snel
+17;Goedkeuringsproces;Beoordeling & Goedkeuring;Ik ontvang feedback als er iets niet klopt aan mijn registratie.;3;Administratie meldt het wel
+18;Goedkeuringsproces;Beoordeling & Goedkeuring;Het goedkeuringsproces is transparant en ik kan de status volgen.;3;Ik heb redelijk overzicht
+19;Kwaliteitscontrole;Beoordeling & Goedkeuring;Er zijn duidelijke controles om fouten in registraties te signaleren.;3;Steekproefsgewijs
+20;Kwaliteitscontrole;Beoordeling & Goedkeuring;Fouten worden tijdig gecorrigeerd zonder dat dit veel moeite kost.;3;Gaat redelijk
+21;Kwaliteitscontrole;Beoordeling & Goedkeuring;Er is een helder escalatiepad als ik het niet eens ben met een afkeuring.;3;Informeel geregeld
+22;Inzicht & Rapportage;Transparantie & Inzicht;Ik heb inzicht in mijn eigen geregistreerde uren en onkosten.;4;Goed overzicht
+23;Inzicht & Rapportage;Transparantie & Inzicht;Mijn team of afdeling heeft inzicht in gezamenlijke registratiecijfers.;3;Basis rapportages beschikbaar
+24;Inzicht & Rapportage;Transparantie & Inzicht;Management gebruikt registratiedata voor besluitvorming en sturing.;3;We gebruiken het maar het kan beter
+25;Communicatie & Instructies;Informatie & Communicatie;Instructies voor uren- en onkostenregistratie zijn duidelijk en actueel.;3;Bestaan maar zijn niet altijd up-to-date
+26;Communicatie & Instructies;Informatie & Communicatie;Wijzigingen in het proces worden tijdig en helder gecommuniceerd.;3;Via e-mail maar bereikt niet iedereen
+27;Communicatie & Instructies;Informatie & Communicatie;Ik weet bij wie ik terecht kan met vragen over registratie.;4;Administratie is helder aanspreekpunt
+28;Eigenaarschap & Bewustzijn;Eigenaarschap & Cultuur;Ik voel me persoonlijk verantwoordelijk voor correcte registratie.;4;Absoluut, het is belangrijk voor projectsturing
+29;Eigenaarschap & Bewustzijn;Eigenaarschap & Cultuur;Binnen mijn team is er een cultuur van zorgvuldige registratie.;3;Kantoorteam wel, buitendienst minder
+30;Eigenaarschap & Bewustzijn;Eigenaarschap & Cultuur;Fouten in registratie worden constructief besproken zonder verwijten.;4;We proberen een open cultuur te houden
+31;Procesafspraken & Naleving;Proces & Werkafspraken;De werkafspraken rondom registratie zijn helder en eenduidig.;4;Beleid is goed gedocumenteerd
+32;Procesafspraken & Naleving;Proces & Werkafspraken;Er wordt actief gestuurd op naleving van registratieafspraken.;3;Kan beter, te weinig consequenties
+33;Procesafspraken & Naleving;Proces & Werkafspraken;Nieuwe medewerkers worden goed ingewerkt op het registratieproces.;3;Onboarding kan gestructureerder

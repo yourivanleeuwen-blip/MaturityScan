@@ -1,0 +1,105 @@
+{
+  "version": "1.0",
+  "exportedAt": "2026-07-03T00:00:00.000Z",
+  "capabilities": [
+    {"id": "c01", "naam": "Tijdige Urenregistratie", "domein": "Registratie & Invoer"},
+    {"id": "c02", "naam": "Correctheid Urenboekingen", "domein": "Registratie & Invoer"},
+    {"id": "c03", "naam": "Onkostendeclaratie", "domein": "Registratie & Invoer"},
+    {"id": "c04", "naam": "Gebruiksvriendelijkheid Systemen", "domein": "Systeem & Tooling"},
+    {"id": "c05", "naam": "Systeemstabiliteit", "domein": "Systeem & Tooling"},
+    {"id": "c06", "naam": "Goedkeuringsproces", "domein": "Beoordeling & Goedkeuring"},
+    {"id": "c07", "naam": "Kwaliteitscontrole", "domein": "Beoordeling & Goedkeuring"},
+    {"id": "c08", "naam": "Inzicht & Rapportage", "domein": "Transparantie & Inzicht"},
+    {"id": "c09", "naam": "Communicatie & Instructies", "domein": "Informatie & Communicatie"},
+    {"id": "c10", "naam": "Eigenaarschap & Bewustzijn", "domein": "Eigenaarschap & Cultuur"},
+    {"id": "c11", "naam": "Procesafspraken & Naleving", "domein": "Proces & Werkafspraken"}
+  ],
+  "domains": [
+    "Registratie & Invoer",
+    "Systeem & Tooling",
+    "Beoordeling & Goedkeuring",
+    "Transparantie & Inzicht",
+    "Informatie & Communicatie",
+    "Eigenaarschap & Cultuur",
+    "Proces & Werkafspraken"
+  ],
+  "levelDesc": {
+    "Tijdige Urenregistratie": {
+      "1": "Geen structuur, uren worden weken later of niet geregistreerd",
+      "2": "Registratie gebeurt maar vaak te laat en na herinnering",
+      "3": "Meeste medewerkers registreren wekelijks, deadlines bekend",
+      "4": "Dagelijkse registratie is de norm, afwijkingen worden gesignaleerd",
+      "5": "Real-time registratie geïntegreerd in werkproces, volledig geautomatiseerd"
+    },
+    "Correctheid Urenboekingen": {
+      "1": "Codes onbekend, veel foutieve boekingen, geen controle",
+      "2": "Basiskennis van codes maar fouten komen regelmatig voor",
+      "3": "Meeste boekingen correct, codes beschikbaar maar niet altijd actueel",
+      "4": "Gestandaardiseerde codelijsten, structurele controle op correctheid",
+      "5": "Automatische validatie, voorspellende suggesties, minimale fouten"
+    },
+    "Onkostendeclaratie": {
+      "1": "Chaotisch proces, bonnen raken kwijt, regels onduidelijk",
+      "2": "Basisproces aanwezig maar omslachtig en tijdrovend",
+      "3": "Werkbaar proces, regels bekend, verwerkingstijd acceptabel",
+      "4": "Gestroomlijnd proces met digitale bonverwerking",
+      "5": "Volledig digitaal, automatische categorisatie en goedkeuring"
+    },
+    "Gebruiksvriendelijkheid Systemen": {
+      "1": "Systemen onbruikbaar voor eindgebruikers, veel klachten",
+      "2": "Systemen functioneel maar niet intuïtief, mobiel problematisch",
+      "3": "Bruikbaar op desktop, mobiel beperkt, basisfunctionaliteit voldoet",
+      "4": "Intuïtieve interface op alle apparaten, goede foutafhandeling",
+      "5": "Naadloze gebruikerservaring, contextuele hulp, personalisatie"
+    },
+    "Systeemstabiliteit": {
+      "1": "Frequente storingen, data-verlies, correcties onmogelijk",
+      "2": "Incidentele storingen, correcties alleen via administratie",
+      "3": "Stabiel systeem, correcties mogelijk maar omslachtig",
+      "4": "Betrouwbaar systeem, zelfservice correcties, goede logging",
+      "5": "Hoge beschikbaarheid, automatische foutdetectie en -herstel"
+    },
+    "Goedkeuringsproces": {
+      "1": "Geen of zeer trage goedkeuring, geen feedback",
+      "2": "Goedkeuring vindt plaats maar traag en zonder feedback",
+      "3": "Tijdige goedkeuring, basisfeedback bij afkeuring",
+      "4": "Gestructureerd proces met deadlines, feedback en statusoverzicht",
+      "5": "Geautomatiseerd met escalatie, real-time status en analytics"
+    },
+    "Kwaliteitscontrole": {
+      "1": "Geen controles, fouten worden niet gesignaleerd",
+      "2": "Ad-hoc controles, fouten worden laat ontdekt",
+      "3": "Structurele controles, correcties mogelijk maar tijdrovend",
+      "4": "Proactieve foutdetectie, eenvoudige correctieworkflow",
+      "5": "Automatische validatie, AI-gestuurde anomaliedetectie"
+    },
+    "Inzicht & Rapportage": {
+      "1": "Geen inzicht in eigen of teamregistratie",
+      "2": "Beperkt persoonlijk inzicht, geen teamoverzichten",
+      "3": "Persoonlijk overzicht beschikbaar, handmatige rapportages",
+      "4": "Team- en afdelingsoverzichten, gestandaardiseerde rapportages",
+      "5": "Real-time dashboards, predictive analytics, data-gedreven sturing"
+    },
+    "Communicatie & Instructies": {
+      "1": "Geen instructies, wijzigingen worden niet gecommuniceerd",
+      "2": "Instructies bestaan maar zijn verouderd, communicatie ad hoc",
+      "3": "Actuele instructies, wijzigingen gecommuniceerd maar bereik beperkt",
+      "4": "Rolgerichte instructies, proactieve communicatie via meerdere kanalen",
+      "5": "Contextuele in-app hulp, geautomatiseerde change-communicatie"
+    },
+    "Eigenaarschap & Bewustzijn": {
+      "1": "Geen verantwoordelijkheidsgevoel, registratie als last ervaren",
+      "2": "Bewustzijn van belang maar prioriteit ligt elders",
+      "3": "Persoonlijk verantwoordelijkheidsgevoel, teamcultuur wisselend",
+      "4": "Sterke eigenaarscultuur, fouten worden constructief besproken",
+      "5": "Registratie als kernwaarde verankerd in organisatiecultuur"
+    },
+    "Procesafspraken & Naleving": {
+      "1": "Geen afspraken, ieder werkt op eigen manier",
+      "2": "Basisafspraken maar geen naleving of handhaving",
+      "3": "Heldere afspraken, wisselende naleving, beperkte onboarding",
+      "4": "Gestandaardiseerd proces, actieve sturing, formele onboarding",
+      "5": "Continu verbeterproces, afspraken geborgd in systemen en cultuur"
+    }
+  }
+}
