@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Datagedreven Werken Maturity Scan — Team EIFFEL</title>
+  <title>Maturity Scan — Team EIFFEL</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -335,7 +335,7 @@
 
 <!-- HEADER -->
 <header>
-  <div class="header-title">Datagedreven Werken <span>Maturity Scan</span></div>
+  <div class="header-title" id="header-title">Maturity Scan <span>— Team EIFFEL</span></div>
   <div class="eiffel-logo">
     <div class="eiffel-grid">
       <span></span><span></span><span></span><span></span>
@@ -363,7 +363,7 @@
 
 <!-- STATUS BAR -->
 <div class="status-bar">
-  <div class="status-badge"><div class="pulse"></div>Consultant Werktool — Datagedreven Werken Maturity Scan</div>
+  <div class="status-badge"><div class="pulse"></div><span id="status-badge-text">Consultant Werktool — Maturity Scan</span></div>
   <div style="display:flex; align-items:center; gap:12px;">
     <span id="autosave-indicator" style="display:none; font-size:10px; font-weight:700; color:rgba(255,255,255,0.35); letter-spacing:0.08em; text-transform:uppercase;">✓ Sessie opgeslagen</span>
     <button class="reset-btn" id="session-save-btn" onclick="exportSession()" style="display:none; color:rgba(255,255,255,0.5);">↓ Sessie opslaan</button>
@@ -379,59 +379,43 @@
   <!-- ===== TAB: INVOER ===== -->
   <div class="tab-content active" id="tab-invoer">
 
-    <!-- Demo data banner -->
-    <div class="card-warn flex items-center justify-between" style="gap:16px; margin-bottom:16px; flex-wrap:wrap;">
+    <!-- Scan thema configuratie -->
+    <div class="card" style="margin-bottom:16px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
       <div style="flex:1; min-width:200px;">
-        <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--black); margin-bottom:4px;">⚡ Snelstart met Demo-data</div>
-        <div style="font-size:11px; color:#555; line-height:1.6;">Geen bestand bij de hand? Laad een volledige realistische dataset om de tool direct te verkennen.</div>
+        <div class="label" style="margin-bottom:4px;">Scanthema</div>
+        <input type="text" id="scan-thema-input" class="input-underline" value="Datagedreven Werken" placeholder="bijv. Datagedreven Werken, Uren & Onkosten, Cybersecurity" oninput="updateScanThema()" style="font-size:14px; width:100%; max-width:400px;" />
       </div>
-      <button class="btn btn-orange" onclick="loadDemoData()">Demo-data laden</button>
-    </div>
-
-    <!-- API Key -->
-    <div class="card-gray flex items-center justify-between" style="gap:16px; margin-bottom:0; flex-wrap:wrap; border-bottom:none;">
-      <div style="flex:1; min-width:200px;">
-        <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--black); margin-bottom:4px;">🔑 AI Model Configuratie</div>
-        <div style="font-size:11px; color:#555;" id="key-status-text">Geen Anthropic sleutel ingevoerd. De analyse gebruikt de Anthropic API via uw eigen sleutel.</div>
-      </div>
-      <button class="btn btn-outline" style="font-size:10px;" onclick="toggleKeyPanel()">Sleutel beheren →</button>
-    </div>
-    <div class="key-panel" id="key-panel">
-      <div class="label">Anthropic API Key (sk-ant-...)</div>
-      <div class="key-row">
-        <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." />
-        <button class="btn btn-red" onclick="saveApiKey()">Opslaan</button>
-      </div>
-      <div style="font-size:10px; color:#aaa; margin-top:8px;">Uw sleutel wordt uitsluitend in het sessiegeheugen van uw browser bewaard en nooit permanent opgeslagen.</div>
+      <button class="btn btn-orange" onclick="loadDemoData()" style="flex-shrink:0;">Demo-data laden</button>
     </div>
 
     <!-- Sub-tabs -->
-    <div class="sub-tabs" style="margin-top:16px;">
-      <button class="sub-tab active" onclick="switchSubTab('upload', event)">TAB A — Upload (CSV / Excel)</button>
-      <button class="sub-tab" onclick="switchSubTab('ai', event)">✦ TAB B — Interview Notities (AI-analyse)</button>
-      <button class="sub-tab" onclick="switchSubTab('editor', event)">⚙ TAB C — Capabilities Beheren</button>
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="switchSubTab('upload', event)">Upload</button>
+      <button class="sub-tab" onclick="switchSubTab('ai', event)">AI-analyse</button>
+      <button class="sub-tab" onclick="switchSubTab('editor', event)">Framework</button>
     </div>
 
     <!-- TAB A: Upload -->
     <div id="sub-upload" class="sub-content">
-      <div class="card mt-4">
-        <div class="grid-2" style="gap:24px;">
-          <div>
-            <div class="section-title" style="margin-bottom:8px;">Stap 1 — Download template</div>
-            <div style="font-size:11px; color:#555; line-height:1.7; margin-bottom:16px;">Download de invultemplate met scoringsgids. Stuur het template naar de klant of stakeholder ter invulling — elk ingevuld bestand is één respondent.</div>
+      <div class="card" style="margin-top:0; border-top:none;">
+        <div style="display:flex; align-items:flex-start; gap:24px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:220px;">
+            <div class="label" style="margin-bottom:8px;">1. Template downloaden</div>
+            <div style="font-size:11px; color:#555; line-height:1.6; margin-bottom:12px;">Download en stuur naar respondenten. Eén bestand per respondent.</div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button class="btn btn-outline" onclick="downloadTemplate()">↓ Excel template (.xlsx)</button>
-              <button class="btn btn-outline" onclick="downloadTemplateCSV()" style="font-size:10px;">↓ CSV template</button>
+              <button class="btn btn-outline" onclick="downloadTemplate()">Excel (.xlsx)</button>
+              <button class="btn btn-outline" onclick="downloadTemplateCSV()" style="font-size:10px;">CSV</button>
             </div>
-            <div id="export-template-btn" style="margin-top:10px; display:none;">
-              <button class="btn btn-outline" onclick="exportScanAsTemplate()" style="font-size:10px;">↓ Huidige scores als template exporteren</button>
+            <div id="export-template-btn" style="margin-top:8px; display:none;">
+              <button class="btn btn-outline" onclick="exportScanAsTemplate()" style="font-size:10px;">Huidige scores als template</button>
             </div>
           </div>
-          <div style="border-left:1px solid var(--gray-border); padding-left:24px;">
-            <div class="section-title" style="margin-bottom:8px;">Stap 2 — Upload ingevulde bestanden</div>
-            <div style="font-size:11px; color:#555; line-height:1.7; margin-bottom:16px;">Upload één of meerdere ingevulde bestanden. Elk bestand telt als één bron. De app combineert alle bronnen (bestanden + AI-analyse) tot een gemiddelde score.</div>
+          <div style="width:1px; background:var(--gray-border); align-self:stretch; min-height:60px;"></div>
+          <div style="flex:1; min-width:220px;">
+            <div class="label" style="margin-bottom:8px;">2. Ingevulde bestanden uploaden</div>
+            <div style="font-size:11px; color:#555; line-height:1.6; margin-bottom:12px;">Upload meerdere bestanden. Bronnen worden gecombineerd tot een gemiddelde.</div>
             <input type="file" id="file-input" accept=".csv,.xlsx,.xls" multiple style="display:none;" onchange="handleMultiFileUpload(event)" />
-            <button class="btn btn-red" onclick="document.getElementById('file-input').click()">↑ Bestanden toevoegen</button>
+            <button class="btn btn-red" onclick="document.getElementById('file-input').click()">Bestanden uploaden</button>
             <div class="error-msg" id="upload-error" style="display:none;"></div>
           </div>
         </div>
@@ -442,11 +426,10 @@
         <div class="flex items-center justify-between" style="margin-bottom:10px;">
           <div>
             <div class="section-title">Bronnen <span class="source-count-badge" id="source-count">0 bronnen</span></div>
-            <div style="font-size:11px; color:#888; margin-top:4px;">Alle bronnen worden gecombineerd tot één gemiddelde score per capability.</div>
           </div>
           <div style="display:flex; gap:8px;">
-            <button class="btn btn-outline" onclick="clearAllSources()" style="font-size:10px;">Alles wissen</button>
-            <button class="btn btn-red" id="combine-btn" onclick="combineAndPreview()">Combineer & bekijk resultaat</button>
+            <button class="btn btn-outline" onclick="clearAllSources()" style="font-size:10px;">Wissen</button>
+            <button class="btn btn-red" id="combine-btn" onclick="combineAndPreview()">Combineren</button>
           </div>
         </div>
         <div class="source-list" id="source-list"></div>
@@ -454,7 +437,7 @@
 
       <!-- Upload warnings -->
       <div class="card-warn mt-4" id="upload-warnings-box" style="display:none;">
-        <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#D78A00; margin-bottom:6px;">⚠ Aandachtspunten bij import</div>
+        <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#D78A00; margin-bottom:6px;">Aandachtspunten</div>
         <div class="warn-list" id="upload-warnings-list"></div>
       </div>
 
@@ -465,7 +448,7 @@
             <div class="section-title">Gecombineerd resultaat</div>
             <div style="font-size:11px; color:#888; margin-top:4px;" id="preview-subtitle"></div>
           </div>
-          <button class="btn btn-red" onclick="applyUploadedScores()">Scores toepassen → Dashboard</button>
+          <button class="btn btn-red" onclick="applyUploadedScores()">Toepassen</button>
         </div>
         <div class="table-wrap">
           <table id="preview-table">
@@ -478,32 +461,42 @@
 
     <!-- TAB B: AI -->
     <div id="sub-ai" class="sub-content" style="display:none;">
-      <div class="card mt-4">
-        <div class="section-title" style="margin-bottom:6px;">Interviewnotities analyseren met AI</div>
-        <div style="font-size:11px; color:#555; margin-bottom:14px; line-height:1.7;">Plak ruwe interviewnotities, gespreksverslagen of Microsoft Copilot-samenvattingen hieronder. De AI leest de tekst en stelt scores vast voor alle capabilities. U kunt het resultaat direct toepassen óf toevoegen als bron om te combineren met ingevulde templates.</div>
-        <textarea id="interview-notes" rows="10" style="resize:vertical; font-size:12px; line-height:1.7;" placeholder="Plak hier uw interviewnotities of Copilot-output van gesprekken met stakeholders. Beschrijf de situatie per thema: beleid, tools, cultuur, datakwaliteit, leiderschap..."></textarea>
-        <div class="flex items-center justify-between" style="margin-top:14px; flex-wrap:wrap; gap:10px;">
-          <button class="btn btn-red" id="ai-btn" onclick="runAIAnalysis()">✦ Analyseer met AI</button>
-          <div class="label" id="ai-model-label">Actief model: Anthropic Claude</div>
+      <div class="card" style="margin-top:0; border-top:none;">
+        <div class="label" style="margin-bottom:8px;">Interviewnotities analyseren</div>
+        <div style="font-size:11px; color:#555; margin-bottom:10px; line-height:1.6;">Plak interviewnotities of gespreksverslagen. AI stelt scores vast per capability.</div>
+        <textarea id="interview-notes" rows="8" style="resize:vertical; font-size:12px; line-height:1.7;" placeholder="Plak hier uw interviewnotities, gespreksverslagen of Copilot-samenvattingen..."></textarea>
+        <div class="flex items-center justify-between" style="margin-top:10px; flex-wrap:wrap; gap:10px;">
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="btn btn-red" id="ai-btn" onclick="runAIAnalysis()">Analyseren</button>
+            <button class="btn btn-outline" style="font-size:10px;" onclick="toggleKeyPanel()">API-sleutel</button>
+          </div>
+          <div class="label" id="ai-model-label">Model: Claude</div>
         </div>
         <div class="error-msg" id="ai-error" style="display:none;"></div>
+      </div>
+      <div class="key-panel" id="key-panel">
+        <div class="label">Anthropic API Key (sk-ant-...)</div>
+        <div class="key-row">
+          <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." />
+          <button class="btn btn-red" onclick="saveApiKey()">Opslaan</button>
+        </div>
+        <div style="font-size:10px; color:#aaa; margin-top:6px;" id="key-status-text">Sleutel wordt alleen in uw browser bewaard.</div>
       </div>
 
       <!-- AI warnings -->
       <div class="card-warn mt-4" id="ai-warnings-box" style="display:none;">
-        <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#D78A00; margin-bottom:6px;">⚠ AI-analyse aandachtspunten</div>
+        <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#D78A00; margin-bottom:6px;">Aandachtspunten</div>
         <div class="warn-list" id="ai-warnings-list"></div>
       </div>
 
       <!-- AI result table -->
       <div id="ai-result" style="display:none; margin-top:16px;">
         <div class="flex items-center justify-between" style="margin-bottom:12px; flex-wrap:wrap; gap:10px;">
-          <div>
-            <div class="section-title">AI-geadviseerde scores — controleer &amp; corrigeer</div>
-            <div style="font-size:11px; color:#888; margin-top:4px;">Pas aan waar de AI een verkeerde inschatting maakt op basis van uw kennis van de situatie.</div>
+          <div class="section-title">AI-scores — controleer &amp; corrigeer</div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-outline" onclick="addAIAsSource()">+ Als bron toevoegen</button>
+            <button class="btn btn-red" onclick="applyAIScores()">Toepassen</button>
           </div>
-          <button class="btn btn-outline" onclick="addAIAsSource()">+ Toevoegen als bron</button>
-          <button class="btn btn-red" onclick="applyAIScores()">Scores bevestigen → Dashboard</button>
         </div>
         <div class="table-wrap">
           <table id="ai-table">
@@ -516,18 +509,18 @@
 
     <!-- TAB C: Capabilities Editor -->
     <div id="sub-editor" class="sub-content" style="display:none;">
-      <div class="card mt-4">
-        <div class="section-title" style="margin-bottom:6px;">Capabilities & Scoringsmodel Beheren</div>
-        <div style="font-size:11px; color:#555; margin-bottom:14px; line-height:1.7;">Pas het scan-framework aan: voeg capabilities toe, wijzig domeinen, of pas de niveaubeschrijvingen aan. Wijzigingen worden opgeslagen in uw browser en gebruikt bij alle toekomstige scans.</div>
+      <div class="card" style="margin-top:0; border-top:none;">
+        <div class="label" style="margin-bottom:8px;">Scan-framework beheren</div>
+        <div style="font-size:11px; color:#555; margin-bottom:12px; line-height:1.6;">Pas capabilities, domeinen en niveaubeschrijvingen aan. Wijzigingen worden bewaard in uw browser.</div>
         <div class="cap-editor-toolbar">
-          <button class="btn btn-red" onclick="addCapability()">+ Capability toevoegen</button>
-          <button class="btn btn-outline" onclick="addDomain()">+ Domein toevoegen</button>
-          <button class="btn btn-outline" onclick="saveAsDefaultFramework()">★ Als standaard opslaan</button>
-          <button class="btn btn-outline" onclick="resetCapabilitiesToDefaults()">↻ Standaard herstellen</button>
-          <button class="btn btn-outline" id="factory-reset-btn" onclick="factoryResetFramework()" style="display:none;">↻ Fabrieksinstellingen</button>
-          <button class="btn btn-outline" onclick="exportCapabilitiesJSON()">↓ Framework exporteren</button>
+          <button class="btn btn-red" onclick="addCapability()">+ Capability</button>
+          <button class="btn btn-outline" onclick="addDomain()">+ Domein</button>
+          <button class="btn btn-outline" onclick="saveAsDefaultFramework()">Als standaard opslaan</button>
+          <button class="btn btn-outline" onclick="resetCapabilitiesToDefaults()">Standaard herstellen</button>
+          <button class="btn btn-outline" id="factory-reset-btn" onclick="factoryResetFramework()" style="display:none;">Fabrieksinstellingen</button>
+          <button class="btn btn-outline" onclick="exportCapabilitiesJSON()">Exporteren</button>
           <input type="file" id="import-caps-input" accept=".json" style="display:none;" onchange="importCapabilitiesJSON(event)" />
-          <button class="btn btn-outline" onclick="document.getElementById('import-caps-input').click()">↑ Framework importeren</button>
+          <button class="btn btn-outline" onclick="document.getElementById('import-caps-input').click()">Importeren</button>
         </div>
         <div class="template-info-box" id="cap-editor-stats"></div>
         <div id="cap-editor-container"></div>
@@ -727,7 +720,7 @@
           <div class="pdf-header">
             <div>
               <div class="label" style="margin-bottom:4px;">Team EIFFEL Assessment Tool</div>
-              <div style="font-size:22px; font-weight:900; letter-spacing:-0.02em;">Datagedreven Werken Maturity Scan</div>
+              <div style="font-size:22px; font-weight:900; letter-spacing:-0.02em;" id="pdf-title">Maturity Scan</div>
             </div>
             <div class="eiffel-logo">
               <div class="eiffel-grid"><span></span><span></span><span></span><span></span></div>
@@ -738,7 +731,7 @@
           <div class="pdf-summary">
             <div>
               <div style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px;">Samenvatting &amp; Volwassenheid</div>
-              <div style="font-size:11px; color:#555; line-height:1.8; margin-bottom:14px;">Deze scan brengt de huidige stand van zaken en groeiambities in kaart rondom datagedreven werken. Op basis van de resultaten is een roadmap gedefinieerd om de data-volwassenheid stapsgewijs te verhogen.</div>
+              <div style="font-size:11px; color:#555; line-height:1.8; margin-bottom:14px;" id="pdf-summary-text">Deze scan brengt de huidige stand van zaken en groeiambities in kaart. Op basis van de resultaten is een roadmap gedefinieerd om de volwassenheid stapsgewijs te verhogen.</div>
               <div class="pdf-score-box" id="pdf-scores"></div>
             </div>
             <div style="border:1px solid rgba(0,0,0,0.1);">
@@ -865,6 +858,7 @@ let sortField = 'gap';
 let sortDir = 'desc';
 let expandedRows = {};
 let metadata = { organisatie:'', datum: todayStr(), consultant:'' };
+let scanThema = localStorage.getItem('eiffel_scan_thema') || 'Datagedreven Werken';
 let apiKey = localStorage.getItem('eiffel_anthropic_key') || '';
 
 function todayStr() {
@@ -893,6 +887,25 @@ if (storedScores) {
 }
 const storedMeta = localStorage.getItem('eiffel_meta');
 if (storedMeta) { metadata = JSON.parse(storedMeta); }
+
+// Init scan thema
+document.getElementById('scan-thema-input').value = scanThema;
+applyScanThemaToUI();
+
+function updateScanThema() {
+  scanThema = document.getElementById('scan-thema-input').value.trim() || 'Maturity Scan';
+  localStorage.setItem('eiffel_scan_thema', scanThema);
+  applyScanThemaToUI();
+}
+
+function applyScanThemaToUI() {
+  const t = scanThema || 'Maturity Scan';
+  document.title = `${t} Maturity Scan — Team EIFFEL`;
+  document.getElementById('header-title').innerHTML = `${t} <span>Maturity Scan</span>`;
+  document.getElementById('status-badge-text').textContent = `Consultant Werktool — ${t} Maturity Scan`;
+  document.getElementById('pdf-title').textContent = `${t} Maturity Scan`;
+  document.getElementById('pdf-summary-text').textContent = `Deze scan brengt de huidige stand van zaken en groeiambities in kaart rondom ${t.toLowerCase()}. Op basis van de resultaten is een roadmap gedefinieerd om de volwassenheid stapsgewijs te verhogen.`;
+}
 
 // ============================================================
 // NAVIGATION
@@ -947,7 +960,7 @@ function downloadTemplate() {
 
   // Sheet 2: Scoringsgids
   const guideRows = [
-    ['EIFFEL Datagedreven Werken \u2014 Scoringsgids'],
+    [`EIFFEL ${scanThema} \u2014 Scoringsgids`],
     [],
     ['Niveau', 'Label', 'Beschrijving'],
     [1, 'Basic "Survive"', 'Ad hoc, reactief, geen formeel beleid of eigenaarschap'],
@@ -965,7 +978,8 @@ function downloadTemplate() {
   ws2['!cols'] = [{ wch: 42 }, { wch: 24 }, { wch: 50 }, { wch: 50 }, { wch: 50 }, { wch: 50 }];
   XLSX.utils.book_append_sheet(wb, ws2, 'Scoringsgids');
 
-  XLSX.writeFile(wb, 'EIFFEL_Datagedreven_Werken_Template.xlsx');
+  const themaSlug = scanThema.replace(/[^a-z0-9]/gi, '_') || 'MaturityScan';
+  XLSX.writeFile(wb, `EIFFEL_${themaSlug}_Template.xlsx`);
 }
 
 function downloadTemplateCSV() {
@@ -974,7 +988,8 @@ function downloadTemplateCSV() {
   const blob = new Blob(['\uFEFF' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url;
-  a.download = 'EIFFEL_Datagedreven_Werken_Template.csv';
+  const themaSlugCSV = scanThema.replace(/[^a-z0-9]/gi, '_') || 'MaturityScan';
+  a.download = `EIFFEL_${themaSlugCSV}_Template.csv`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
@@ -1149,7 +1164,8 @@ function exportCapabilitiesJSON() {
   const blob = new Blob([JSON.stringify(fw, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url;
-  a.download = 'EIFFEL_Framework_Export.json';
+  const fwSlug = scanThema.replace(/[^a-z0-9]/gi, '_') || 'Framework';
+  a.download = `EIFFEL_${fwSlug}_Framework.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
@@ -1408,7 +1424,7 @@ async function runAIAnalysis() {
   const btn = document.getElementById('ai-btn');
   btn.textContent = '✦ AI analyseert...'; btn.disabled = true;
 
-  const systemPrompt = `Je bent een expert in datavolwassenheid die interviewnotities analyseert voor een management consultant. Geef per capability een huidige score én ambitiescore op schaal 1–4.
+  const systemPrompt = `Je bent een expert in volwassenheidsanalyse op het gebied van "${scanThema}" die interviewnotities analyseert voor een management consultant. Geef per capability een huidige score én ambitiescore op schaal 1–4.
 
 SCORESCHAAL:
 1 = Basic "Survive": ad hoc, reactief, geen formeel beleid of eigenaarschap
@@ -1422,10 +1438,10 @@ REGEL 1 — Alleen scoren op basis van expliciete tekstevidentie:
 Stel een huidige score uitsluitend vast op basis van wat er letterlijk in de notities staat. Interpreteer niet, vul niet aan vanuit aannames. Als een capability niet of nauwelijks wordt besproken, stel dan huidige_score op 1 en schrijf in toelichting: "Niet besproken in het interview — score vereist verificatie door consultant." Stel in dat geval ambitie_score ook op 1.
 
 REGEL 2 — Ambitie conservatief en onderbouwd scoren:
-Stel ambitie_score alleen op 4 als de tekst expliciet wijst op een Leading-ambitie: volledige automatisering, organisatiebrede datagedreven cultuur, of vergelijkbare concrete Leading-kenmerken. Een algemene wens zoals "we willen datagedreven worden" of "we willen dashboards" = ambitie_score 3, niet 4. Wanneer geen ambitie wordt uitgesproken voor een capability EN er ook geen organisatiebrede ambitie in de tekst staat, stel ambitie_score gelijk aan huidige_score.
+Stel ambitie_score alleen op 4 als de tekst expliciet wijst op een Leading-ambitie: volledige automatisering, organisatiebrede cultuurverandering, of vergelijkbare concrete Leading-kenmerken. Een algemene wens zoals "we willen beter worden" of "we willen dashboards" = ambitie_score 3, niet 4. Wanneer geen ambitie wordt uitgesproken voor een capability EN er ook geen organisatiebrede ambitie in de tekst staat, stel ambitie_score gelijk aan huidige_score.
 
 REGEL 2B — Organisatiebrede ambitie geldt als minimumambitie voor besproken capabilities:
-Als de tekst een algemene organisatiebrede ambitie uitspreekt (bijv. "we willen datagedreven worden", "ambitie 2027", "elke afdeling moet zelfstandig dashboards kunnen raadplegen"), gebruik dan ambitie_score minimaal 3 voor alle capabilities die wel expliciet besproken worden in de notities. De organisatiebrede ambitie impliceert vooruitgang op alle besproken terreinen. Alleen voor capabilities die helemaal niet besproken zijn, blijft ambitie_score gelijk aan huidige_score (zie regel 1).
+Als de tekst een algemene organisatiebrede ambitie uitspreekt (bijv. "we willen volwassener worden", "ambitie 2027", "alle afdelingen moeten meedoen"), gebruik dan ambitie_score minimaal 3 voor alle capabilities die wel expliciet besproken worden in de notities. De organisatiebrede ambitie impliceert vooruitgang op alle besproken terreinen. Alleen voor capabilities die helemaal niet besproken zijn, blijft ambitie_score gelijk aan huidige_score (zie regel 1).
 
 REGEL 2C — Capabilities bijna op ambitieniveau krijgen hogere ambitiescore:
 Als de huidige score al 2 of 3 is en er concrete acties lopen (bijv. uitrol, aanstelling, audit afgerond), stel ambitie_score dan minimaal één niveau hoger dan de huidige score. Een organisatie die actief bezig is met implementatie heeft per definitie een hogere ambitie dan waar ze nu staan.
@@ -1929,8 +1945,9 @@ async function exportPDF() {
 function exportSession() {
   if (!scores) return;
   const session = {
-    version: '1.0',
+    version: '1.1',
     exported: new Date().toISOString(),
+    scanThema,
     metadata,
     scores,
   };
@@ -1968,6 +1985,12 @@ function importSession(e) {
       if (!valid) throw new Error('Sessiebestand bevat ongeldige scoredata.');
       // Apply
       metadata = session.metadata;
+      if (session.scanThema) {
+        scanThema = session.scanThema;
+        localStorage.setItem('eiffel_scan_thema', scanThema);
+        document.getElementById('scan-thema-input').value = scanThema;
+        applyScanThemaToUI();
+      }
       setScores(session.scores);
       localStorage.setItem('eiffel_meta', JSON.stringify(metadata));
       showAutosaveIndicator('✓ Sessie hersteld');
