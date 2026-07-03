@@ -614,7 +614,7 @@
           </div>
         </div>
         <div class="radar-card">
-          <div class="radar-title">Domein Volwassenheidsradar (schaal 1–4)</div>
+          <div class="radar-title">Domein Volwassenheidsradar</div>
           <svg id="radar-svg" viewBox="0 0 450 390" style="width:100%; max-width:420px; height:auto;"></svg>
           <div class="radar-legend">
             <div class="legend-item"><span class="legend-fill"></span> Nulmeting</div>
@@ -894,8 +894,9 @@ let CAPABILITIES = customFw ? customFw.capabilities : JSON.parse(JSON.stringify(
 let DOMAINS = customFw ? customFw.domains : [...DEFAULT_DOMAINS];
 let LEVEL_DESC = customFw ? customFw.levelDesc : JSON.parse(JSON.stringify(DEFAULT_LEVEL_DESC));
 
-const MATURITY_LEVELS = { 1:'Basic "Survive"', 2:'Moderate "Maintain"', 3:'Advanced "Build"', 4:'Leading "Evolve"' };
-const LEVEL_COLORS = { 1:'#8B0000', 2:'#F5A623', 3:'#C8102E', 4:'#2E7D32' };
+const MATURITY_LEVELS = { 1:'Basic "Survive"', 2:'Moderate "Maintain"', 3:'Advanced "Build"', 4:'Leading "Evolve"', 5:'Excellent "Thrive"' };
+const LEVEL_COLORS = { 1:'#8B0000', 2:'#F5A623', 3:'#C8102E', 4:'#2E7D32', 5:'#1565C0' };
+let MAX_SCORE = 4;
 
 // ============================================================
 // STATE
@@ -1001,7 +1002,7 @@ function downloadTemplate() {
   const wb = XLSX.utils.book_new();
 
   // Sheet 1: Invultemplate (one file per respondent, no Respondent column)
-  const headerRow = ['Capability', 'Domein', 'Huidige score (1-4)', 'Ambitiescore (1-4)', 'Toelichting'];
+  const headerRow = ['Capability', 'Domein', `Huidige score (1-${MAX_SCORE})`, `Ambitiescore (1-${MAX_SCORE})`, 'Toelichting'];
   const dataRows = CAPABILITIES.map(c => [c.naam, c.domein, '', '', '']);
   const ws1 = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows]);
   ws1['!cols'] = [{ wch: 42 }, { wch: 24 }, { wch: 20 }, { wch: 20 }, { wch: 50 }];
@@ -1032,7 +1033,7 @@ function downloadTemplate() {
 }
 
 function downloadTemplateCSV() {
-  const rows = ['Capability;Domein;Huidige score (1-4);Ambitiescore (1-4);Toelichting'];
+  const rows = [`Capability;Domein;Huidige score (1-${MAX_SCORE});Ambitiescore (1-${MAX_SCORE});Toelichting`];
   CAPABILITIES.forEach(c => rows.push(`"${c.naam}";"${c.domein}";;;""`));
   const blob = new Blob(['\uFEFF' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -1045,7 +1046,7 @@ function downloadTemplateCSV() {
 function exportScanAsTemplate() {
   if (!scores) return;
   const wb = XLSX.utils.book_new();
-  const headerRow = ['Capability', 'Domein', 'Huidige score (1-4)', 'Ambitiescore (1-4)', 'Toelichting'];
+  const headerRow = ['Capability', 'Domein', `Huidige score (1-${MAX_SCORE})`, `Ambitiescore (1-${MAX_SCORE})`, 'Toelichting'];
   const dataRows = scores.map(s => [s.naam, s.domein, s.huidige_score, s.ambitie_score, s.toelichting || '']);
   const ws = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows]);
   ws['!cols'] = [{ wch: 42 }, { wch: 24 }, { wch: 20 }, { wch: 20 }, { wch: 50 }];
@@ -1481,9 +1482,58 @@ function addFileSource(filename, rows) {
   scoreSources.push({ type: 'file', name: filename, scores: parsed.scores, warnings: parsed.warnings, addedAt: new Date().toISOString() });
 }
 
+function detectQuestionnaireFormat(keys) {
+  const hasStelling = keys.some(k => k.toLowerCase().includes('stelling'));
+  const hasScore15 = keys.some(k => k.toLowerCase().includes('score') && k.includes('5'));
+  return hasStelling || hasScore15;
+}
+
+function parseQuestionnaireRows(filename, rows) {
+  const keys = Object.keys(rows[0] || {});
+  const capH = keys.find(k => k.toLowerCase().includes('capability'));
+  const scoreH = keys.find(k => k.toLowerCase().includes('score'));
+  const toelH = keys.find(k => k.toLowerCase().includes('toelichting'));
+  if (!capH || !scoreH) { showUploadError(`${filename}: kolom "Capability" of "Score" ontbreekt.`); return null; }
+
+  const warnings = [];
+  const capData = {};
+  CAPABILITIES.forEach(c => { capData[c.naam.toLowerCase()] = { scores: [], toelichtingen: [] }; });
+
+  rows.forEach((row, idx) => {
+    const rn = idx + 2;
+    const capRaw = String(row[capH] || '').trim();
+    const capLow = capRaw.toLowerCase();
+    if (!capLow) return;
+    const match = CAPABILITIES.find(c => c.naam.toLowerCase() === capLow || c.naam.toLowerCase().includes(capLow) || capLow.includes(c.naam.toLowerCase()));
+    if (!match) { warnings.push(`${filename} rij ${rn}: onbekende capability '${capRaw}'.`); return; }
+    const key = match.naam.toLowerCase();
+    const raw = row[scoreH];
+    if (raw === undefined || raw === null || String(raw).trim() === '') return;
+    const n = Number(raw);
+    if (isNaN(n)) { warnings.push(`${filename} rij ${rn}: score '${raw}' is geen getal.`); return; }
+    capData[key].scores.push(Math.max(1, Math.min(5, Math.round(n))));
+    const toel = toelH ? String(row[toelH] || '').trim() : '';
+    if (toel) capData[key].toelichtingen.push(toel);
+  });
+
+  MAX_SCORE = 5;
+  const scores = CAPABILITIES.map(c => {
+    const d = capData[c.naam.toLowerCase()];
+    const avg = d.scores.length > 0 ? Math.round((d.scores.reduce((a, b) => a + b, 0) / d.scores.length) * 10) / 10 : 1;
+    return { naam: c.naam, domein: c.domein, huidige_score: avg, ambitie_score: 5, toelichting: d.toelichtingen.join('; ') };
+  });
+  warnings.push(`Vragenlijstformaat herkend: ${rows.length} stellingen gemiddeld naar ${CAPABILITIES.length} capabilities (schaal 1-5).`);
+  return { scores, warnings };
+}
+
 function parseFileRows(filename, rows) {
   if (!rows || rows.length === 0) { showUploadError(`${filename}: bevat geen gegevens.`); return null; }
   const keys = Object.keys(rows[0] || {});
+
+  if (detectQuestionnaireFormat(keys)) {
+    return parseQuestionnaireRows(filename, rows);
+  }
+
   const capH = keys.find(k => k.toLowerCase().includes('capability'));
   const huidH = keys.find(k => k.toLowerCase().includes('huidige') || k.toLowerCase() === 'score');
   const ambH = keys.find(k => k.toLowerCase().includes('ambitie') || k.toLowerCase() === 'ambitie');
@@ -1491,6 +1541,8 @@ function parseFileRows(filename, rows) {
   const warnings = [];
   const capScores = {};
   CAPABILITIES.forEach(c => { capScores[c.naam.toLowerCase()] = { h: null, a: null }; });
+
+  let detectedMax = 4;
   rows.forEach((row, idx) => {
     const rn = idx + 2;
     const capRaw = String(row[capH] || '').trim();
@@ -1503,16 +1555,18 @@ function parseFileRows(filename, rows) {
       if (raw === undefined || raw === null || String(raw).trim() === '') return null;
       const n = Number(raw);
       if (isNaN(n)) { warnings.push(`${filename} rij ${rn} [${match.naam}]: ${label} '${raw}' is geen getal.`); return null; }
-      return Math.max(1, Math.min(4, Math.round(n)));
+      if (n > 4) detectedMax = 5;
+      return Math.max(1, Math.min(5, Math.round(n)));
     };
     const h = parseScore(huidH ? row[huidH] : undefined, 'huidige score');
     const a = parseScore(ambH ? row[ambH] : undefined, 'ambitiescore');
     if (h !== null) capScores[key].h = h;
     if (a !== null) capScores[key].a = a;
   });
+  MAX_SCORE = detectedMax;
   const scores = CAPABILITIES.map(c => {
     const d = capScores[c.naam.toLowerCase()];
-    return { naam: c.naam, domein: c.domein, huidige_score: d.h !== null ? d.h : 1, ambitie_score: d.a !== null ? d.a : 1 };
+    return { naam: c.naam, domein: c.domein, huidige_score: d.h !== null ? d.h : 1, ambitie_score: d.a !== null ? d.a : detectedMax };
   });
   return { scores, warnings };
 }
@@ -1750,12 +1804,12 @@ function renderAITable(data) {
       <td style="color:#888;">${r.domein}</td>
       <td style="text-align:center;">
         <select class="mono" style="width:50px; padding:4px; color:var(--red); font-weight:700; border-color:var(--black);" onchange="updateAIScore(${i},'huidige_score',this.value)">
-          ${[1,2,3,4].map(n=>`<option value="${n}" ${r.huidige_score==n?'selected':''}>${n}</option>`).join('')}
+          ${Array.from({length:MAX_SCORE},(_,i)=>i+1).map(n=>`<option value="${n}" ${r.huidige_score==n?'selected':''}>${n}</option>`).join('')}
         </select>
       </td>
       <td style="text-align:center;">
         <select class="mono" style="width:50px; padding:4px; font-weight:700; border-color:var(--black);" onchange="updateAIScore(${i},'ambitie_score',this.value)">
-          ${[1,2,3,4].map(n=>`<option value="${n}" ${r.ambitie_score==n?'selected':''}>${n}</option>`).join('')}
+          ${Array.from({length:MAX_SCORE},(_,i)=>i+1).map(n=>`<option value="${n}" ${r.ambitie_score==n?'selected':''}>${n}</option>`).join('')}
         </select>
       </td>
       <td><input type="text" value="${r.toelichting.replace(/"/g,'&quot;')}" class="toelichting-input" onchange="updateAIScore(${i},'toelichting',this.value)" /></td>
@@ -1936,12 +1990,12 @@ function renderRadar(svgId) {
   });
   const angles = { 'Data Management':-Math.PI/2, 'Datageletterdheid':0, 'Talent & Cultuur':Math.PI/2, 'Strategie & Output':Math.PI };
   const pt = (d,v) => {
-    const r = (Math.max(1,Math.min(4,v))/4)*R;
+    const r = (Math.max(1,Math.min(MAX_SCORE,v))/MAX_SCORE)*R;
     return { x: cx+r*Math.cos(angles[d]), y: cy+r*Math.sin(angles[d]) };
   };
   let html = '';
   // Grid
-  [1,2,3,4].forEach(lvl => {
+  Array.from({length:MAX_SCORE},(_,i)=>i+1).forEach(lvl => {
     const pts = DOMAINS.map(d=>{const p=pt(d,lvl);return `${p.x},${p.y}`;}).join(' ');
     html += `<polygon points="${pts}" fill="none" stroke="#E5E5E5" stroke-width="1"/>`;
   });
@@ -1950,7 +2004,7 @@ function renderRadar(svgId) {
     const p=pt(d,4); html+=`<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="#E5E5E5" stroke-width="1.5" stroke-dasharray="3,3"/>`;
   });
   // Level labels
-  [1,2,3,4].forEach(lvl => {
+  Array.from({length:MAX_SCORE},(_,i)=>i+1).forEach(lvl => {
     const p=pt('Data Management',lvl);
     html+=`<rect x="${p.x-10}" y="${p.y-8}" width="20" height="14" fill="white" opacity="0.9"/>`;
     html+=`<text x="${p.x}" y="${p.y+4}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="#999" font-weight="600">${lvl}</text>`;
@@ -2016,12 +2070,12 @@ function renderGapTable() {
       <td style="color:#888;">${r.domein}</td>
       <td style="text-align:center;">
         <select class="mono" style="width:50px;padding:4px;color:var(--red);font-weight:700;border-color:var(--black);" onchange="updateScore(${r.origIdx},'huidige_score',this.value)">
-          ${[1,2,3,4].map(n=>`<option value="${n}" ${r.huidige_score==n?'selected':''}>${n}</option>`).join('')}
+          ${Array.from({length:MAX_SCORE},(_,i)=>i+1).map(n=>`<option value="${n}" ${r.huidige_score==n?'selected':''}>${n}</option>`).join('')}
         </select>
       </td>
       <td style="text-align:center;">
         <select class="mono" style="width:50px;padding:4px;font-weight:700;border-color:var(--black);" onchange="updateScore(${r.origIdx},'ambitie_score',this.value)">
-          ${[1,2,3,4].map(n=>`<option value="${n}" ${r.ambitie_score==n?'selected':''}>${n}</option>`).join('')}
+          ${Array.from({length:MAX_SCORE},(_,i)=>i+1).map(n=>`<option value="${n}" ${r.ambitie_score==n?'selected':''}>${n}</option>`).join('')}
         </select>
       </td>
       <td style="text-align:center; font-weight:700;" class="mono">${gap>0?'+'+gap:gap}</td>
@@ -2753,7 +2807,7 @@ function renderCompareRadar(scanA, scanB, svgId) {
   const cx = 225, cy = 185, R = 130;
   const angles = { 'Data Management': -Math.PI/2, 'Datageletterdheid': 0, 'Talent & Cultuur': Math.PI/2, 'Strategie & Output': Math.PI };
   const pt = (d, v) => {
-    const r = (Math.max(1, Math.min(4, v)) / 4) * R;
+    const r = (Math.max(1, Math.min(MAX_SCORE, v)) / MAX_SCORE) * R;
     return { x: cx + r * Math.cos(angles[d]), y: cy + r * Math.sin(angles[d]) };
   };
 
