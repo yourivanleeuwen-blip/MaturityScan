@@ -1242,17 +1242,34 @@ function importCapabilitiesJSON(e) {
 
 function extractJSON(text) {
   let clean = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-  const starts = clean.startsWith('[') ? ['[', ']'] : ['{', '}'];
-  const startIdx = clean.indexOf(starts[0]);
+  const isArray = clean.indexOf('[') >= 0 && (clean.indexOf('{') < 0 || clean.indexOf('[') < clean.indexOf('{'));
+  const open = isArray ? '[' : '{';
+  const close = isArray ? ']' : '}';
+  const startIdx = clean.indexOf(open);
   if (startIdx < 0) throw new Error('Geen JSON gevonden in AI-antwoord.');
   let depth = 0;
   let endIdx = -1;
+  let inString = false;
+  let escape = false;
   for (let i = startIdx; i < clean.length; i++) {
-    if (clean[i] === starts[0]) depth++;
-    else if (clean[i] === starts[1]) { depth--; if (depth === 0) { endIdx = i; break; } }
+    const ch = clean[i];
+    if (escape) { escape = false; continue; }
+    if (ch === '\\') { escape = true; continue; }
+    if (ch === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (ch === open) depth++;
+    else if (ch === close) { depth--; if (depth === 0) { endIdx = i; break; } }
   }
-  if (endIdx < 0) throw new Error('Onvolledige JSON in AI-antwoord.');
-  return JSON.parse(clean.slice(startIdx, endIdx + 1));
+  if (endIdx >= 0) return JSON.parse(clean.slice(startIdx, endIdx + 1));
+  if (isArray) {
+    let truncated = clean.slice(startIdx);
+    const lastComplete = truncated.lastIndexOf('}');
+    if (lastComplete > 0) {
+      truncated = truncated.slice(0, lastComplete + 1) + ']';
+      try { return JSON.parse(truncated); } catch(_) {}
+    }
+  }
+  throw new Error('Onvolledige JSON in AI-antwoord.');
 }
 
 async function generateFrameworkAI() {
@@ -1329,23 +1346,18 @@ async function generateQuestionnaireAI() {
   status.style.display = ''; status.textContent = 'AI genereert stellingen...';
   errorEl.style.display = 'none';
 
-  const capList = CAPABILITIES.map(c => `- ${c.naam} (${c.domein})`).join('\n');
-  const prompt = `Je bent een expert in maturity-assessments. Genereer een vragenlijst voor het thema "${scanThema}".
-
-Capabilities en domeinen:
-${capList}
-
-Maak per capability 3-5 stellingen die respondenten beoordelen op een Likert-schaal van 1 (Helemaal oneens) tot 5 (Helemaal eens).
-Stellingen moeten concreet, meetbaar en relevant zijn voor de dagelijkse praktijk.
-
-Antwoord ALLEEN met valid JSON array:
-[{"capability": "Naam", "stelling": "De stelling..."}]`;
+  const capList = CAPABILITIES.map(c => `${c.naam} (${c.domein})`).join('; ');
+  const prompt = `Genereer een Likert-vragenlijst (1-5) voor het thema "${scanThema}".
+Capabilities: ${capList}
+Maak PRECIES 3 korte stellingen per capability. Stellingen moeten concreet en meetbaar zijn.
+ALLEEN raw JSON, geen markdown/backticks:
+[{"capability":"Naam","stelling":"Stelling..."}]`;
 
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 4096, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 16384, messages: [{ role: 'user', content: prompt }] })
     });
     if (!resp.ok) throw new Error(`API fout: ${resp.status}`);
     const data = await resp.json();
