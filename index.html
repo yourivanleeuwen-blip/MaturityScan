@@ -228,6 +228,25 @@
     footer { background: white; border-top: 1px solid rgba(0,0,0,0.08); height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; }
     footer span { font-size: 10px; color: #aaa; font-weight: 600; }
 
+    /* PRINT */
+    @media print {
+      @page { size: A4; margin: 12mm 10mm; }
+      body { background: white !important; }
+      header, footer, .nav-tabs, main > .tab-content:not(#tab-export),
+      #tab-export > *:not(#pdf-print-wrap),
+      .export-header-card, .export-btns, #pdf-error, #pdf-btn, #pdf-btn-print { display: none !important; }
+      #tab-export { display: block !important; padding: 0 !important; }
+      #pdf-print-wrap { display: block !important; background: white !important; padding: 0 !important; }
+      #printable-report { width: 100% !important; max-width: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
+      .pdf-summary { grid-template-columns: 1fr 1fr; }
+      .pdf-roadmap-item { break-inside: avoid; }
+      .pdf-gap-table tr { break-inside: avoid; }
+      .pdf-gap-table { font-size: 9px; }
+      .pdf-gap-table td { padding: 5px 8px !important; }
+      .pdf-gap-table th { padding: 5px 8px !important; }
+      svg { max-height: 280px; width: auto; }
+    }
+
     /* HISTORIE */
     .historie-card { background: white; border: 1px solid var(--black); padding: 16px; display: flex; align-items: flex-start; gap: 16px; transition: background 0.1s; }
     .historie-card:hover { background: var(--gray-bg); }
@@ -744,13 +763,14 @@
         </div>
         <div class="export-btns">
           <button class="btn btn-outline" onclick="exportCSV()">↓ Scores als CSV</button>
-          <button class="btn btn-red" id="pdf-btn" onclick="exportPDF()">↓ Download PDF Rapport</button>
+          <button class="btn btn-outline" id="pdf-btn" onclick="exportPDF()">↓ PDF (afbeelding)</button>
+          <button class="btn btn-red" id="pdf-btn-print" onclick="printReport()">↓ Print / PDF Rapport</button>
         </div>
       </div>
       <div id="pdf-error" class="card-error" style="display:none; margin-bottom:16px; font-size:12px; color:var(--red);"></div>
 
       <div class="label" style="margin-bottom:12px;">A4 Rapportage Preview</div>
-      <div style="background:#e0e0e0; padding:20px; overflow-x:auto;">
+      <div id="pdf-print-wrap" style="background:#e0e0e0; padding:20px; overflow-x:auto;">
         <div id="printable-report">
           <div class="pdf-header">
             <div>
@@ -2184,6 +2204,11 @@ function renderExport() {
   document.getElementById('pdf-year').textContent = new Date().getFullYear();
   document.getElementById('pdf-date').textContent = new Date().toLocaleDateString('nl-NL');
   renderRadar('radar-svg-pdf');
+}
+
+function printReport() {
+  renderExport();
+  setTimeout(() => window.print(), 200);
 }
 
 function exportCSV() {
