@@ -1454,9 +1454,16 @@ function handleMultiFileUpload(e) {
       reader.onload = ev => {
         try {
           const wb = XLSX.read(new Uint8Array(ev.target.result), { type:'array' });
-          const dataSheet = wb.SheetNames.find(n => n.toLowerCase() !== 'instructies') || wb.SheetNames[0];
-          const ws = wb.Sheets[dataSheet];
-          addFileSource(file.name, XLSX.utils.sheet_to_json(ws));
+          const dataSheets = wb.SheetNames.filter(n => n.toLowerCase() !== 'instructies');
+          if (dataSheets.length === 0) dataSheets.push(wb.SheetNames[0]);
+          dataSheets.forEach(sheetName => {
+            const ws = wb.Sheets[sheetName];
+            const rows = XLSX.utils.sheet_to_json(ws);
+            if (rows.length > 0) {
+              const label = dataSheets.length > 1 ? `${file.name} [${sheetName}]` : file.name;
+              addFileSource(label, rows);
+            }
+          });
         } catch(err) { showUploadError(`${file.name}: Excel leesfout — ${err.message}`); }
         if (--pending === 0) renderSourceList();
       };
