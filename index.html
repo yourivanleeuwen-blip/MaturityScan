@@ -1352,6 +1352,9 @@ ALLEEN raw JSON, geen markdown/backticks:
     const data = await resp.json();
     const text = data.content[0].text;
     generatedQuestions = extractJSON(text);
+    generatedQuestions.forEach(q => {
+      q.capability = q.capability.replace(/\s*\([^)]*\)\s*$/, '').trim();
+    });
     renderQuestionnaireEditor();
     status.textContent = `${generatedQuestions.length} stellingen gegenereerd.`;
   } catch (err) {
