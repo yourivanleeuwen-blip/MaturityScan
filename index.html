@@ -231,12 +231,15 @@
     /* PRINT */
     @media print {
       @page { size: A4; margin: 12mm 10mm; }
-      body { background: white !important; }
-      header, footer, .nav-tabs, main > .tab-content:not(#tab-export),
-      #tab-export > *:not(#pdf-print-wrap),
-      .export-header-card, .export-btns, #pdf-error, #pdf-btn, #pdf-btn-print { display: none !important; }
-      #tab-export { display: block !important; padding: 0 !important; }
-      #pdf-print-wrap { display: block !important; background: white !important; padding: 0 !important; }
+      body { background: white !important; overflow: visible !important; }
+      header, footer, .nav-tabs, .nav-meta,
+      #tab-invoer, #tab-dashboard, #tab-historie,
+      #export-empty, .export-header-card, #pdf-error,
+      #tab-export > div:first-child,
+      #export-main > *:not(#pdf-print-wrap) { display: none !important; }
+      main { padding: 0 !important; }
+      #tab-export, #export-main { display: block !important; padding: 0 !important; }
+      #pdf-print-wrap { display: block !important; background: white !important; padding: 0 !important; overflow: visible !important; }
       #printable-report { width: 100% !important; max-width: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
       .pdf-summary { grid-template-columns: 1fr 1fr; }
       .pdf-roadmap-item { break-inside: avoid; }
