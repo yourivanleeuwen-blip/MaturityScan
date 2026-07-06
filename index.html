@@ -231,23 +231,24 @@
     /* PRINT */
     @media print {
       @page { size: A4; margin: 12mm 10mm; }
-      body { background: white !important; overflow: visible !important; }
-      header, footer, .nav-tabs, .nav-meta,
-      #tab-invoer, #tab-dashboard, #tab-historie,
-      #export-empty, .export-header-card, #pdf-error,
-      #tab-export > div:first-child,
-      #export-main > *:not(#pdf-print-wrap) { display: none !important; }
-      main { padding: 0 !important; }
-      #tab-export, #export-main { display: block !important; padding: 0 !important; }
-      #pdf-print-wrap { display: block !important; background: white !important; padding: 0 !important; overflow: visible !important; }
+      * { overflow: visible !important; }
+      body { background: white !important; }
+      body > * { display: none !important; }
+      body > main { display: block !important; }
+      main { padding: 0 !important; max-width: none !important; }
+      main > * { display: none !important; }
+      main > #tab-export { display: block !important; padding: 0 !important; max-width: none !important; }
+      #tab-export > * { display: none !important; }
+      #tab-export > #export-main { display: block !important; }
+      #export-main > * { display: none !important; }
+      #export-main > #pdf-print-wrap { display: block !important; background: white !important; padding: 0 !important; }
       #printable-report { width: 100% !important; max-width: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
-      .pdf-summary { grid-template-columns: 1fr 1fr; }
       .pdf-roadmap-item { break-inside: avoid; }
       .pdf-gap-table tr { break-inside: avoid; }
       .pdf-gap-table { font-size: 9px; }
       .pdf-gap-table td { padding: 5px 8px !important; }
       .pdf-gap-table th { padding: 5px 8px !important; }
-      svg { max-height: 280px; width: auto; }
+      #radar-svg-pdf { max-height: 280px; width: auto; }
     }
 
     /* HISTORIE */
