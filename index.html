@@ -1736,7 +1736,7 @@ function combineAndPreview() {
     const bronLabel = scoreSources.length > 1 ? `Gemiddelde van ${scoreSources.length} bronnen.` : scoreSources[0].type === 'ai' ? 'Geanalyseerd via AI.' : 'Geïmporteerd via bestand.';
     return {
       naam: c.naam, domein: c.domein,
-      huidige_score: Math.round(avgH), ambitie_score: Math.round(avgA),
+      huidige_score: Math.round(avgH * 10) / 10, ambitie_score: Math.round(avgA * 10) / 10,
       toelichting: toelichting.length ? toelichting.join(' ') : bronLabel
     };
   });
@@ -1778,8 +1778,8 @@ function renderPreviewTable(data) {
     <tr>
       <td><strong>${r.naam}</strong></td>
       <td style="color:#888;">${r.domein}</td>
-      <td style="text-align:center;"><span class="score-huidige">${r.huidige_score}</span></td>
-      <td style="text-align:center;"><span class="score-ambitie">${r.ambitie_score}</span></td>
+      <td style="text-align:center;"><span class="score-huidige">${Number(r.huidige_score).toFixed(1)}</span></td>
+      <td style="text-align:center;"><span class="score-ambitie">${Number(r.ambitie_score).toFixed(1)}</span></td>
       <td style="color:#888; font-style:italic; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${r.toelichting}">${r.toelichting}</td>
     </tr>`).join('');
   document.getElementById('upload-preview').style.display = 'block';
@@ -1901,8 +1901,8 @@ function renderAITable(data) {
       <td></td>
       <td colspan="5" style="background:#FFF5F6; padding:14px;">
         <div class="expanded-grid">
-          <div class="expanded-card"><div class="card-label">Huidig niveau</div><div id="ai-desc-h-${i}">${LEVEL_DESC[r.naam]?.[r.huidige_score]||''}</div></div>
-          <div class="expanded-card"><div class="card-label next">Volgende stap</div><div id="ai-desc-n-${i}">${r.huidige_score<MAX_SCORE?LEVEL_DESC[r.naam]?.[r.huidige_score+1]||'':'Reeds op Leading-niveau.'}</div></div>
+          <div class="expanded-card"><div class="card-label">Huidig niveau</div><div id="ai-desc-h-${i}">${LEVEL_DESC[r.naam]?.[Math.round(r.huidige_score)]||''}</div></div>
+          <div class="expanded-card"><div class="card-label next">Volgende stap</div><div id="ai-desc-n-${i}">${Math.round(r.huidige_score)<MAX_SCORE?LEVEL_DESC[r.naam]?.[Math.round(r.huidige_score)+1]||'':'Reeds op Leading-niveau.'}</div></div>
         </div>
       </td>
     </tr>`).join('');
@@ -1919,14 +1919,14 @@ function toggleAIRow(i) {
 
 function updateAIScore(i, field, val) {
   if (!aiExtractedScores) return;
-  if (field !== 'toelichting') val = parseInt(val, 10);
+  if (field !== 'toelichting') val = Math.round(parseFloat(val) * 10) / 10;
   aiExtractedScores[i][field] = val;
   if (field === 'huidige_score' || field === 'ambitie_score') {
     const r = aiExtractedScores[i];
     const hEl = document.getElementById(`ai-desc-h-${i}`);
     const nEl = document.getElementById(`ai-desc-n-${i}`);
-    if (hEl) hEl.textContent = LEVEL_DESC[r.naam]?.[r.huidige_score] || '';
-    if (nEl) nEl.textContent = r.huidige_score < MAX_SCORE ? LEVEL_DESC[r.naam]?.[r.huidige_score+1] || '' : 'Reeds op Leading-niveau.';
+    if (hEl) hEl.textContent = LEVEL_DESC[r.naam]?.[Math.round(r.huidige_score)] || '';
+    if (nEl) nEl.textContent = Math.round(r.huidige_score) < MAX_SCORE ? LEVEL_DESC[r.naam]?.[Math.round(r.huidige_score)+1] || '' : 'Reeds op Leading-niveau.';
   }
 }
 
@@ -2133,8 +2133,8 @@ function renderGapTable() {
   const tbody = document.getElementById('gap-tbody');
   tbody.innerHTML = sorted.map((r, visIdx) => {
     const gap = r.ambitie_score - r.huidige_score;
-    const hDesc = LEVEL_DESC[r.naam]?.[r.huidige_score] || '';
-    const nDesc = r.huidige_score < MAX_SCORE ? LEVEL_DESC[r.naam]?.[r.huidige_score+1] || '' : 'Reeds op het hoogste niveau (Leading).';
+    const hDesc = LEVEL_DESC[r.naam]?.[Math.round(r.huidige_score)] || '';
+    const nDesc = Math.round(r.huidige_score) < MAX_SCORE ? LEVEL_DESC[r.naam]?.[Math.round(r.huidige_score)+1] || '' : 'Reeds op het hoogste niveau (Leading).';
     const rowId = `gap-row-${r.naam.replace(/[^a-z]/gi,'_')}`;
     const expId = `gap-exp-${r.naam.replace(/[^a-z]/gi,'_')}`;
     return `
@@ -2143,24 +2143,20 @@ function renderGapTable() {
       <td><strong title="${hDesc}">${r.naam}</strong></td>
       <td style="color:#888;">${r.domein}</td>
       <td style="text-align:center;">
-        <select class="mono" style="width:50px;padding:4px;color:var(--red);font-weight:700;border-color:var(--black);" onchange="updateScore(${r.origIdx},'huidige_score',this.value)">
-          ${Array.from({length:MAX_SCORE},(_,i)=>i+1).map(n=>`<option value="${n}" ${r.huidige_score==n?'selected':''}>${n}</option>`).join('')}
-        </select>
+        <input type="number" class="mono" min="1" max="${MAX_SCORE}" step="0.1" value="${Number(r.huidige_score).toFixed(1)}" style="width:54px;padding:4px;color:var(--red);font-weight:700;border:1px solid var(--black);text-align:center;" onchange="updateScore(${r.origIdx},'huidige_score',this.value)" />
       </td>
       <td style="text-align:center;">
-        <select class="mono" style="width:50px;padding:4px;font-weight:700;border-color:var(--black);" onchange="updateScore(${r.origIdx},'ambitie_score',this.value)">
-          ${Array.from({length:MAX_SCORE},(_,i)=>i+1).map(n=>`<option value="${n}" ${r.ambitie_score==n?'selected':''}>${n}</option>`).join('')}
-        </select>
+        <input type="number" class="mono" min="1" max="${MAX_SCORE}" step="0.1" value="${Number(r.ambitie_score).toFixed(1)}" style="width:54px;padding:4px;font-weight:700;border:1px solid var(--black);text-align:center;" onchange="updateScore(${r.origIdx},'ambitie_score',this.value)" />
       </td>
-      <td style="text-align:center; font-weight:700;" class="mono">${gap>0?'+'+gap:gap}</td>
+      <td style="text-align:center; font-weight:700;" class="mono">${gap>0?'+'+gap.toFixed(1):gap.toFixed(1)}</td>
       <td style="text-align:center;">${getPriorityEl(gap)}</td>
     </tr>
     <tr id="${expId}" style="display:none;">
       <td></td>
       <td colspan="6" style="background:#FFF5F6; padding:14px;">
         <div class="expanded-grid">
-          <div class="expanded-card"><div class="card-label">Huidig niveau: ${MATURITY_LEVELS[r.huidige_score]}</div><div>${hDesc}</div></div>
-          <div class="expanded-card" style="border-left:2px solid var(--red);"><div class="card-label next">Volgende stap: ${r.huidige_score<MAX_SCORE?MATURITY_LEVELS[r.huidige_score+1]:'Leading'}</div><div style="font-style:italic;">${nDesc}</div></div>
+          <div class="expanded-card"><div class="card-label">Huidig niveau: ${MATURITY_LEVELS[Math.round(r.huidige_score)]}</div><div>${hDesc}</div></div>
+          <div class="expanded-card" style="border-left:2px solid var(--red);"><div class="card-label next">Volgende stap: ${Math.round(r.huidige_score)<MAX_SCORE?MATURITY_LEVELS[Math.round(r.huidige_score)+1]:'Leading'}</div><div style="font-style:italic;">${nDesc}</div></div>
         </div>
         ${r.toelichting ? `<div style="margin-top:10px; background:white; border:1px solid rgba(0,0,0,0.08); padding:10px;">
           <div class="label" style="margin-bottom:4px;">Consultant toelichting</div>
@@ -2190,7 +2186,7 @@ function toggleGapRow(rowId, expId, btn) {
 
 function updateScore(idx, field, val) {
   if (!scores) return;
-  scores[idx][field] = parseInt(val, 10);
+  scores[idx][field] = Math.round(parseFloat(val) * 10) / 10;
   localStorage.setItem('eiffel_scores', JSON.stringify(scores));
   renderDashboard();
 }
@@ -2288,9 +2284,9 @@ function renderExport() {
     return `<tr>
       <td style="font-weight:600;">${r.naam}</td>
       <td style="color:#888;">${r.domein}</td>
-      <td style="text-align:center;font-weight:700;color:${getMaturityInfo(r.huidige_score).color};" class="mono">${r.huidige_score}</td>
-      <td style="text-align:center;font-weight:700;" class="mono">${r.ambitie_score}</td>
-      <td style="text-align:center;font-weight:700;" class="mono">${g > 0 ? '+' + g : g}</td>
+      <td style="text-align:center;font-weight:700;color:${getMaturityInfo(r.huidige_score).color};" class="mono">${Number(r.huidige_score).toFixed(1)}</td>
+      <td style="text-align:center;font-weight:700;" class="mono">${Number(r.ambitie_score).toFixed(1)}</td>
+      <td style="text-align:center;font-weight:700;" class="mono">${g > 0 ? '+' + g.toFixed(1) : g.toFixed(1)}</td>
       <td style="text-align:center;"><span class="pdf-prio-badge ${pClass}">${pLabel}</span></td>
     </tr>`;
   }).join('');
@@ -2303,16 +2299,16 @@ function renderExport() {
     return `<div class="pdf-roadmap-domain">
       <div class="pdf-roadmap-domain-title">${domein} (${items.length} actiepunten)</div>
       ${items.map(r => {
-        const dH = LEVEL_DESC[r.naam]?.[r.huidige_score] || '';
-        const dN = r.huidige_score < MAX_SCORE ? LEVEL_DESC[r.naam]?.[r.huidige_score + 1] || '' : '';
+        const dH = LEVEL_DESC[r.naam]?.[Math.round(r.huidige_score)] || '';
+        const dN = Math.round(r.huidige_score) < MAX_SCORE ? LEVEL_DESC[r.naam]?.[Math.round(r.huidige_score) + 1] || '' : '';
         return `<div class="pdf-roadmap-item">
           <div class="pdf-roadmap-item-header">
             <span class="pdf-roadmap-item-name">${r.naam}</span>
-            <span class="pdf-roadmap-item-badge">${r.huidige_score} → ${r.ambitie_score}</span>
+            <span class="pdf-roadmap-item-badge">${Number(r.huidige_score).toFixed(1)} → ${Number(r.ambitie_score).toFixed(1)}</span>
           </div>
           <div class="pdf-roadmap-grid">
-            <div><div class="pdf-roadmap-level-label">Huidig — ${MATURITY_LEVELS[r.huidige_score]}</div><div style="color:#666; font-style:italic;">${dH}</div></div>
-            <div><div class="pdf-roadmap-level-label" style="color:var(--red);">Volgende stap — ${MATURITY_LEVELS[r.huidige_score + 1] || 'Leading'}</div><div style="font-weight:500;">${dN}</div></div>
+            <div><div class="pdf-roadmap-level-label">Huidig — ${MATURITY_LEVELS[Math.round(r.huidige_score)]}</div><div style="color:#666; font-style:italic;">${dH}</div></div>
+            <div><div class="pdf-roadmap-level-label" style="color:var(--red);">Volgende stap — ${MATURITY_LEVELS[Math.round(r.huidige_score) + 1] || 'Leading'}</div><div style="font-weight:500;">${dN}</div></div>
           </div>
         </div>`;
       }).join('')}
@@ -2426,8 +2422,8 @@ function exportCSV() {
   const rows = ['Capability;Domein;Nulmeting;Ambitie;Gap;Prioriteit;Toelichting'];
   scores.forEach(r => {
     const gap = r.ambitie_score-r.huidige_score;
-    const p = gap>=2?'Hoog':gap===1?'Gemiddeld':'Op schema';
-    rows.push(`"${r.naam}";"${r.domein}";${r.huidige_score};${r.ambitie_score};${gap};"${p}";"${r.toelichting.replace(/"/g,'""')}"`);
+    const p = gap>=2?'Hoog':gap>=1?'Gemiddeld':'Op schema';
+    rows.push(`"${r.naam}";"${r.domein}";${Number(r.huidige_score).toFixed(1)};${Number(r.ambitie_score).toFixed(1)};${gap.toFixed(1)};"${p}";"${r.toelichting.replace(/"/g,'""')}"`);
   });
   const blob = new Blob(['\uFEFF'+rows.join('\n')], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
@@ -3044,9 +3040,9 @@ function buildComparisonHTML(scanA, scanB, labelA, labelB, radarId) {
           return `<tr>
             <td><strong>${cap.naam}</strong></td>
             <td style="color:#888;">${cap.domein}</td>
-            <td style="text-align:center;" class="mono"><span class="score-huidige">${hA}</span></td>
-            <td style="text-align:center;" class="mono"><span class="score-ambitie">${hB}</span></td>
-            <td style="text-align:center;" class="mono ${deltaClass}">${delta > 0 ? '+' : ''}${delta}</td>
+            <td style="text-align:center;" class="mono"><span class="score-huidige">${Number(hA).toFixed(1)}</span></td>
+            <td style="text-align:center;" class="mono"><span class="score-ambitie">${Number(hB).toFixed(1)}</span></td>
+            <td style="text-align:center;" class="mono ${deltaClass}">${delta > 0 ? '+' : ''}${delta.toFixed(1)}</td>
           </tr>`;
         }).join('')}</tbody>
       </table>
