@@ -826,16 +826,23 @@
             </div>
           </div>
 
+          <!-- 1. AI MANAGEMENT ADVIES (optional, shown when generated) -->
+          <div class="pdf-section" id="pdf-ai-section" style="display:none;">
+            <div class="pdf-section-title">1. Management Advies (AI-gegenereerd)</div>
+            <div class="pdf-section-intro">Onderstaande analyse en aanbevelingen zijn automatisch gegenereerd op basis van de scanresultaten. Deze dienen als startpunt voor verdere consultantbespreking.</div>
+            <div class="pdf-ai-summary" id="pdf-ai-content"></div>
+          </div>
+
           <!-- 2. EXECUTIVE SUMMARY -->
           <div class="pdf-section">
-            <div class="pdf-section-title">1. Executive Summary</div>
+            <div class="pdf-section-title" id="pdf-section-summary">1. Executive Summary</div>
             <div class="pdf-section-intro" id="pdf-summary-text"></div>
             <div class="pdf-kpi-row" id="pdf-kpis"></div>
           </div>
 
           <!-- 3. RADAR + DOMAIN BARS -->
           <div class="pdf-section">
-            <div class="pdf-section-title">2. Domeinoverzicht</div>
+            <div class="pdf-section-title" id="pdf-section-domain">2. Domeinoverzicht</div>
             <div class="pdf-section-intro">Onderstaand overzicht toont de huidige volwassenheid per domein in vergelijking met de ambitie. De radar visualiseert het totaalbeeld; de staafdiagrammen geven per domein de exacte score weer.</div>
             <div class="pdf-radar-summary">
               <div>
@@ -848,7 +855,7 @@
 
           <!-- 4. GAP TABLE -->
           <div class="pdf-section">
-            <div class="pdf-section-title">3. Maturity Matrix &amp; Gap Analyse</div>
+            <div class="pdf-section-title" id="pdf-section-gap">3. Maturity Matrix &amp; Gap Analyse</div>
             <div class="pdf-section-intro">Overzicht van alle capabilities met hun huidige score, ambitiescore en de gap daartussen. Capabilities met een gap van 2 of meer zijn als hoge prioriteit gemarkeerd.</div>
             <table class="pdf-gap-table">
               <thead><tr><th>Capability</th><th>Domein</th><th style="text-align:center">Huidig</th><th style="text-align:center">Ambitie</th><th style="text-align:center">Gap</th><th style="text-align:center">Prioriteit</th></tr></thead>
@@ -858,16 +865,9 @@
 
           <!-- 5. ROADMAP -->
           <div class="pdf-section">
-            <div class="pdf-section-title">4. Strategische Roadmap</div>
+            <div class="pdf-section-title" id="pdf-section-roadmap">4. Strategische Roadmap</div>
             <div class="pdf-section-intro">Per domein zijn de capabilities weergegeven die groei vereisen. Voor elke capability is het huidige volwassenheidsniveau en de eerstvolgende stap beschreven op basis van het framework.</div>
             <div id="pdf-roadmap"></div>
-          </div>
-
-          <!-- 6. AI SUMMARY (optional) -->
-          <div class="pdf-section" id="pdf-ai-section" style="display:none;">
-            <div class="pdf-section-title">5. Management Advies (AI-gegenereerd)</div>
-            <div class="pdf-section-intro">Onderstaande analyse en aanbevelingen zijn automatisch gegenereerd op basis van de scanresultaten. Deze dienen als startpunt voor verdere consultantbespreking.</div>
-            <div class="pdf-ai-summary" id="pdf-ai-content"></div>
           </div>
 
           <!-- FOOTER -->
@@ -2402,6 +2402,10 @@ Wees specifiek: verwijs naar domeinen en capabilities bij naam. Vermijd algemeen
     const html = data.content?.[0]?.text || '';
     document.getElementById('pdf-ai-content').innerHTML = html;
     document.getElementById('pdf-ai-section').style.display = 'block';
+    document.getElementById('pdf-section-summary').textContent = '2. Executive Summary';
+    document.getElementById('pdf-section-domain').textContent = '3. Domeinoverzicht';
+    document.getElementById('pdf-section-gap').textContent = '4. Maturity Matrix & Gap Analyse';
+    document.getElementById('pdf-section-roadmap').textContent = '5. Strategische Roadmap';
     btn.textContent = '✓ Samenvatting gegenereerd';
     statusEl.textContent = 'AI management samenvatting is toegevoegd aan het rapport.';
     setTimeout(() => { btn.textContent = 'AI Management Samenvatting genereren'; btn.disabled = false; }, 3000);
