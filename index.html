@@ -190,21 +190,50 @@
     .export-btns { display: flex; gap: 12px; flex-shrink: 0; }
 
     /* PDF PREVIEW */
-    #printable-report { background: white; padding: 48px; width: 800px; margin: 0 auto; box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
-    .pdf-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--red); padding-bottom: 16px; margin-bottom: 24px; }
-    .pdf-meta-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; background: var(--gray-bg); padding: 16px; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 24px; }
-    .pdf-meta-item .label { display: block; margin-bottom: 4px; }
-    .pdf-meta-item .value { font-size: 13px; font-weight: 600; }
-    .pdf-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 24px; margin-bottom: 24px; }
-    .pdf-score-box { display: flex; align-items: center; gap: 20px; background: var(--gray-bg); padding: 16px; border: 1px solid rgba(0,0,0,0.06); }
-    .pdf-score-item { display: flex; flex-direction: column; }
-    .pdf-score-item .big { font-size: 32px; font-weight: 900; font-family: 'JetBrains Mono', monospace; }
-    .pdf-divider { width: 1px; height: 48px; background: #ccc; }
-    .pdf-gap-table th { font-size: 9px; padding: 8px 10px; }
-    .pdf-gap-table td { font-size: 11px; padding: 7px 10px; }
-    .pdf-roadmap-item { border: 1px solid rgba(0,0,0,0.1); padding: 10px 14px; margin-bottom: 8px; break-inside: avoid; }
-    .pdf-roadmap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 10px; margin-top: 6px; }
-    .pdf-footer { display: flex; justify-content: space-between; border-top: 1px solid #eee; padding-top: 14px; margin-top: 24px; font-size: 9px; color: #aaa; }
+    #printable-report { background: white; padding: 48px; width: 800px; margin: 0 auto; box-shadow: 0 4px 24px rgba(0,0,0,0.12); font-size: 11px; line-height: 1.6; color: #1A1A1A; }
+    .pdf-cover { text-align: center; padding: 60px 40px 40px; border-bottom: 3px solid var(--red); margin-bottom: 32px; }
+    .pdf-cover-subtitle { font-size: 10px; font-weight: 700; color: var(--red); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px; }
+    .pdf-cover-title { font-size: 26px; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 6px; }
+    .pdf-cover-org { font-size: 15px; font-weight: 600; color: #555; margin-bottom: 24px; }
+    .pdf-cover-meta { display: flex; justify-content: center; gap: 32px; font-size: 10px; color: #888; }
+    .pdf-cover-meta span { display: flex; align-items: center; gap: 4px; }
+    .pdf-section { margin-bottom: 28px; break-inside: avoid; }
+    .pdf-section-title { font-size: 12px; font-weight: 800; color: var(--red); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid var(--red); }
+    .pdf-section-intro { font-size: 10px; color: #666; line-height: 1.7; margin-bottom: 14px; }
+    .pdf-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .pdf-kpi { background: var(--gray-bg); border: 1px solid rgba(0,0,0,0.06); padding: 14px; text-align: center; }
+    .pdf-kpi-value { font-size: 28px; font-weight: 900; font-family: 'JetBrains Mono', monospace; }
+    .pdf-kpi-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin-top: 4px; }
+    .pdf-kpi-sub { font-size: 9px; font-weight: 600; margin-top: 2px; }
+    .pdf-radar-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    .pdf-domain-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 10px; }
+    .pdf-domain-bar-label { width: 140px; font-weight: 600; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pdf-domain-bar-track { flex: 1; height: 14px; background: #f0f0f0; position: relative; overflow: hidden; }
+    .pdf-domain-bar-fill { height: 100%; transition: width 0.3s; }
+    .pdf-domain-bar-val { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; width: 28px; text-align: right; }
+    .pdf-gap-table { width: 100%; border-collapse: collapse; }
+    .pdf-gap-table th { font-size: 8px; padding: 6px 8px; text-align: left; border-bottom: 2px solid var(--red); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #888; }
+    .pdf-gap-table td { font-size: 10px; padding: 5px 8px; border-bottom: 1px solid #f0f0f0; }
+    .pdf-gap-table tr:nth-child(even) { background: #FAFAFA; }
+    .pdf-prio-badge { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 6px; display: inline-block; }
+    .pdf-prio-hoog { background: #FFF0F0; color: #8B0000; border: 1px solid rgba(139,0,0,0.2); }
+    .pdf-prio-gem { background: #FFF8E1; color: #B8860B; border: 1px solid rgba(184,134,11,0.2); }
+    .pdf-prio-ok { background: #F0FFF0; color: #2E7D32; border: 1px solid rgba(46,125,50,0.2); }
+    .pdf-roadmap-domain { break-inside: avoid; margin-bottom: 16px; }
+    .pdf-roadmap-domain-title { font-size: 10px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 0; border-bottom: 1px solid #ddd; margin-bottom: 6px; }
+    .pdf-roadmap-item { padding: 8px 10px; margin-bottom: 4px; border-left: 3px solid var(--red); background: #FAFAFA; break-inside: avoid; }
+    .pdf-roadmap-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .pdf-roadmap-item-name { font-size: 10px; font-weight: 700; }
+    .pdf-roadmap-item-badge { font-size: 8px; font-weight: 700; color: var(--red); background: #FFF5F6; border: 1px solid rgba(200,16,46,0.15); padding: 1px 6px; }
+    .pdf-roadmap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 9px; }
+    .pdf-roadmap-level-label { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #888; margin-bottom: 2px; }
+    .pdf-ai-summary { background: #F8F8F8; border: 1px solid rgba(0,0,0,0.08); padding: 16px; font-size: 10px; line-height: 1.7; color: #444; }
+    .pdf-ai-summary h4 { font-size: 10px; font-weight: 700; color: var(--black); margin: 12px 0 4px; }
+    .pdf-ai-summary h4:first-child { margin-top: 0; }
+    .pdf-ai-summary ul { margin: 4px 0 8px 16px; padding: 0; }
+    .pdf-ai-summary li { margin-bottom: 2px; }
+    .pdf-footer { display: flex; justify-content: space-between; border-top: 2px solid var(--red); padding-top: 14px; margin-top: 32px; font-size: 8px; color: #aaa; font-weight: 600; letter-spacing: 0.04em; }
+    .pdf-page-hint { font-size: 8px; color: #ccc; text-align: right; margin-bottom: 4px; }
 
     /* EMPTY STATE */
     .empty-state { max-width: 480px; margin: 60px auto; text-align: center; padding: 40px; border: 1px dashed rgba(0,0,0,0.2); background: white; }
@@ -774,44 +803,74 @@
       <div id="pdf-error" class="card-error" style="display:none; margin-bottom:16px; font-size:12px; color:var(--red);"></div>
 
       <div class="label" style="margin-bottom:12px;">A4 Rapportage Preview</div>
+      <div style="margin-bottom:12px; display:flex; align-items:center; gap:12px;">
+        <button class="btn btn-outline" id="ai-report-btn" onclick="generateReportAI()" style="font-size:10px;">AI Management Samenvatting genereren</button>
+        <span id="ai-report-status" style="font-size:10px; color:#888; display:none;"></span>
+      </div>
       <div id="pdf-print-wrap" style="background:#e0e0e0; padding:20px; overflow-x:auto;">
         <div id="printable-report">
-          <div class="pdf-header">
-            <div>
-              <div class="label" style="margin-bottom:4px;">Team EIFFEL Assessment Tool</div>
-              <div style="font-size:22px; font-weight:900; letter-spacing:-0.02em;" id="pdf-title">Maturity Scan</div>
-            </div>
-            <div class="eiffel-logo">
+
+          <!-- 1. COVER -->
+          <div class="pdf-cover">
+            <div class="eiffel-logo" style="justify-content:center; margin-bottom:20px;">
               <div class="eiffel-grid"><span></span><span></span><span></span><span></span></div>
               <span style="font-size:15px; font-weight:900; color:var(--red); letter-spacing:0.15em; text-transform:uppercase;">team EIFFEL</span>
             </div>
-          </div>
-          <div class="pdf-meta-grid" id="pdf-meta"></div>
-          <div class="pdf-summary">
-            <div>
-              <div style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px;">Samenvatting &amp; Volwassenheid</div>
-              <div style="font-size:11px; color:#555; line-height:1.8; margin-bottom:14px;" id="pdf-summary-text">Deze scan brengt de huidige stand van zaken en groeiambities in kaart. Op basis van de resultaten is een roadmap gedefinieerd om de volwassenheid stapsgewijs te verhogen.</div>
-              <div class="pdf-score-box" id="pdf-scores"></div>
-            </div>
-            <div style="border:1px solid rgba(0,0,0,0.1);">
-              <svg id="radar-svg-pdf" viewBox="0 0 500 440" style="width:100%; height:auto;"></svg>
-              <div class="radar-legend" style="padding:8px 14px;"><div class="legend-item"><span class="legend-fill"></span> Nulmeting</div><div class="legend-item"><span class="legend-dash"></span> Ambitie</div></div>
+            <div class="pdf-cover-subtitle">Volwassenheidsscan Rapport</div>
+            <div class="pdf-cover-title" id="pdf-title">Maturity Scan</div>
+            <div class="pdf-cover-org" id="pdf-cover-org"></div>
+            <div class="pdf-cover-meta">
+              <span id="pdf-cover-date"></span>
+              <span>|</span>
+              <span id="pdf-cover-consultant"></span>
             </div>
           </div>
-          <div style="margin-bottom:24px;">
-            <div style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px;">Maturity Matrix &amp; Gap Analyse</div>
-            <div class="table-wrap">
-              <table class="pdf-gap-table">
-                <thead><tr><th>Capability</th><th>Domein</th><th style="text-align:center">Huidig</th><th style="text-align:center">Ambitie</th><th style="text-align:center">Gap</th><th style="text-align:center">Prioriteit</th></tr></thead>
-                <tbody id="pdf-gap-tbody"></tbody>
-              </table>
+
+          <!-- 2. EXECUTIVE SUMMARY -->
+          <div class="pdf-section">
+            <div class="pdf-section-title">1. Executive Summary</div>
+            <div class="pdf-section-intro" id="pdf-summary-text"></div>
+            <div class="pdf-kpi-row" id="pdf-kpis"></div>
+          </div>
+
+          <!-- 3. RADAR + DOMAIN BARS -->
+          <div class="pdf-section">
+            <div class="pdf-section-title">2. Domeinoverzicht</div>
+            <div class="pdf-section-intro">Onderstaand overzicht toont de huidige volwassenheid per domein in vergelijking met de ambitie. De radar visualiseert het totaalbeeld; de staafdiagrammen geven per domein de exacte score weer.</div>
+            <div class="pdf-radar-summary">
+              <div>
+                <svg id="radar-svg-pdf" viewBox="0 0 500 440" style="width:100%; height:auto;"></svg>
+                <div class="radar-legend" style="padding:4px 14px;"><div class="legend-item"><span class="legend-fill"></span> Nulmeting</div><div class="legend-item"><span class="legend-dash"></span> Ambitie</div></div>
+              </div>
+              <div id="pdf-domain-bars" style="padding-top:16px;"></div>
             </div>
           </div>
-          <div style="border-top:1px solid #eee; padding-top:24px; margin-top:8px;">
-            <div style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Aanbevolen Strategische Roadmap</div>
-            <div style="font-size:11px; color:#888; margin-bottom:14px; line-height:1.6;">Door de beschreven acties per capability uit te voeren klimt de organisatie stapsgewijs omhoog in volwassenheid.</div>
+
+          <!-- 4. GAP TABLE -->
+          <div class="pdf-section">
+            <div class="pdf-section-title">3. Maturity Matrix &amp; Gap Analyse</div>
+            <div class="pdf-section-intro">Overzicht van alle capabilities met hun huidige score, ambitiescore en de gap daartussen. Capabilities met een gap van 2 of meer zijn als hoge prioriteit gemarkeerd.</div>
+            <table class="pdf-gap-table">
+              <thead><tr><th>Capability</th><th>Domein</th><th style="text-align:center">Huidig</th><th style="text-align:center">Ambitie</th><th style="text-align:center">Gap</th><th style="text-align:center">Prioriteit</th></tr></thead>
+              <tbody id="pdf-gap-tbody"></tbody>
+            </table>
+          </div>
+
+          <!-- 5. ROADMAP -->
+          <div class="pdf-section">
+            <div class="pdf-section-title">4. Strategische Roadmap</div>
+            <div class="pdf-section-intro">Per domein zijn de capabilities weergegeven die groei vereisen. Voor elke capability is het huidige volwassenheidsniveau en de eerstvolgende stap beschreven op basis van het framework.</div>
             <div id="pdf-roadmap"></div>
           </div>
+
+          <!-- 6. AI SUMMARY (optional) -->
+          <div class="pdf-section" id="pdf-ai-section" style="display:none;">
+            <div class="pdf-section-title">5. Management Advies (AI-gegenereerd)</div>
+            <div class="pdf-section-intro">Onderstaande analyse en aanbevelingen zijn automatisch gegenereerd op basis van de scanresultaten. Deze dienen als startpunt voor verdere consultantbespreking.</div>
+            <div class="pdf-ai-summary" id="pdf-ai-content"></div>
+          </div>
+
+          <!-- FOOTER -->
           <div class="pdf-footer">
             <span>© <span id="pdf-year"></span> Team EIFFEL • Vertrouwelijk Consultant Rapport</span>
             <span>Rapport gegenereerd op <span id="pdf-date"></span></span>
@@ -2158,56 +2217,199 @@ function renderExport() {
   const avgA = scores.reduce((s,r)=>s+r.ambitie_score,0)/scores.length;
   const mH = getMaturityInfo(avgH);
   const mA = getMaturityInfo(avgA);
+  const gap = avgA - avgH;
+  const highPrio = scores.filter(r => r.ambitie_score - r.huidige_score >= 2).length;
   const dateStr = metadata.datum ? new Date(metadata.datum+'T00:00:00').toLocaleDateString('nl-NL',{day:'numeric',month:'long',year:'numeric'}) : '—';
 
-  document.getElementById('pdf-meta').innerHTML = `
-    <div class="pdf-meta-item"><span class="label">Organisatie</span><span class="value">${metadata.organisatie||'Niet gespecificeerd'}</span></div>
-    <div class="pdf-meta-item"><span class="label">Datum scan</span><span class="value">${dateStr}</span></div>
-    <div class="pdf-meta-item"><span class="label">Eiffel Consultant</span><span class="value">${metadata.consultant||'Niet gespecificeerd'}</span></div>`;
+  // 1. Cover
+  document.getElementById('pdf-title').textContent = `${scanThema} Maturity Scan`;
+  document.getElementById('pdf-cover-org').textContent = metadata.organisatie || 'Organisatie niet gespecificeerd';
+  document.getElementById('pdf-cover-date').textContent = `Datum: ${dateStr}`;
+  document.getElementById('pdf-cover-consultant').textContent = `Consultant: ${metadata.consultant || '—'}`;
 
-  document.getElementById('pdf-scores').innerHTML = `
-    <div class="pdf-score-item"><span class="label">Gemiddeld Huidig</span><span class="big" style="color:var(--black)">${avgH.toFixed(1)}</span><span class="label" style="margin-top:4px; color:${mH.color}">${mH.label}</span></div>
-    <div class="pdf-divider"></div>
-    <div class="pdf-score-item"><span class="label">Gemiddelde Ambitie</span><span class="big" style="color:#555">${avgA.toFixed(1)}</span><span class="label" style="margin-top:4px; color:${mA.color}">${mA.label}</span></div>`;
+  // 2. Executive Summary
+  document.getElementById('pdf-summary-text').textContent = `Deze volwassenheidsscan brengt de huidige stand van zaken en groeiambities in kaart rondom ${scanThema.toLowerCase()}. De organisatie scoort gemiddeld een ${avgH.toFixed(1)} op een schaal van 1–${MAX_SCORE}, wat overeenkomt met het niveau "${mH.label}". De ambitie ligt op ${avgA.toFixed(1)} ("${mA.label}"). Er zijn ${highPrio} capabilities geidentificeerd met een hoge prioriteit (gap ≥ 2).`;
 
-  const gapTbody = document.getElementById('pdf-gap-tbody');
-  gapTbody.innerHTML = scores.map((r,i) => {
-    const gap = r.ambitie_score - r.huidige_score;
-    const pColor = gap>=2 ? 'color:#8B0000;font-weight:700;' : gap===1 ? 'color:#D78A00;font-weight:600;' : 'color:#2E7D32;';
-    const pLabel = gap>=2?'Hoog':gap===1?'Gemiddeld':'Op schema';
-    return `<tr style="${i%2===1?'background:var(--gray-bg);':''}">
-      <td>${r.naam}</td><td style="color:#888;">${r.domein}</td>
-      <td style="text-align:center;color:var(--red);font-weight:700;" class="mono">${r.huidige_score}</td>
+  document.getElementById('pdf-kpis').innerHTML = `
+    <div class="pdf-kpi">
+      <div class="pdf-kpi-value" style="color:${mH.color}">${avgH.toFixed(1)}</div>
+      <div class="pdf-kpi-label">Huidige Score</div>
+      <div class="pdf-kpi-sub" style="color:${mH.color}">${mH.label}</div>
+    </div>
+    <div class="pdf-kpi">
+      <div class="pdf-kpi-value" style="color:${mA.color}">${avgA.toFixed(1)}</div>
+      <div class="pdf-kpi-label">Ambitie Score</div>
+      <div class="pdf-kpi-sub" style="color:${mA.color}">${mA.label}</div>
+    </div>
+    <div class="pdf-kpi">
+      <div class="pdf-kpi-value" style="color:${gap >= 1.5 ? '#8B0000' : '#F5A623'}">${gap.toFixed(1)}</div>
+      <div class="pdf-kpi-label">Gemiddelde Gap</div>
+      <div class="pdf-kpi-sub" style="color:#888">${gap >= 2 ? 'Significant' : gap >= 1 ? 'Matig' : 'Beperkt'}</div>
+    </div>
+    <div class="pdf-kpi">
+      <div class="pdf-kpi-value" style="color:#8B0000">${highPrio}</div>
+      <div class="pdf-kpi-label">Hoge Prioriteit</div>
+      <div class="pdf-kpi-sub" style="color:#888">van ${scores.length} capabilities</div>
+    </div>`;
+
+  // 3. Domain bars
+  const domainAvg = {};
+  DOMAINS.forEach(d => {
+    const ds = scores.filter(s => s.domein === d);
+    domainAvg[d] = {
+      h: ds.length ? ds.reduce((s,r) => s + r.huidige_score, 0) / ds.length : 0,
+      a: ds.length ? ds.reduce((s,r) => s + r.ambitie_score, 0) / ds.length : 0,
+      n: ds.length
+    };
+  });
+  document.getElementById('pdf-domain-bars').innerHTML = DOMAINS.map(d => {
+    const da = domainAvg[d];
+    const hPct = (da.h / MAX_SCORE * 100).toFixed(0);
+    const aPct = (da.a / MAX_SCORE * 100).toFixed(0);
+    const mInfo = getMaturityInfo(da.h);
+    return `<div style="margin-bottom:10px;">
+      <div class="pdf-domain-bar">
+        <div class="pdf-domain-bar-label" title="${d}">${d}</div>
+        <div class="pdf-domain-bar-track">
+          <div class="pdf-domain-bar-fill" style="width:${aPct}%; background:rgba(0,0,0,0.06); position:absolute;"></div>
+          <div class="pdf-domain-bar-fill" style="width:${hPct}%; background:${mInfo.color}; opacity:0.8; position:relative; z-index:1;"></div>
+        </div>
+        <div class="pdf-domain-bar-val">${da.h.toFixed(1)}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // 4. Gap table
+  const sortedScores = [...scores].sort((a,b) => (b.ambitie_score - b.huidige_score) - (a.ambitie_score - a.huidige_score));
+  document.getElementById('pdf-gap-tbody').innerHTML = sortedScores.map(r => {
+    const g = r.ambitie_score - r.huidige_score;
+    const pClass = g >= 2 ? 'pdf-prio-hoog' : g >= 1 ? 'pdf-prio-gem' : 'pdf-prio-ok';
+    const pLabel = g >= 2 ? 'Hoog' : g >= 1 ? 'Gemiddeld' : 'Op schema';
+    return `<tr>
+      <td style="font-weight:600;">${r.naam}</td>
+      <td style="color:#888;">${r.domein}</td>
+      <td style="text-align:center;font-weight:700;color:${getMaturityInfo(r.huidige_score).color};" class="mono">${r.huidige_score}</td>
       <td style="text-align:center;font-weight:700;" class="mono">${r.ambitie_score}</td>
-      <td style="text-align:center;font-weight:700;" class="mono">${gap>0?'+'+gap:gap}</td>
-      <td style="text-align:center; ${pColor} font-size:10px; text-transform:uppercase; letter-spacing:0.06em;">${pLabel}</td>
+      <td style="text-align:center;font-weight:700;" class="mono">${g > 0 ? '+' + g : g}</td>
+      <td style="text-align:center;"><span class="pdf-prio-badge ${pClass}">${pLabel}</span></td>
     </tr>`;
   }).join('');
 
-  const roadmapItems = scores.filter(s=>s.ambitie_score>s.huidige_score);
+  // 5. Roadmap grouped by domain, sorted by gap
+  const roadmapItems = scores.filter(s => s.ambitie_score > s.huidige_score).sort((a,b) => (b.ambitie_score - b.huidige_score) - (a.ambitie_score - a.huidige_score));
   const grouped = {};
   roadmapItems.forEach(r => { if (!grouped[r.domein]) grouped[r.domein] = []; grouped[r.domein].push(r); });
   document.getElementById('pdf-roadmap').innerHTML = Object.entries(grouped).map(([domein, items]) => {
-    const domHtml = items.map(r => {
-      const dH = LEVEL_DESC[r.naam]?.[r.huidige_score] || '';
-      const dN = r.huidige_score<MAX_SCORE ? LEVEL_DESC[r.naam]?.[r.huidige_score+1]||'' : '';
-      return `<div class="pdf-roadmap-item">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:4px;margin-bottom:6px;border-bottom:1px solid #f0f0f0;">
-          <strong style="font-size:11px;">${r.naam}</strong>
-          <span style="font-size:8px;color:var(--red);background:#FFF5F6;border:1px solid rgba(200,16,46,0.2);padding:1px 6px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">${r.huidige_score} → ${r.ambitie_score}</span>
-        </div>
-        <div class="pdf-roadmap-grid">
-          <div><div class="label" style="margin-bottom:2px;">Huidig (${MATURITY_LEVELS[r.huidige_score]})</div><div style="color:#555;font-style:italic;font-size:10px;line-height:1.5;">"${dH}"</div></div>
-          <div style="border-left:1px solid #eee;padding-left:10px;"><div class="label" style="margin-bottom:2px;color:var(--red);">Volgende stap (${MATURITY_LEVELS[r.huidige_score+1]||'Leading'})</div><div style="font-size:10px;line-height:1.5;font-weight:500;">"${dN}"</div></div>
-        </div>
-      </div>`;
-    }).join('');
-    return `<div style="margin-bottom:12px;"><div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;border-bottom:1px solid #eee;padding-bottom:4px;">${domein}</div>${domHtml}</div>`;
+    return `<div class="pdf-roadmap-domain">
+      <div class="pdf-roadmap-domain-title">${domein} (${items.length} actiepunten)</div>
+      ${items.map(r => {
+        const dH = LEVEL_DESC[r.naam]?.[r.huidige_score] || '';
+        const dN = r.huidige_score < MAX_SCORE ? LEVEL_DESC[r.naam]?.[r.huidige_score + 1] || '' : '';
+        return `<div class="pdf-roadmap-item">
+          <div class="pdf-roadmap-item-header">
+            <span class="pdf-roadmap-item-name">${r.naam}</span>
+            <span class="pdf-roadmap-item-badge">${r.huidige_score} → ${r.ambitie_score}</span>
+          </div>
+          <div class="pdf-roadmap-grid">
+            <div><div class="pdf-roadmap-level-label">Huidig — ${MATURITY_LEVELS[r.huidige_score]}</div><div style="color:#666; font-style:italic;">${dH}</div></div>
+            <div><div class="pdf-roadmap-level-label" style="color:var(--red);">Volgende stap — ${MATURITY_LEVELS[r.huidige_score + 1] || 'Leading'}</div><div style="font-weight:500;">${dN}</div></div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
   }).join('');
 
   document.getElementById('pdf-year').textContent = new Date().getFullYear();
   document.getElementById('pdf-date').textContent = new Date().toLocaleDateString('nl-NL');
   renderRadar('radar-svg-pdf');
+}
+
+async function generateReportAI() {
+  if (!scores || scores.length === 0) { alert('Geen scores beschikbaar. Vul eerst de scan in.'); return; }
+  const key = localStorage.getItem('eiffel_anthropic_key');
+  if (!key) { alert('Stel eerst een Anthropic API-key in via het AI-tabblad.'); return; }
+
+  const btn = document.getElementById('ai-report-btn');
+  const statusEl = document.getElementById('ai-report-status');
+  btn.disabled = true; btn.textContent = '⏳ AI genereert samenvatting...';
+  statusEl.style.display = 'inline'; statusEl.textContent = 'Even geduld, dit kan 15-30 seconden duren...';
+
+  const thema = localStorage.getItem('eiffel_scan_thema') || 'Maturity Scan';
+  const org = metadata.organisatie || 'de organisatie';
+  const domainScores = {};
+  DOMAINS.forEach(d => { domainScores[d] = { caps: [], huidig: 0, ambitie: 0, count: 0 }; });
+  scores.forEach(r => {
+    const ds = domainScores[r.domein];
+    if (!ds) return;
+    ds.caps.push({ naam: r.naam, huidig: r.huidige_score, ambitie: r.ambitie_score, gap: r.ambitie_score - r.huidige_score, toelichting: r.toelichting });
+    ds.huidig += r.huidige_score; ds.ambitie += r.ambitie_score; ds.count++;
+  });
+  const domSummary = DOMAINS.map(d => {
+    const ds = domainScores[d];
+    if (!ds || !ds.count) return null;
+    const avgH = (ds.huidig / ds.count).toFixed(1);
+    const avgA = (ds.ambitie / ds.count).toFixed(1);
+    const topGaps = ds.caps.sort((a,b) => b.gap - a.gap).slice(0, 3).map(c => `${c.naam} (huidig:${c.huidig}, ambitie:${c.ambitie}, gap:${c.gap})`);
+    return `Domein: ${d}\n  Gemiddeld huidig: ${avgH}, Gemiddeld ambitie: ${avgA}\n  Grootste gaps: ${topGaps.join('; ')}`;
+  }).filter(Boolean).join('\n\n');
+
+  const avgAll = (scores.reduce((s,r) => s + r.huidige_score, 0) / scores.length).toFixed(1);
+  const avgAmb = (scores.reduce((s,r) => s + r.ambitie_score, 0) / scores.length).toFixed(1);
+  const highPrio = scores.filter(r => r.ambitie_score - r.huidige_score >= 2).length;
+
+  const systemPrompt = `Je bent een senior management consultant van Team EIFFEL. Je schrijft een strategisch management adviesrapport op basis van volwassenheidsscans. Schrijf in professioneel Nederlands. Gebruik HTML-opmaak (<h4>, <ul>, <li>, <p>, <strong>) voor structuur. Geen markdown.`;
+
+  const userPrompt = `Schrijf een management samenvatting en advies voor de volgende volwassenheidsscan.
+
+CONTEXT:
+- Scanthema: ${thema}
+- Organisatie: ${org}
+- Totaal capabilities: ${scores.length}
+- Gemiddeld huidig volwassenheidsniveau: ${avgAll} / ${MAX_SCORE}
+- Gemiddeld ambitieniveau: ${avgAmb} / ${MAX_SCORE}
+- Aantal capabilities met hoge prioriteit (gap ≥ 2): ${highPrio}
+- Schaal: 1 (Basic "Survive") tot ${MAX_SCORE} (Leading "Evolve")
+
+DOMEIN OVERZICHT:
+${domSummary}
+
+SCHRIJF het rapport met PRECIES deze structuur:
+<h4>Management Samenvatting</h4>
+<p>2-3 alinea's met overall beeld, sterktes en risico's</p>
+
+<h4>Belangrijkste Bevindingen</h4>
+<ul><li>4-6 concrete bevindingen op basis van de data</li></ul>
+
+<h4>Strategisch Advies</h4>
+<ul><li>4-6 prioritaire aanbevelingen, geordend op impact</li></ul>
+
+<h4>Quick Wins (0-3 maanden)</h4>
+<ul><li>3-4 direct uitvoerbare acties</li></ul>
+
+<h4>Roadmap Prioriteiten (3-12 maanden)</h4>
+<ul><li>3-5 middellange termijn initiatieven</li></ul>
+
+Wees specifiek: verwijs naar domeinen en capabilities bij naam. Vermijd algemeenheden.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 3000, system: systemPrompt, messages: [{ role: 'user', content: userPrompt }] })
+    });
+    if (!res.ok) { const e = await res.text(); throw new Error(`API-fout (${res.status}): ${e}`); }
+    const data = await res.json();
+    const html = data.content?.[0]?.text || '';
+    document.getElementById('pdf-ai-content').innerHTML = html;
+    document.getElementById('pdf-ai-section').style.display = 'block';
+    btn.textContent = '✓ Samenvatting gegenereerd';
+    statusEl.textContent = 'AI management samenvatting is toegevoegd aan het rapport.';
+    setTimeout(() => { btn.textContent = 'AI Management Samenvatting genereren'; btn.disabled = false; }, 3000);
+  } catch(err) {
+    btn.textContent = 'AI Management Samenvatting genereren'; btn.disabled = false;
+    statusEl.textContent = '⚠ ' + err.message;
+    statusEl.style.color = 'var(--red)';
+  }
 }
 
 function printReport() {
