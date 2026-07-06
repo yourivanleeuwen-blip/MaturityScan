@@ -202,8 +202,8 @@
     .pdf-divider { width: 1px; height: 48px; background: #ccc; }
     .pdf-gap-table th { font-size: 9px; padding: 8px 10px; }
     .pdf-gap-table td { font-size: 11px; padding: 7px 10px; }
-    .pdf-roadmap-item { border: 1px solid rgba(0,0,0,0.1); padding: 14px; margin-bottom: 10px; }
-    .pdf-roadmap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 11px; margin-top: 8px; }
+    .pdf-roadmap-item { border: 1px solid rgba(0,0,0,0.1); padding: 10px 14px; margin-bottom: 8px; break-inside: avoid; }
+    .pdf-roadmap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 10px; margin-top: 6px; }
     .pdf-footer { display: flex; justify-content: space-between; border-top: 1px solid #eee; padding-top: 14px; margin-top: 24px; font-size: 9px; color: #aaa; }
 
     /* EMPTY STATE */
@@ -2160,19 +2160,25 @@ function renderExport() {
     </tr>`;
   }).join('');
 
-  document.getElementById('pdf-roadmap').innerHTML = scores.filter(s=>s.ambitie_score>s.huidige_score).map(r => {
-    const dH = LEVEL_DESC[r.naam]?.[r.huidige_score] || '';
-    const dN = r.huidige_score<MAX_SCORE ? LEVEL_DESC[r.naam]?.[r.huidige_score+1]||'' : '';
-    return `<div class="pdf-roadmap-item">
-      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding-bottom:6px;margin-bottom:8px;">
-        <strong style="font-size:12px;">${r.naam}</strong>
-        <span style="font-size:9px;color:var(--red);background:#FFF5F6;border:1px solid rgba(200,16,46,0.2);padding:2px 8px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Groei: ${r.huidige_score} → ${r.ambitie_score}</span>
-      </div>
-      <div class="pdf-roadmap-grid">
-        <div><div class="label" style="margin-bottom:4px;">Huidig (${MATURITY_LEVELS[r.huidige_score]})</div><div style="color:#555;font-style:italic;font-size:11px;line-height:1.6;">"${dH}"</div></div>
-        <div style="border-left:1px solid #eee;padding-left:12px;"><div class="label" style="margin-bottom:4px;color:var(--red);">Volgende stap (${MATURITY_LEVELS[r.huidige_score+1]||'Leading'})</div><div style="font-size:11px;line-height:1.6;font-weight:500;">"${dN}"</div></div>
-      </div>
-    </div>`;
+  const roadmapItems = scores.filter(s=>s.ambitie_score>s.huidige_score);
+  const grouped = {};
+  roadmapItems.forEach(r => { if (!grouped[r.domein]) grouped[r.domein] = []; grouped[r.domein].push(r); });
+  document.getElementById('pdf-roadmap').innerHTML = Object.entries(grouped).map(([domein, items]) => {
+    const domHtml = items.map(r => {
+      const dH = LEVEL_DESC[r.naam]?.[r.huidige_score] || '';
+      const dN = r.huidige_score<MAX_SCORE ? LEVEL_DESC[r.naam]?.[r.huidige_score+1]||'' : '';
+      return `<div class="pdf-roadmap-item">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:4px;margin-bottom:6px;border-bottom:1px solid #f0f0f0;">
+          <strong style="font-size:11px;">${r.naam}</strong>
+          <span style="font-size:8px;color:var(--red);background:#FFF5F6;border:1px solid rgba(200,16,46,0.2);padding:1px 6px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">${r.huidige_score} → ${r.ambitie_score}</span>
+        </div>
+        <div class="pdf-roadmap-grid">
+          <div><div class="label" style="margin-bottom:2px;">Huidig (${MATURITY_LEVELS[r.huidige_score]})</div><div style="color:#555;font-style:italic;font-size:10px;line-height:1.5;">"${dH}"</div></div>
+          <div style="border-left:1px solid #eee;padding-left:10px;"><div class="label" style="margin-bottom:2px;color:var(--red);">Volgende stap (${MATURITY_LEVELS[r.huidige_score+1]||'Leading'})</div><div style="font-size:10px;line-height:1.5;font-weight:500;">"${dN}"</div></div>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div style="margin-bottom:12px;"><div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;border-bottom:1px solid #eee;padding-bottom:4px;">${domein}</div>${domHtml}</div>`;
   }).join('');
 
   document.getElementById('pdf-year').textContent = new Date().getFullYear();
@@ -2209,12 +2215,34 @@ async function exportPDF() {
     window.scrollTo(scrollX, scrollY);
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p','mm','a4');
-    const imgW=210, pageH=297;
-    const imgH = (canvas.height*imgW)/canvas.width;
-    let left = imgH, pos=0;
-    pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,pos,imgW,imgH);
-    left -= pageH;
-    while (left >= 0) { pos=left-imgH; pdf.addPage(); pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,pos,imgW,imgH); left-=pageH; }
+    const imgW = 210, pageH = 297, margin = 8;
+    const usable = pageH - margin * 2;
+    const scale = imgW / canvas.width;
+    const imgH = canvas.height * scale;
+
+    if (imgH <= pageH) {
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgW, imgH);
+    } else {
+      const sliceHeightPx = usable / scale;
+      let srcY = 0;
+      let page = 0;
+      while (srcY < canvas.height) {
+        const remaining = canvas.height - srcY;
+        const thisSlicePx = Math.min(sliceHeightPx, remaining);
+        const sliceCanvas = document.createElement('canvas');
+        sliceCanvas.width = canvas.width;
+        sliceCanvas.height = Math.ceil(thisSlicePx);
+        const ctx = sliceCanvas.getContext('2d');
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+        ctx.drawImage(canvas, 0, srcY, canvas.width, thisSlicePx, 0, 0, canvas.width, thisSlicePx);
+        const sliceImgH = thisSlicePx * scale;
+        if (page > 0) pdf.addPage();
+        pdf.addImage(sliceCanvas.toDataURL('image/png'), 'PNG', 0, margin, imgW, sliceImgH);
+        srcY += thisSlicePx;
+        page++;
+      }
+    }
     const org = metadata.organisatie ? metadata.organisatie.replace(/[^a-z0-9]/gi,'_') : 'Organisatie';
     pdf.save(`MaturityScan_Rapport_${org}.pdf`);
     btn.textContent = '✓ PDF gedownload!';
